@@ -37,7 +37,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="278dp"
                 android:layout_weight="1"
-                app:srcCompat="@drawable/Logo" />
+                app:srcCompat="@drawable/logo" />
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"

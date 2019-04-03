@@ -1,3 +1,5 @@
+// TODO. Update signed in thing in main: https://stackoverflow.com/questions/22526950/how-to-check-if-current-user-is-logged-in-android
+
 package com.example.ufree;
 
 import android.animation.Animator;
@@ -82,11 +84,19 @@ public class LogIn extends AppCompatActivity implements LoaderCallbacks<Cursor> 
             }
         });
 
-        Button signInButton = (Button) findViewById(R.id.sign_up_button);
-        signInButton.setOnClickListener(new OnClickListener() {
+        Button logInButton = (Button) findViewById(R.id.log_in_button);
+        logInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
+            }
+        });
+        
+        Button signUpButton = (Button) findViewById(R.id.sign_up_button);
+        signUpButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO. Navigate to sign up page
             }
         });
 
@@ -191,7 +201,6 @@ public class LogIn extends AppCompatActivity implements LoaderCallbacks<Cursor> 
     }
 
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
         return email.contains("@");
     }
 
@@ -270,6 +279,7 @@ public class LogIn extends AppCompatActivity implements LoaderCallbacks<Cursor> 
 
     }
 
+    // TODO. To take out or not
     private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
         //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
         ArrayAdapter<String> adapter =
@@ -322,8 +332,6 @@ public class LogIn extends AppCompatActivity implements LoaderCallbacks<Cursor> 
                     return pieces[1].equals(mPassword);
                 }
             }
-
-            // TODO: register the new account here.
             return true;
         }
 
