@@ -5,6 +5,7 @@ package com.example.ufree;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -332,7 +333,7 @@ public class LogIn extends AppCompatActivity implements LoaderCallbacks<Cursor> 
                     return pieces[1].equals(mPassword);
                 }
             }
-            return true;
+            return false;
         }
 
         @Override
@@ -341,7 +342,9 @@ public class LogIn extends AppCompatActivity implements LoaderCallbacks<Cursor> 
             showProgress(false);
 
             if (success) {
-                finish();
+                // Launch Who's Free activity on success
+                Intent intent = new Intent(LogIn.this, MainActivity.class);
+                startActivity(intent);
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
