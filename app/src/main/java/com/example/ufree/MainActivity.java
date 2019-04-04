@@ -1,7 +1,9 @@
 package com.example.ufree;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.view.View;
@@ -17,8 +19,19 @@ import android.view.MenuItem;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private boolean loggedIn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        loggedIn = pref.getBoolean("loggedIn", false);
+        System.out.println("--------------------" + loggedIn);
+        if (!loggedIn) {
+            Intent intent = new Intent(this, LogIn.class);
+            startActivity(intent);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
