@@ -26,7 +26,6 @@ public class MainActivity extends AppCompatActivity
 
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         loggedIn = pref.getBoolean("loggedIn", false);
-        System.out.println("--------------------" + loggedIn);
         if (!loggedIn) {
             Intent intent = new Intent(this, LogIn.class);
             startActivity(intent);
@@ -61,8 +60,6 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
         }
     }
 
@@ -95,9 +92,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            // TODO remove
-            Intent intent = new Intent(this, LogIn.class);
-            startActivity(intent);
+
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
