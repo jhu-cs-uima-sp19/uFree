@@ -164,7 +164,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
                 // Log.d(TAG, String.valueOf(bitmap));
 
-                ImageView imageView = (ImageView) findViewById(R.id.imageView);
+                ImageView imageView = (ImageView) findViewById(R.id.profile_picture);
                 imageView.setImageBitmap(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
