@@ -93,7 +93,6 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.whosFree_nav) {
             // Handle the camera action
         } else if (id == R.id.events_nav) {
->>>>>>> master
 
         } else if (id == R.id.friends_nav) {
 

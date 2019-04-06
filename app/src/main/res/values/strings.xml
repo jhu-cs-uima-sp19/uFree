@@ -10,7 +10,6 @@
     <string name="title_activity_events">EventsActivity</string>
     <string name="invitations">Invitations</string>
     <string name="events">Events</string>
-    <string name="search">search</string>
     <string name="title_activity_single_friend_events">SingleFriendEventsActivity</string>
 
     <string name="search">Search</string>
