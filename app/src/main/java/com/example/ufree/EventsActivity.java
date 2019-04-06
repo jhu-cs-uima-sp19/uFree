@@ -1,5 +1,6 @@
 package com.example.ufree;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -23,7 +24,10 @@ public class EventsActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        // set up title of app bar
+        getSupportActionBar().setTitle("Events");
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_events);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -40,6 +44,8 @@ public class EventsActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        // set Events to be selected
+        navigationView.getMenu().getItem(1).setChecked(true);
     }
 
     @Override
@@ -67,7 +73,7 @@ public class EventsActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.search_events) {
             return true;
         }
 
@@ -80,17 +86,16 @@ public class EventsActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        if (id == R.id.whosFree_nav) {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.events_nav) {
+            // SHOULD NOT DO ANYTHING
+        } else if (id == R.id.friends_nav) {
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.calendar_nav) {
 
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.profile_nav) {
 
         }
 

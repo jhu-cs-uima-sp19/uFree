@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity
         // set up title of app bar
         getSupportActionBar().setTitle("Who's Free");
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_main);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -47,6 +47,8 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        // set Who's Free to be selected
+        navigationView.getMenu().getItem(0).setChecked(true);
 
         // initialize firebase
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -77,7 +79,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.search_main) {
             return true;
         }
 
@@ -91,9 +93,10 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.whosFree_nav) {
-            // Handle the camera action
+            // SHOULD NOT DO ANYTHING
         } else if (id == R.id.events_nav) {
-
+            Intent intent = new Intent(this, EventsActivity.class);
+            startActivity(intent);
         } else if (id == R.id.friends_nav) {
 
         } else if (id == R.id.calendar_nav) {
