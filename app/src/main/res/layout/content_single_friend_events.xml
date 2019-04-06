@@ -8,20 +8,6 @@
     tools:context=".SingleFriendEventsActivity"
     tools:showIn="@layout/app_bar_single_friend_events">
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/floatingActionButton"
-        android:layout_width="84dp"
-        android:layout_height="78dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:clickable="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.974"
-        app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_add" />
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/SingleFriendRecyclerView"
         android:layout_width="395dp"
