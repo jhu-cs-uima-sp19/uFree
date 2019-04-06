@@ -6,4 +6,8 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_events">EventsActivity</string>
+    <string name="invitations">Invitations</string>
+    <string name="events">Events</string>
+    <string name="title_activity_single_friend_events">SingleFriendEventsActivity</string>
 </resources>
