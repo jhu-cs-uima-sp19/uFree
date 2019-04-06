@@ -19,4 +19,7 @@
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_password_dont_match">Passwords don\'t match</string>
     <string name="error_field_required">This field is required</string>
+
+    <string name="search">Search</string>
+    <string name="changeStatus_nav">Free now till</string>
 </resources>

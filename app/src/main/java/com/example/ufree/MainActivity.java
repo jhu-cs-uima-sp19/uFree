@@ -14,6 +14,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -23,6 +26,9 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // set up title of app bar
+        getSupportActionBar().setTitle("Who's Free");
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -41,6 +47,9 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // initialize firebase
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
     }
 
     @Override
@@ -88,11 +97,17 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_slideshow) {
 
-        } else if (id == R.id.nav_manage) {
+        }
 
-        } else if (id == R.id.nav_share) {
+        if (id == R.id.whosFree_nav) {
+            // Handle the camera action
+        } else if (id == R.id.events_nav) {
 
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.friends_nav) {
+
+        } else if (id == R.id.calendar_nav) {
+
+        } else if (id == R.id.profile_nav) {
 
         }
 
