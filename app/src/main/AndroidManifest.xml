@@ -13,7 +13,12 @@
         <activity
             android:name=".SingleFriendEventsActivity"
             android:label="@string/title_activity_single_friend_events"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName="com.example.ufree.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.ufree.MainActivity" />
+        </activity>
         <activity
             android:name=".EventsActivity"
             android:label="@string/title_activity_events"
