@@ -1,0 +1,35 @@
+{
+  "project_info": {
+    "project_number": "334114204910",
+    "firebase_url": "https://ufree-4ffc1.firebaseio.com",
+    "project_id": "ufree-4ffc1",
+    "storage_bucket": "ufree-4ffc1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:334114204910:android:6210426c831bee34",
+        "android_client_info": {
+          "package_name": "com.example.ufree"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJ1J3MKL_eFzRMsSZqs-yrnkMF-qvZqwY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "334114204910-sb4pt3vpise9ku91a4ktbouhbg1g0guh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

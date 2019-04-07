@@ -14,24 +14,20 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
-public class MainActivity extends AppCompatActivity
+public class EventsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_events);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         // set up title of app bar
-        getSupportActionBar().setTitle("Who's Free");
+        getSupportActionBar().setTitle("Events");
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_main);
-
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_events);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -39,8 +35,6 @@ public class MainActivity extends AppCompatActivity
                 startActivity(intent);
             }
         });
-
-        //fab.setVisibility(View.GONE);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -50,11 +44,8 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        // set Who's Free to be selected
-        navigationView.getMenu().getItem(0).setChecked(true);
-
-        // initialize firebase
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        // set Events to be selected
+        navigationView.getMenu().getItem(1).setChecked(true);
     }
 
     @Override
@@ -70,7 +61,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.events, menu);
         return true;
     }
 
@@ -82,7 +73,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.search_main) {
+        if (id == R.id.search_events) {
             return true;
         }
 
@@ -96,10 +87,10 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.whosFree_nav) {
-            // SHOULD NOT DO ANYTHING
-        } else if (id == R.id.events_nav) {
-            Intent intent = new Intent(this, EventsActivity.class);
+            Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
+        } else if (id == R.id.events_nav) {
+            // SHOULD NOT DO ANYTHING
         } else if (id == R.id.friends_nav) {
 
         } else if (id == R.id.calendar_nav) {
