@@ -160,19 +160,14 @@
         app:layout_constraintTop_toBottomOf="@+id/DescriptionInput"
         app:layout_constraintVertical_bias="0.878" />
 
-    <ImageButton
+    <ImageView
         android:id="@+id/AddInviteButton"
-        android:layout_width="37dp"
-        android:layout_height="37dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/AttendingTextView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.022"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/InvitedTextView"
-        app:layout_constraintVertical_bias="0.576"
         app:srcCompat="@drawable/ic_add_circle_orange_light_24dp" />
+
 </android.support.constraint.ConstraintLayout>

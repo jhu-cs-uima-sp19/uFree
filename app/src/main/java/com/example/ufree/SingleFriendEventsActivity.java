@@ -25,7 +25,7 @@ public class SingleFriendEventsActivity extends AppCompatActivity {
         // set up back navigation
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         // set up title of app bar
-        getSupportActionBar().setTitle("Events with Dave");
+        getSupportActionBar().setTitle("Events with a friend");
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_singleFriendEvents);
