@@ -3,7 +3,8 @@ package com.example.ufree;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -14,7 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.google.firebase.database.DatabaseReference;
+import com.example.ufree.FreeFriend.FreeFriendContent;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity
@@ -24,14 +25,15 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        /* Set up App bar */
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         // set up title of app bar
         getSupportActionBar().setTitle("Who's Free");
 
+        /* Set up floating add button */
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_main);
-
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -42,6 +44,7 @@ public class MainActivity extends AppCompatActivity
 
         //fab.setVisibility(View.GONE);
 
+        /* Set up navigation drawer */
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -53,9 +56,27 @@ public class MainActivity extends AppCompatActivity
         // set Who's Free to be selected
         navigationView.getMenu().getItem(0).setChecked(true);
 
+        /* Set up Recycler View */
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.freeFriendsRecyclerView);
+        recyclerView.setHasFixedSize(true);
+
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+
+        // sample freind data
+        RecyclerView.Adapter mAdapter = new FreeFriendRecyclerViewAdapter(FreeFriendContent.FREE_FREINDS_LIST,
+                new FreeFriendFragment.OnListFragmentInteractionListener() {
+                    public void onListFragmentInteraction(FreeFriendContent.FreeFriend item) { }
+                });
+        recyclerView.setAdapter(mAdapter);
+
         // initialize firebase
         FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+
     }
+
+
 
     @Override
     public void onBackPressed() {
