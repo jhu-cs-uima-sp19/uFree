@@ -10,12 +10,14 @@ public class Event {
     public HashMap<String, Integer> date;
     public HashMap<String, Integer> time;
     public String location;
+    public String description;
 
     public Event(ArrayList<Integer> invitees, HashMap<String, Integer> d,
-                 HashMap<String, Integer> t, String l) {
+                 HashMap<String, Integer> t, String l, String desc) {
         this.participants = invitees;
         this.date = d;
         this.time = t;
         this.location = l;
+        this.description = desc;
     }
 }

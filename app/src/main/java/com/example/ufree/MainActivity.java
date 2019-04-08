@@ -30,14 +30,14 @@ public class MainActivity extends AppCompatActivity
         // set up title of app bar
         getSupportActionBar().setTitle("Who's Free");
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_main);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(), NewEventActivity.class);
-                startActivity(intent);
-            }
-        });
+//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_singleFriendEvents);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Intent intent = new Intent(view.getContext(), NewEventActivity.class);
+//                startActivity(intent);
+//            }
+//        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.search_main) {
+        if (id == R.id.profile_nav) {
             return true;
         }
 

@@ -14,17 +14,24 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class EventsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private FirebaseDatabase db;
+    private DatabaseReference dbref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = FirebaseDatabase.getInstance();
+        dbref = db.getReference("events");
         setContentView(R.layout.activity_events);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
