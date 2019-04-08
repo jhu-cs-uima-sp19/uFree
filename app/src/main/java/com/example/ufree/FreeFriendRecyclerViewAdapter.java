@@ -1,5 +1,6 @@
 package com.example.ufree;
 
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,7 +57,7 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
         return freeFriends.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public final View mView;
         public final TextView mIdView;
         public final TextView mContentView;
@@ -73,5 +74,13 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
         public String toString() {
             return super.toString() + " '" + mContentView.getText() + "'";
         }
+
+        // TODO: Figure out how to enable onClick in Recycler View
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent(mView.getContext(), SingleFriendEventsActivity.class);
+            mView.getContext().startActivity(intent);
+        }
     }
+
 }
