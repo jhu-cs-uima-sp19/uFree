@@ -38,12 +38,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
+import com.google.firebase.database.*;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -81,6 +84,11 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
     private View mLoginFormView;
 
     private int RESULT_LOAD_IMAGE;
+    private int counter;
+
+    //database elements
+    private FirebaseDatabase db = FirebaseDatabase.getInstance();
+    DatabaseReference dbref = db.getReference("ufree-4ffc1");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,16 +102,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
         mBirthdayView = (TextView) findViewById(R.id.birthday);
         mPasswordView = (EditText) findViewById(R.id.password);
         mConfirmPasswordView = (EditText) findViewById(R.id.confirm_password);
-        /*mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
-                    attemptSignUp();
-                    return true;
-                }
-                return false;
-            }
-        });*/
 
         changeProfilePic();
 
@@ -173,52 +171,8 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
 
     }
 
-    /*private void populateAutoComplete() {
-        if (!mayRequestContacts()) {
-            return;
-        }
-
-        getLoaderManager().initLoader(0, null, this);
-    }*/
-
-    /*private boolean mayRequestContacts() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
-        if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-                        }
-                    });
-        } else {
-            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-        }
-        return false;
-    }*/
-
     /**
-     * Callback received when a permissions request has been completed.
-     */
-    /*@Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_READ_CONTACTS) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                populateAutoComplete();
-            }
-        }
-    }*/
-
-
-    /**
-     * Attempts to sign in or register the account specified by the login form.
+     * Attempts to sign in or register the account specified by the signup form.
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
@@ -308,12 +262,10 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
             // form field with an error.
             focusView.requestFocus();
         } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            // TODO. Update userlogintask
             showProgress(true);
-            mAuthTask = new UserLoginTask(fullName, email, phoneNumberString, birthday, password);
-            mAuthTask.execute((Void) null);
+            User myUser = new User(fullName, email, 0, 0);
+            dbref.child(String.valueOf(counter)).setValue(myUser);
+            counter++;
         }
     }
 
