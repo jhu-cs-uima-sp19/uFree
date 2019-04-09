@@ -2,8 +2,12 @@ package com.example.ufree;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -15,22 +19,29 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import android.support.v7.widget.LinearLayoutManager;
+import com.google.firebase.database.ValueEventListener;
 
 public class EventsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private FirebaseDatabase db;
     private DatabaseReference dbref;
-    private RecyclerView eventsList;
+    private RecyclerView eventsRecyclerView;
+    private ArrayList<Event> events = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = FirebaseDatabase.getInstance();
-        dbref = db.getReference("events");
+        dbref = db.getReference();
         setContentView(R.layout.activity_events);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -58,11 +69,40 @@ public class EventsActivity extends AppCompatActivity
         // set Events to be selected
         navigationView.getMenu().getItem(1).setChecked(true);
 
-        //create recycler and set layout
-        RecyclerView eventsRecyclerView = findViewById(R.id.EventsRecyclerView);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-        linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
-        eventsRecyclerView.setLayoutManager(linearLayoutManager);
+        //create recycler and set adapter
+        eventsRecyclerView = findViewById(R.id.EventsRecyclerView);
+        final CustomAdapter recyclerAdapter = new CustomAdapter(events);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        eventsRecyclerView.setLayoutManager(mLayoutManager);
+        eventsRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        eventsRecyclerView.setAdapter(recyclerAdapter);
+
+        //initialize the counter
+        dbref.child("events").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                ArrayList<HashMap<String, String>> dbEvents =
+                        (ArrayList<HashMap<String, String>>) dataSnapshot.getValue();
+                System.out.println(dbEvents.size());
+
+                for (HashMap<String, String> dbEvent : dbEvents) {
+                    Event e = new Event();
+                    e.description = dbEvent.get("description");
+                    e.location = dbEvent.get("location");
+
+                    if (e != null ) {
+                        events.add(e);
+                    }
+
+                    recyclerAdapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
+
     }
 
     @Override

@@ -20,4 +20,6 @@ public class Event {
         this.location = l;
         this.description = desc;
     }
+
+    public Event(){};
 }
