@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,16 +17,14 @@ import android.view.MenuItem;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
+import android.support.v7.widget.LinearLayoutManager;
 
 public class EventsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private FirebaseDatabase db;
     private DatabaseReference dbref;
+    private RecyclerView eventsList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +57,12 @@ public class EventsActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         // set Events to be selected
         navigationView.getMenu().getItem(1).setChecked(true);
+
+        //create recycler and set layout
+        RecyclerView eventsRecyclerView = findViewById(R.id.EventsRecyclerView);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+        linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        eventsRecyclerView.setLayoutManager(linearLayoutManager);
     }
 
     @Override

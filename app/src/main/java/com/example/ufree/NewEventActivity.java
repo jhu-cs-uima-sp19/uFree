@@ -64,7 +64,6 @@ public class NewEventActivity extends AppCompatActivity {
         return true;
     }
 
-
     public void addEventAction(View v) {
         System.out.println("executing");
         HashMap<String, Integer> date = new HashMap<>();
