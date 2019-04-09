@@ -7,10 +7,11 @@
     <string name="nav_header_desc">Navigation header</string>
 
     <string name="title_activity_events">EventsActivity</string>
-    <string name="invitations">Invitations</string>
-    <string name="events">Events</string>
+    <string name="title_activity_profile">ProfileActivity</string>
     <string name="title_activity_single_friend_events">SingleFriendEventsActivity</string>
 
+    <string name="invitations">Invitations</string>
+    <string name="events">Events</string>
     <string name="search">Search</string>
     <string name="close">Close</string>
     <string name="changeStatus_nav">Free now till</string>
