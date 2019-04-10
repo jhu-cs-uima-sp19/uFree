@@ -1,5 +1,6 @@
 package com.example.ufree;
 
+import android.content.Intent;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
@@ -32,6 +33,7 @@ public class NewEventActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_event);
+
         //initialize our database objects
         db = FirebaseDatabase.getInstance();
         dbref = db.getReference();
@@ -39,6 +41,11 @@ public class NewEventActivity extends AppCompatActivity {
         //initialize the input fields
         locationInput = (EditText) findViewById(R.id.LocationInput);
         descriptionInput = (EditText) findViewById(R.id.DescriptionInput);
+        Bundle extras = getIntent().getExtras();
+        String descriptionInputValue = extras.getString("description", "a brief title for your event");
+        String locationInputValue= extras.getString("location", "the location of your event");
+        descriptionInput.setText(descriptionInputValue);
+        locationInput.setText(locationInputValue);
 
         //initialize the counter
         dbref.child("counters").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -79,6 +86,10 @@ public class NewEventActivity extends AppCompatActivity {
         dbref.child("events").child(String.valueOf(counter)).setValue(e);
         counter++;
         dbref.child("counters").child("events").setValue(counter);
+
+        //return to the events page
+        Intent intent = new Intent(this, EventsActivity.class);
+        startActivity(intent);
     }
 
     @Override

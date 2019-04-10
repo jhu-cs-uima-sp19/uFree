@@ -2,6 +2,7 @@ package com.example.ufree;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -18,6 +19,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -27,7 +30,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+
+import org.w3c.dom.Text;
 
 public class EventsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -90,9 +96,7 @@ public class EventsActivity extends AppCompatActivity
                     e.description = dbEvent.get("description");
                     e.location = dbEvent.get("location");
 
-                    if (e != null ) {
-                        events.add(e);
-                    }
+                    events.add(e);
 
                     recyclerAdapter.notifyDataSetChanged();
                 }
@@ -102,7 +106,6 @@ public class EventsActivity extends AppCompatActivity
             public void onCancelled(@NonNull DatabaseError databaseError) {
             }
         });
-
     }
 
     @Override
@@ -160,4 +163,23 @@ public class EventsActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    /** function to handle click events for recyclerview items. */
+    public void viewEventAction(View view) {
+        TextView selectedItemDescription = (TextView) view.findViewById(R.id.description);
+        TextView selectedItemLocation = (TextView) view.findViewById(R.id.location);
+
+
+        if (selectedItemDescription != null && selectedItemLocation != null) {
+            String description = String.valueOf(selectedItemDescription.getText());
+            String location = String.valueOf(selectedItemLocation.getText());
+            Intent intent = new Intent(this, NewEventActivity.class);
+            Bundle extras = new Bundle();
+            extras.putString("description", description.toString());
+            extras.putString("location", location.toString());
+            intent.putExtras(extras);
+            startActivity(intent);
+        }
+    }
+
 }

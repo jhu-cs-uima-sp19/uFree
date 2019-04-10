@@ -6,6 +6,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 
 public class CustomAdapter extends RecyclerView.Adapter {
@@ -18,10 +21,12 @@ public class CustomAdapter extends RecyclerView.Adapter {
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView description;
+        public TextView location;
 
         public MyViewHolder(View view) {
             super(view);
             description = (TextView) view.findViewById(R.id.description);
+            location = (TextView) view.findViewById(R.id.location);
         }
     }
 
@@ -39,6 +44,8 @@ public class CustomAdapter extends RecyclerView.Adapter {
         //this better be okay...
         MyViewHolder mvHolder = (MyViewHolder) holder;
         mvHolder.description.setText(event.description);
+        mvHolder.location.setText(event.location);
+
     }
 
     @Override
