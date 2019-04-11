@@ -22,11 +22,13 @@ public class CustomAdapter extends RecyclerView.Adapter {
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView description;
         public TextView location;
+        public TextView id;
 
         public MyViewHolder(View view) {
             super(view);
             description = (TextView) view.findViewById(R.id.description);
             location = (TextView) view.findViewById(R.id.location);
+            id = (TextView) view.findViewById(R.id.id);
         }
     }
 
@@ -45,7 +47,7 @@ public class CustomAdapter extends RecyclerView.Adapter {
         MyViewHolder mvHolder = (MyViewHolder) holder;
         mvHolder.description.setText(event.description);
         mvHolder.location.setText(event.location);
-
+        mvHolder.id.setText(String.valueOf(event.id));
     }
 
     @Override

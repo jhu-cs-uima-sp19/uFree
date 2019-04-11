@@ -11,6 +11,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -20,6 +22,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.lang.Long;
 
 public class NewEventActivity extends AppCompatActivity {
 
@@ -27,6 +30,11 @@ public class NewEventActivity extends AppCompatActivity {
     private DatabaseReference dbref;
     private EditText locationInput;
     private EditText descriptionInput;
+    private Spinner monthInputSpinner;
+    private Spinner hourInputSpinner;
+    private Spinner minuteInputSpinner;
+    private EditText dayInput;
+    private long eventIdValue;
     private long counter;
 
     @Override
@@ -41,11 +49,14 @@ public class NewEventActivity extends AppCompatActivity {
         //initialize the input fields
         locationInput = (EditText) findViewById(R.id.LocationInput);
         descriptionInput = (EditText) findViewById(R.id.DescriptionInput);
+        monthInputSpinner = (Spinner) findViewById(R.id.monthSpinner);
+        hourInputSpinner = (Spinner) findViewById(R.id.hourSpinner);
+        minuteInputSpinner = (Spinner) findViewById(R.id.minuteSpinner);
+        dayInput = (EditText) findViewById(R.id.dayEditText);
+
+        Spinner monthInput = findViewById(R.id.monthSpinner);
+
         Bundle extras = getIntent().getExtras();
-        String descriptionInputValue = extras.getString("description", "a brief title for your event");
-        String locationInputValue= extras.getString("location", "the location of your event");
-        descriptionInput.setText(descriptionInputValue);
-        locationInput.setText(locationInputValue);
 
         //initialize the counter
         dbref.child("counters").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -60,6 +71,30 @@ public class NewEventActivity extends AppCompatActivity {
             }
         });
 
+        if (extras != null) {
+            eventIdValue = extras.getLong("id", counter);
+            System.out.println("ID IS: " + eventIdValue);
+            dbref.child("events").child(String.valueOf(eventIdValue)).addListenerForSingleValueEvent(new ValueEventListener() {
+
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    HashMap<String, Object> event = (HashMap<String, Object>) dataSnapshot.getValue();
+                    if (event != null) {
+                        locationInput.setText((String) event.get("location"));
+                        descriptionInput.setText((String) event.get("description"));
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {}
+            });
+        } else {
+            descriptionInput.setText("event title");
+            locationInput.setText("event description");
+        }
+
+
+
         // set up title of app bar
         getSupportActionBar().setTitle("New Event");
     }
@@ -71,6 +106,62 @@ public class NewEventActivity extends AppCompatActivity {
         return true;
     }
 
+    private Integer convertTimeToInt(String time) {
+        if (time.equals("January") || time.equals("1 AM")) {
+            return 1;
+        } else if (time.equals("February") || time.equals("2 AM")) {
+            return 2;
+        } else if (time.equals("March") || time.equals("3 AM")) {
+            return 3;
+        } else if (time.equals("April") || time.equals("4 AM")) {
+            return 4;
+        } else if (time.equals("May") || time.equals("5 AM")) {
+            return 5;
+        } else if (time.equals("June") || time.equals("6 AM")) {
+            return 6;
+        } else if (time.equals("July") || time.equals("7 AM")) {
+            return 7;
+        } else if (time.equals("August") || time.equals("8 AM")) {
+            return 8;
+        } else if (time.equals("September") || time.equals("9 AM")) {
+            return 9;
+        } else if (time.equals("October") || time.equals("10 AM")) {
+            return 10;
+        } else if (time.equals("November") || time.equals("11 AM")) {
+            return 11;
+        } else if (time.equals("December") || time.equals("12 PM")) {
+            return 12;
+        } else if (time.equals("12 AM") || time.equals("00")) {
+            return 0;
+        } else if (time == null) {
+          return -2;
+        } else if (time.equals("1 PM")) {
+            return 13;
+        } else if (time.equals("2 PM")) {
+            return 14;
+        } else if (time.equals("3 PM")) {
+            return 15;
+        } else if (time.equals("4 PM")) {
+            return 16;
+        } else if (time.equals("5 PM")) {
+            return 17;
+        } else if (time.equals("6 PM")) {
+            return 18;
+        } else if (time.equals("7 PM")) {
+            return 19;
+        } else if (time.equals("8 PM")) {
+            return 20;
+        } else if (time.equals("9 PM")) {
+            return 21;
+        } else if (time.equals("10 PM")) {
+            return 22;
+        } else if (time.equals("11 PM")) {
+            return 23;
+        } else {
+            return -2;
+        }
+    }
+
     public void addEventAction(View v) {
         System.out.println("executing");
         HashMap<String, Integer> date = new HashMap<>();
@@ -80,12 +171,27 @@ public class NewEventActivity extends AppCompatActivity {
 
         String location = String.valueOf(locationInput.getText());
         String description = String.valueOf(descriptionInput.getText());
+        String hour = String.valueOf(hourInputSpinner.getSelectedItem());
+        String minute = String.valueOf(minuteInputSpinner.getSelectedItem());
+        String month = String.valueOf(monthInputSpinner.getSelectedItem());
+        Integer day = Integer.parseInt(String.valueOf(dayInput.getText()));
+
+        System.out.println(month + " " + day);
+        System.out.println(hour + " " + minute);
+        date.put("month",convertTimeToInt(month));
+        date.put("day", day);
+        time.put("hour", convertTimeToInt(hour));
+        time.put("minute", convertTimeToInt(minute));
 
         //add the event to the database then increment the counter
-        Event e = new Event(invitees, date, time, location, description);
-        dbref.child("events").child(String.valueOf(counter)).setValue(e);
-        counter++;
-        dbref.child("counters").child("events").setValue(counter);
+        Event e = new Event(invitees, date, time, location, description, eventIdValue);
+
+        dbref.child("events").child(String.valueOf(eventIdValue)).setValue(e);
+        if (eventIdValue == -1) {
+            dbref.child("events").child(String.valueOf(counter)).setValue(e);
+            counter++;
+            dbref.child("counters").child("events").setValue(counter);
+        }
 
         //return to the events page
         Intent intent = new Intent(this, EventsActivity.class);
@@ -106,5 +212,12 @@ public class NewEventActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void removeEventAction(View v) {
+        dbref.child("events").child(String.valueOf(eventIdValue)).removeValue();
+        //return to the events page
+        Intent intent = new Intent(this, EventsActivity.class);
+        startActivity(intent);
     }
 }

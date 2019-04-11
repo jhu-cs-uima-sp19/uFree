@@ -10,7 +10,8 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="10dp"
-    android:onClick="viewEventAction">
+    android:onClick="viewEventAction"
+    android:longClickable="true">
     <!--items for a single row of RecyclerView-->
     <TextView
         android:id="@+id/description"
@@ -28,4 +29,10 @@
         android:paddingTop="38sp"
         android:textSize="15sp"
         android:textColor="#3300ff"/>
+
+    <TextView
+        android:id="@+id/id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
 </RelativeLayout>

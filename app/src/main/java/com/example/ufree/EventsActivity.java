@@ -42,6 +42,7 @@ public class EventsActivity extends AppCompatActivity
     private DatabaseReference dbref;
     private RecyclerView eventsRecyclerView;
     private ArrayList<Event> events = new ArrayList<>();
+    private Integer selectedEventID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,19 +88,26 @@ public class EventsActivity extends AppCompatActivity
         dbref.child("events").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                ArrayList<HashMap<String, String>> dbEvents =
-                        (ArrayList<HashMap<String, String>>) dataSnapshot.getValue();
-                System.out.println(dbEvents.size());
+                HashMap<String, HashMap<String, Object>> dbEvents =
+                        (HashMap<String, HashMap<String, Object>>) dataSnapshot.getValue();
 
-                for (HashMap<String, String> dbEvent : dbEvents) {
-                    Event e = new Event();
-                    e.description = dbEvent.get("description");
-                    e.location = dbEvent.get("location");
-
-                    events.add(e);
+                for (HashMap<String, Object> dbEvent : dbEvents.values()) {
+                    if (dbEvent != null) {
+                        System.out.println(dbEvent);
+                        Event e = new Event();
+                        e.description = (String) dbEvent.get("description");
+                        e.location = (String) dbEvent.get("location");
+                        e.time = (HashMap<String, Integer>) dbEvent.get("time");
+                        e.date = (HashMap<String, Integer>) dbEvent.get("date");
+                        e.id = Long.valueOf(String.valueOf(dbEvent.get("id")));
+                        events.add(e);
+                    }
 
                     recyclerAdapter.notifyDataSetChanged();
                 }
+
+                HashMap<String, Object> m = (HashMap<String, Object>) dataSnapshot.getValue();
+                System.out.println(m.get("3"));
             }
 
             @Override
@@ -149,11 +157,7 @@ public class EventsActivity extends AppCompatActivity
         if (id == R.id.whosFree_nav) {
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
-        } else if (id == R.id.events_nav) {
-            // SHOULD NOT DO ANYTHING
         } else if (id == R.id.friends_nav) {
-
-        } else if (id == R.id.calendar_nav) {
 
         } else if (id == R.id.profile_nav) {
 
@@ -168,15 +172,13 @@ public class EventsActivity extends AppCompatActivity
     public void viewEventAction(View view) {
         TextView selectedItemDescription = (TextView) view.findViewById(R.id.description);
         TextView selectedItemLocation = (TextView) view.findViewById(R.id.location);
-
+        TextView selectedItemId = (TextView) view.findViewById(R.id.id);
 
         if (selectedItemDescription != null && selectedItemLocation != null) {
-            String description = String.valueOf(selectedItemDescription.getText());
-            String location = String.valueOf(selectedItemLocation.getText());
+            Long id = Long.valueOf(String.valueOf(selectedItemId.getText()));
             Intent intent = new Intent(this, NewEventActivity.class);
             Bundle extras = new Bundle();
-            extras.putString("description", description.toString());
-            extras.putString("location", location.toString());
+            extras.putLong("id", id);
             intent.putExtras(extras);
             startActivity(intent);
         }
