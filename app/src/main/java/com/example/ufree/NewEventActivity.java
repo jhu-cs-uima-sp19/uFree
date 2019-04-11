@@ -93,8 +93,6 @@ public class NewEventActivity extends AppCompatActivity {
             locationInput.setText("event description");
         }
 
-
-
         // set up title of app bar
         getSupportActionBar().setTitle("New Event");
     }
