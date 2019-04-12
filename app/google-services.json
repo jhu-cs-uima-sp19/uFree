@@ -21,6 +21,14 @@
             "package_name": "com.example.ufree",
             "certificate_hash": "d0add89dae0f71f706fbabcfb6634bcaa1e3e7f3"
           }
+        },
+        {
+          "client_id": "334114204910-p3cnml3t232ab8cs9nei5hppb6trjljs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ufree",
+            "certificate_hash": "e2d765b32019e06118c7dc1ba7d0bf81f254eedb"
+          }
         }
       ],
       "api_key": [
