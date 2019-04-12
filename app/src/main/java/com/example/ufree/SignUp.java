@@ -64,18 +64,6 @@ import com.google.firebase.auth.FirebaseAuth;
 public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
     /**
-     * Id to identity READ_CONTACTS permission request.
-     */
-    private static final int REQUEST_READ_CONTACTS = 0;
-
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
-    /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
@@ -92,14 +80,20 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
     private View mProgressView;
     private View mLoginFormView;
 
-    private int RESULT_LOAD_IMAGE;
-    private int counter;
+    private int RESULT_LOAD_IMAGE = 0;
 
     //database elements
     private FirebaseDatabase db = FirebaseDatabase.getInstance();
-    DatabaseReference dbref = db.getReference("ufree-4ffc1");
+    DatabaseReference dbRef = db.getReference("users");
 
     private FirebaseAuth auth;
+
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String phoneNumber;
+    private String birthday;
+    String password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -202,13 +196,13 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
         mPasswordView.setError(null);
         mConfirmPasswordView.setError(null);
 
-        // Store values at the time of the signup attempt.
-        String firstName = mFirstNameView.getText().toString().trim();
-        String lastName = mLastNameView.getText().toString().trim();
-        String email = mEmailView.getText().toString().trim();
-        String phoneNumberString =  mPhoneNumberView.getText().toString().trim();
-        String birthday = mBirthdayView.getText().toString().trim();
-        String password = mPasswordView.getText().toString().trim();
+        // Store values at the time of the sign up attempt.
+        firstName = mFirstNameView.getText().toString().trim();
+        lastName = mLastNameView.getText().toString().trim();
+        email = mEmailView.getText().toString().trim();
+        phoneNumber =  mPhoneNumberView.getText().toString().trim();
+        birthday = mBirthdayView.getText().toString().trim();
+        password = mPasswordView.getText().toString().trim();
         String confirmPassword = mConfirmPasswordView.getText().toString().trim();
 
         boolean cancel = false;
@@ -247,7 +241,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
             cancel = true;
         }
 
-        if (TextUtils.isEmpty(phoneNumberString)) {
+        if (TextUtils.isEmpty(phoneNumber)) {
             mPhoneNumberView.setError(getString(R.string.error_field_required));
             focusView = mPhoneNumberView;
             cancel = true;
@@ -285,10 +279,22 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
             // form field with an error.
             focusView.requestFocus();
         } else {
-            showProgress(true);
+            /*showProgress(true);
 
             mAuthTask = new UserLoginTask(firstName, lastName, email, phoneNumberString, birthday, password);
-            mAuthTask.execute((Void) null);
+            mAuthTask.execute((Void) null);*/
+            auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(SignUp.this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (!task.isSuccessful()) {
+                                Toast.makeText(SignUp.this, "Sign Up Failed" + task.getException(), Toast.LENGTH_LONG).show();
+                            } else {
+                                dbRef.child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(firstName, lastName, phoneNumber, birthday, 0, 0));
+                                finish();
+                            }
+                        }
+                    });
         }
     }
 
@@ -419,18 +425,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
             } catch (InterruptedException e) {
                 return false;
             }
-
-            // TODO. If email already exists then don't make account.
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(email)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(password);
-                }
-            }
-
-            // TODO: register the new account here.
-
             return true;
         }
 
@@ -440,23 +434,18 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
             showProgress(false);
 
             if (success) {
-                auth.createUserWithEmailAndPassword(email, password)
+                /*auth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener(SignUp.this, new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if (!task.isSuccessful()) {
-                                    Toast.makeText(SignUp.this, "Sign Up Failed" + task.getException(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(SignUp.this, "Sign Up Failed" + task.getException(), Toast.LENGTH_LONG).show();
                                 } else {
-                                    User myUser = new User(firstName, lastName, email, 0, 0);
-                                    dbref.child(String.valueOf(counter)).setValue(myUser);
-                                    counter++;
-                                    startActivity(new Intent(SignUp.this, MainActivity.class));
+                                    dbRef.child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(firstName, lastName, phoneNumber, birthday, 0, 0));
+                                    finish();
                                 }
                             }
-                        });
-                Intent intent = new Intent(SignUp.this, MainActivity.class);
-                startActivity(intent);
-                finish();
+                        });*/
             } else {
                 mPasswordView.requestFocus();
             }
