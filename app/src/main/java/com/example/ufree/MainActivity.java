@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity
 
         // initialize firebase
         FirebaseApp.initializeApp(MainActivity.this);
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
     }
 
     @Override
@@ -90,15 +91,6 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-        /*if (id == R.id.nav_camera) {
-            Intent intent = new Intent(this, SignUp.class);
-            startActivity(intent);
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        }*/
 
         if (id == R.id.whosFree_nav) {
             // Handle the camera action

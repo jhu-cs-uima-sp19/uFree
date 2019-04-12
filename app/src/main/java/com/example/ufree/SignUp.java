@@ -39,12 +39,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.w3c.dom.Text;
+import com.google.firebase.database.*;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -90,6 +93,11 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
     private View mLoginFormView;
 
     private int RESULT_LOAD_IMAGE;
+    private int counter;
+
+    //database elements
+    private FirebaseDatabase db = FirebaseDatabase.getInstance();
+    DatabaseReference dbref = db.getReference("ufree-4ffc1");
 
     private FirebaseAuth auth;
 
@@ -97,6 +105,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
+
         // Set up the sign up form.
         mFirstNameView = (EditText) findViewById(R.id.first_name);
         mLastNameView =(EditText) findViewById(R.id.last_name);
@@ -141,7 +150,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
         datePickerDialog.show();
     }
 
-
     private void changeProfilePic() {
         ImageView profilePictureImage = (ImageView) findViewById(R.id.profile_picture);
         profilePictureImage.setOnClickListener(new View.OnClickListener() {
@@ -176,7 +184,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
     }
 
     /**
-     * Attempts to sign in or register the account specified by the login form.
+     * Attempts to sign in or register the account specified by the signup form.
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
@@ -211,7 +219,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
             mFirstNameView.setError(getString(R.string.error_field_required));
             focusView = mFirstNameView;
             cancel = true;
-        } else if (!isfirstNameValid(firstName)) {
+        } else if (!isFirstNameValid(firstName)) {
             mFirstNameView.setError(String.format(getString(R.string.error_invalid_field), "first name"));
             focusView = mFirstNameView;
             cancel = true;
@@ -222,7 +230,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
             mLastNameView.setError(getString(R.string.error_field_required));
             focusView = mLastNameView;
             cancel = true;
-        } else if (!isfirstNameValid(lastName)) {
+        } else if (!isFirstNameValid(lastName)) {
             mLastNameView.setError(String.format(getString(R.string.error_invalid_field), "last name"));
             focusView = mLastNameView;
             cancel = true;
@@ -277,16 +285,14 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
             // form field with an error.
             focusView.requestFocus();
         } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            // TODO. Update userlogintask
             showProgress(true);
+
             mAuthTask = new UserLoginTask(firstName, lastName, email, phoneNumberString, birthday, password);
             mAuthTask.execute((Void) null);
         }
     }
 
-    private boolean isfirstNameValid(String firstName) {
+    private boolean isFirstNameValid(String firstName) {
         return firstName.length() > 1;
     }
 
@@ -295,7 +301,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
         return password.length() >= 6;
     }
 
@@ -364,8 +369,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
             emails.add(cursor.getString(ProfileQuery.ADDRESS));
             cursor.moveToNext();
         }
-
-        //addEmailsToAutoComplete(emails);
     }
 
     @Override
@@ -375,13 +378,13 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
 
 
     private interface ProfileQuery {
+        int ADDRESS = 0;
+        int IS_PRIMARY = 1;
+
         String[] PROJECTION = {
                 ContactsContract.CommonDataKinds.Email.ADDRESS,
                 ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
         };
-
-        int ADDRESS = 0;
-        int IS_PRIMARY = 1;
     }
 
     /**
@@ -427,17 +430,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
             }
 
             // TODO: register the new account here.
-            auth.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(SignUp.this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (!task.isSuccessful()) {
-                                Toast.makeText(SignUp.this, "Sign Up Failed" + task.getException(), Toast.LENGTH_SHORT).show();
-                            } else {
-                                startActivity(new Intent(SignUp.this, MainActivity.class));
-                            }
-                        }
-                    });
+
             return true;
         }
 
@@ -447,11 +440,24 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
             showProgress(false);
 
             if (success) {
+                auth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(SignUp.this, new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (!task.isSuccessful()) {
+                                    Toast.makeText(SignUp.this, "Sign Up Failed" + task.getException(), Toast.LENGTH_SHORT).show();
+                                } else {
+                                    User myUser = new User(firstName, lastName, email, 0, 0);
+                                    dbref.child(String.valueOf(counter)).setValue(myUser);
+                                    counter++;
+                                    startActivity(new Intent(SignUp.this, MainActivity.class));
+                                }
+                            }
+                        });
                 Intent intent = new Intent(SignUp.this, MainActivity.class);
                 startActivity(intent);
                 finish();
             } else {
-                /*mPasswordView.setError(getString(R.string.error_incorrect_password));*/
                 mPasswordView.requestFocus();
             }
         }
