@@ -9,12 +9,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".NewEventActivity"></activity>
+        <activity
+            android:name=".WelcomeActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity android:name=".NewEventActivity" />
         <activity
             android:name=".SingleFriendEventsActivity"
             android:label="@string/title_activity_single_friend_events"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:parentActivityName="com.example.ufree.MainActivity">
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.ufree.MainActivity" />
