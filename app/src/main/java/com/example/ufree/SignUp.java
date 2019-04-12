@@ -36,6 +36,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
@@ -46,6 +47,13 @@ import java.util.Calendar;
 import java.util.List;
 
 import static android.Manifest.permission.READ_CONTACTS;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApiNotAvailableException;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 
 /**
  * A login screen that offers login via email/password.
@@ -70,7 +78,8 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
     private UserLoginTask mAuthTask = null;
 
     // UI references.
-    private EditText mFullNameView;
+    private EditText mFirstNameView;
+    private EditText mLastNameView;
     private AutoCompleteTextView mEmailView;
     private EditText mPhoneNumberView;
     private TextView mBirthdayView;
@@ -82,28 +91,22 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
 
     private int RESULT_LOAD_IMAGE;
 
+    private FirebaseAuth auth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
         // Set up the sign up form.
-        mFullNameView = (EditText) findViewById(R.id.full_name);
+        mFirstNameView = (EditText) findViewById(R.id.first_name);
+        mLastNameView =(EditText) findViewById(R.id.last_name);
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        // populateAutoComplete();
         mPhoneNumberView = (EditText) findViewById(R.id.phone_number);
         mBirthdayView = (TextView) findViewById(R.id.birthday);
         mPasswordView = (EditText) findViewById(R.id.password);
         mConfirmPasswordView = (EditText) findViewById(R.id.confirm_password);
-        /*mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == EditorInfo.IME_ACTION_DONE || id == EditorInfo.IME_NULL) {
-                    attemptSignUp();
-                    return true;
-                }
-                return false;
-            }
-        });*/
+
+        auth = FirebaseAuth.getInstance();
 
         changeProfilePic();
 
@@ -162,7 +165,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
 
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                // Log.d(TAG, String.valueOf(bitmap));
 
                 ImageView imageView = (ImageView) findViewById(R.id.profile_picture);
                 imageView.setImageBitmap(bitmap);
@@ -172,50 +174,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
         }
 
     }
-
-    /*private void populateAutoComplete() {
-        if (!mayRequestContacts()) {
-            return;
-        }
-
-        getLoaderManager().initLoader(0, null, this);
-    }*/
-
-    /*private boolean mayRequestContacts() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
-        if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-                        }
-                    });
-        } else {
-            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-        }
-        return false;
-    }*/
-
-    /**
-     * Callback received when a permissions request has been completed.
-     */
-    /*@Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_READ_CONTACTS) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                populateAutoComplete();
-            }
-        }
-    }*/
-
 
     /**
      * Attempts to sign in or register the account specified by the login form.
@@ -228,7 +186,8 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
         }
 
         // Reset errors.
-        mFullNameView.setError(null);
+        mFirstNameView.setError(null);
+        mLastNameView.setError(null);
         mEmailView.setError(null);
         mPhoneNumberView.setError(null);
         mBirthdayView.setError(null);
@@ -236,24 +195,36 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
         mConfirmPasswordView.setError(null);
 
         // Store values at the time of the signup attempt.
-        String fullName = mFullNameView.getText().toString();
-        String email = mEmailView.getText().toString();
-        String phoneNumberString =  mPhoneNumberView.getText().toString();
-        String birthday = mBirthdayView.getText().toString();
-        String password = mPasswordView.getText().toString();
-        String confirmPassword = mConfirmPasswordView.getText().toString();
+        String firstName = mFirstNameView.getText().toString().trim();
+        String lastName = mLastNameView.getText().toString().trim();
+        String email = mEmailView.getText().toString().trim();
+        String phoneNumberString =  mPhoneNumberView.getText().toString().trim();
+        String birthday = mBirthdayView.getText().toString().trim();
+        String password = mPasswordView.getText().toString().trim();
+        String confirmPassword = mConfirmPasswordView.getText().toString().trim();
 
         boolean cancel = false;
         View focusView = null;
 
-        // Check for valid full name
-        if (TextUtils.isEmpty(fullName)) {
-            mFullNameView.setError(getString(R.string.error_field_required));
-            focusView = mFullNameView;
+        // Check for valid first name
+        if (TextUtils.isEmpty(firstName)) {
+            mFirstNameView.setError(getString(R.string.error_field_required));
+            focusView = mFirstNameView;
             cancel = true;
-        } else if (!isFullNameValid(fullName)) {
-            mFullNameView.setError(String.format(getString(R.string.error_invalid_field), "full name"));
-            focusView = mFullNameView;
+        } else if (!isfirstNameValid(firstName)) {
+            mFirstNameView.setError(String.format(getString(R.string.error_invalid_field), "first name"));
+            focusView = mFirstNameView;
+            cancel = true;
+        }
+
+        // Check for valid last name
+        if (TextUtils.isEmpty(lastName)) {
+            mLastNameView.setError(getString(R.string.error_field_required));
+            focusView = mLastNameView;
+            cancel = true;
+        } else if (!isfirstNameValid(lastName)) {
+            mLastNameView.setError(String.format(getString(R.string.error_invalid_field), "last name"));
+            focusView = mLastNameView;
             cancel = true;
         }
 
@@ -272,8 +243,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
             mPhoneNumberView.setError(getString(R.string.error_field_required));
             focusView = mPhoneNumberView;
             cancel = true;
-        } else {
-            int phoneNumber = Integer.parseInt(phoneNumberString);
         }
 
         if (TextUtils.isEmpty(birthday)) {
@@ -312,13 +281,13 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
             // perform the user login attempt.
             // TODO. Update userlogintask
             showProgress(true);
-            mAuthTask = new UserLoginTask(fullName, email, phoneNumberString, birthday, password);
+            mAuthTask = new UserLoginTask(firstName, lastName, email, phoneNumberString, birthday, password);
             mAuthTask.execute((Void) null);
         }
     }
 
-    private boolean isFullNameValid(String fullName) {
-        return fullName.contains(" ");
+    private boolean isfirstNameValid(String firstName) {
+        return firstName.length() > 1;
     }
 
     private boolean isEmailValid(String email) {
@@ -327,7 +296,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() >= 6;
     }
 
     private boolean isConfirmPasswordValid(String password1, String password2) {
@@ -404,15 +373,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
 
     }
 
-    /*private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(SignUp.this,
-                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
-
-        mEmailView.setAdapter(adapter);
-    }*/
-
 
     private interface ProfileQuery {
         String[] PROJECTION = {
@@ -430,14 +390,16 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String fullName;
+        private final String firstName;
+        private final String lastName;
         private final String email;
         private final String phoneNumber;
         private final String birthday;
         private final String password;
 
-        UserLoginTask(String iFullName, String iEmail, String iPhoneNumber, String iBirthday, String iPassword) {
-            fullName = iFullName;
+        UserLoginTask(String iFirstName, String iLastName, String iEmail, String iPhoneNumber, String iBirthday, String iPassword) {
+            firstName = iFirstName;
+            lastName = iLastName;
             email = iEmail;
             phoneNumber = iPhoneNumber;
             birthday = iBirthday;
@@ -465,6 +427,17 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
             }
 
             // TODO: register the new account here.
+            auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(SignUp.this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (!task.isSuccessful()) {
+                                Toast.makeText(SignUp.this, "Sign Up Failed" + task.getException(), Toast.LENGTH_SHORT).show();
+                            } else {
+                                startActivity(new Intent(SignUp.this, MainActivity.class));
+                            }
+                        }
+                    });
             return true;
         }
 
