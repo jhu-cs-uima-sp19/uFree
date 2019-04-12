@@ -5,6 +5,7 @@
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
+<<<<<<< HEAD
     <string name="action_settings">Settings</string>
     <string name="title_activity_log_in">Log in</string>
     <!-- Strings related to login -->
@@ -19,4 +20,17 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+=======
+
+    <string name="title_activity_events">EventsActivity</string>
+    <string name="title_activity_profile">ProfileActivity</string>
+    <string name="title_activity_single_friend_events">SingleFriendEventsActivity</string>
+
+    <string name="invitations">Invitations</string>
+    <string name="events">Events</string>
+    <string name="search">Search</string>
+    <string name="close">Close</string>
+    <string name="changeStatus_nav">Free now till</string>
+
+>>>>>>> origin/master
 </resources>

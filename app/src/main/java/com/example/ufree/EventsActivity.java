@@ -1,12 +1,9 @@
 package com.example.ufree;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -17,35 +14,20 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.example.ufree.FreeFriend.FreeFriendContent;
-import com.google.firebase.database.FirebaseDatabase;
-
-public class MainActivity extends AppCompatActivity
+public class EventsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
-    private boolean loggedIn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        loggedIn = pref.getBoolean("loggedIn", false);
-        if (!loggedIn) {
-            Intent intent = new Intent(this, LogIn.class);
-            startActivity(intent);
-        }
-
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        /* Set up App bar */
+        setContentView(R.layout.activity_events);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        // set up title of app bar
-        getSupportActionBar().setTitle("Who's Free");
 
-        /* Set up floating add button */
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_main);
+        // set up title of app bar
+        getSupportActionBar().setTitle("Events");
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_events);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -54,9 +36,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        //fab.setVisibility(View.GONE);
-
-        /* Set up navigation drawer */
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -65,43 +44,24 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        // set Who's Free to be selected
-        navigationView.getMenu().getItem(0).setChecked(true);
-
-        /* Set up Recycler View */
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.freeFriendsRecyclerView);
-        recyclerView.setHasFixedSize(true);
-
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
-
-        // sample freind data
-        RecyclerView.Adapter mAdapter = new FreeFriendRecyclerViewAdapter(FreeFriendContent.FREE_FREINDS_LIST,
-                new FreeFriendFragment.OnListFragmentInteractionListener() {
-                    public void onListFragmentInteraction(FreeFriendContent.FreeFriend item) { }
-                });
-        recyclerView.setAdapter(mAdapter);
-
-        // initialize firebase
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-
-
+        // set Events to be selected
+        navigationView.getMenu().getItem(1).setChecked(true);
     }
-
-
 
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.events, menu);
         return true;
     }
 
@@ -113,7 +73,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.search_main) {
+        if (id == R.id.search_events) {
             return true;
         }
 
@@ -127,17 +87,16 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.whosFree_nav) {
-            // SHOULD NOT DO ANYTHING
-        } else if (id == R.id.events_nav) {
-            Intent intent = new Intent(this, EventsActivity.class);
+            Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
+        } else if (id == R.id.events_nav) {
+            // SHOULD NOT DO ANYTHING
         } else if (id == R.id.friends_nav) {
 
         } else if (id == R.id.calendar_nav) {
 
         } else if (id == R.id.profile_nav) {
-            Intent intent = new Intent(this, ProfileActivity.class);
-            startActivity(intent);
+
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

@@ -14,6 +14,24 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".NewEventActivity"></activity>
+        <activity
+            android:name=".SingleFriendEventsActivity"
+            android:label="@string/title_activity_single_friend_events"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName="com.example.ufree.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.ufree.MainActivity" />
+        </activity>
+        <activity
+            android:name=".EventsActivity"
+            android:label="@string/title_activity_events"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ProfileActivity"
+            android:label="@string/title_activity_profile"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".LogIn"
             android:label="@string/title_activity_log_in"></activity>
