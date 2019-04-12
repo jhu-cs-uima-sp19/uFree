@@ -279,22 +279,10 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
             // form field with an error.
             focusView.requestFocus();
         } else {
-            /*showProgress(true);
+            showProgress(true);
 
-            mAuthTask = new UserLoginTask(firstName, lastName, email, phoneNumberString, birthday, password);
-            mAuthTask.execute((Void) null);*/
-            auth.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(SignUp.this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (!task.isSuccessful()) {
-                                Toast.makeText(SignUp.this, "Sign Up Failed" + task.getException(), Toast.LENGTH_LONG).show();
-                            } else {
-                                dbRef.child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(firstName, lastName, phoneNumber, birthday, 0, 0));
-                                finish();
-                            }
-                        }
-                    });
+            mAuthTask = new UserLoginTask(firstName, lastName, email, phoneNumber, birthday, password);
+            mAuthTask.execute((Void) null);
         }
     }
 
@@ -434,7 +422,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
             showProgress(false);
 
             if (success) {
-                /*auth.createUserWithEmailAndPassword(email, password)
+                auth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener(SignUp.this, new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -442,10 +430,10 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
                                     Toast.makeText(SignUp.this, "Sign Up Failed" + task.getException(), Toast.LENGTH_LONG).show();
                                 } else {
                                     dbRef.child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(firstName, lastName, phoneNumber, birthday, 0, 0));
-                                    finish();
+                                    startActivity(new Intent(SignUp.this, MainActivity.class));
                                 }
                             }
-                        });*/
+                        });
             } else {
                 mPasswordView.requestFocus();
             }
