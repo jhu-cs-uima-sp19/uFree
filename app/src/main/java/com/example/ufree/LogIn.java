@@ -89,7 +89,7 @@ public class LogIn extends AppCompatActivity implements LoaderCallbacks<Cursor> 
         signUpButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO. Navigate to sign up page
+                //startActivity(new Intent(this, SignUp.class));
             }
         });
 
