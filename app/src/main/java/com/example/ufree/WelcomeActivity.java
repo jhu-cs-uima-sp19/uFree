@@ -96,7 +96,8 @@ public class WelcomeActivity extends AppCompatActivity {
                     public void onClick(View view) {
                         // initialize firebase
                         FirebaseDatabase database = FirebaseDatabase.getInstance();
-                        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
+                        DatabaseReference dbRef = database.getReference();
+
                         // TODO: get user id
                         String userId = "minqitest";
 
@@ -106,12 +107,10 @@ public class WelcomeActivity extends AppCompatActivity {
                         int startDay = calendar.DAY_OF_YEAR;
                         int startHour = calendar.HOUR_OF_DAY;
                         int startMinute = calendar.MINUTE;
-                        //Log.d("free time", "startDay: " + startDay);
-                        //Log.d("free time", "startHour: " + startHour);
-                        //Log.d("free time", "startMinute: " + startMinute);
+
                         SeekBar seekbar = popupView.findViewById(R.id.seekBar_welcome);
                         int freeMinute = (int)((seekbar.getProgress() * 23.5 / 100 + 0.5) * 60);
-                        //Log.d("free time", "freeMinute: " + freeMinute);
+                        Log.d("free time", "freeMinute: " + freeMinute);
 
                         int endDay = startDay;
                         int endTime = startHour * 60 + startMinute + freeMinute;
@@ -123,9 +122,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
                         int endHour = endTime / 60;
                         int endMinute = endTime - endHour * 60;
-                        //Log.d("free time", "endDay: " + endDay);
-                        //Log.d("free time", "endHour: " + endHour);
-                        //Log.d("free time", "endMinute: " + endMinute);
+
                         dbRef.child("users").child(userId).child("startDay").setValue(startDay);
                         dbRef.child("users").child(userId).child("startHour").setValue(startHour);
                         dbRef.child("users").child(userId).child("startMinute").setValue(startMinute);
@@ -133,12 +130,27 @@ public class WelcomeActivity extends AppCompatActivity {
                         dbRef.child("users").child(userId).child("endHour").setValue(endHour);
                         dbRef.child("users").child(userId).child("endMinute").setValue(endMinute);
                         dbRef.child("users").child(userId).child("isFree").setValue(true);
+
+                        finish();
                     }
                 });
 
             }
         });
 
+        ImageView no = (ImageView) findViewById(R.id.no_welcome);
+        no.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // initialize firebase
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference dbRef = database.getReference();
+                // TODO: get user id
+                String userId = "minqitest";
+                dbRef.child("users").child(userId).child("isFree").setValue(false);
+                finish();
+            }
+        });
 
     }
 
