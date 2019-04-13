@@ -58,7 +58,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/bottomBar_main"
         app:layout_constraintStart_toEndOf="@+id/dateButton_main"
-        app:layout_constraintTop_toTopOf="@+id/bottomBar_main" />
+        app:layout_constraintTop_toTopOf="@+id/bottomBar_main"
+        android:onClick="showTimePickerDialog"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_main"
