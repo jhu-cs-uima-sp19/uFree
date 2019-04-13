@@ -1,5 +1,7 @@
 package com.example.ufree;
 
+import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +21,7 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
 
     private final HashMap<String, User> freeFriends;
     private String[] userIds;
+    private Context context;
 
     public static class FreeFriendHolder extends RecyclerView.ViewHolder {
         public ImageView profilePic;
@@ -38,9 +41,10 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
     }
 
 
-    public FreeFriendRecyclerViewAdapter(HashMap<String, User> myFreeFriends) {
-        freeFriends = myFreeFriends;
-        userIds = myFreeFriends.keySet().toArray(new String[myFreeFriends.size()]);
+    public FreeFriendRecyclerViewAdapter(HashMap<String, User> myFreeFriends, Context context) {
+        this.freeFriends = myFreeFriends;
+        this.userIds = myFreeFriends.keySet().toArray(new String[myFreeFriends.size()]);
+        this.context = context;
     }
 
 
@@ -48,6 +52,14 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
     public FreeFriendHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_freefriend, parent, false);
+        view.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(view.getContext(), SingleFriendEventsActivity.class);
+                // TODO: add intent to display correct single event information
+                context.startActivity(intent);
+            }
+        });
         return new FreeFriendHolder(view);
     }
 
