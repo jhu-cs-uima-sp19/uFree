@@ -34,6 +34,7 @@ import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,11 +45,14 @@ public class MainActivity extends AppCompatActivity
     User currentUser;
     boolean checkedAvailability;
     HashMap<String, User> freeFriends = new HashMap<String, User>();
-    static int selectedDay;
-    static int selectedHour;
-    static int selectedMinute;
+    static Calendar selectedCalendar;
     static java.text.DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
+    static java.text.DateFormat dateFormat = new SimpleDateFormat("MMM dd, EEE");
     static boolean dummyUserIsFree = true;
+
+    static final int CALENDAR_PICKER_REQUEST = 1;
+    static final int RESULT_CANCEL = 0;
+    static final int RESULT_CONFIRM = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,16 +132,38 @@ public class MainActivity extends AppCompatActivity
         );
 
         /* Set time machine to be current time */
-        Calendar calendar = Calendar.getInstance();
-        selectedDay = calendar.get(Calendar.DAY_OF_YEAR);
-        selectedHour = calendar.get(Calendar.HOUR_OF_DAY);
-        selectedMinute = calendar.get(Calendar.MINUTE);
+        selectedCalendar = Calendar.getInstance();
+        int selectedDay = selectedCalendar.get(Calendar.DAY_OF_YEAR);
+        int selectedHour = selectedCalendar.get(Calendar.HOUR_OF_DAY);
+        int selectedMinute = selectedCalendar.get(Calendar.MINUTE);
         Log.d("time", "current day: " + selectedDay);
         Log.d("time", "current hour: " + selectedHour);
         Log.d("time", "current minute: " + selectedMinute);
+
+        // Set up time button
         Button timeButton = findViewById(R.id.timeButton_main);
         Time selectedTime = new Time(selectedHour, selectedMinute, 0);
         timeButton.setText(timeFormat.format(selectedTime));
+
+        // Set up date button
+        Button dateButton = findViewById(R.id.dateButton_main);
+        Date selectedDate = new Date(selectedCalendar.get(Calendar.YEAR),
+                selectedCalendar.get(Calendar.MONTH), selectedCalendar.get(Calendar.DAY_OF_MONTH));
+        dateButton.setText(dateFormat.format(selectedDate));
+        dateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(), CalenderPickerActivity.class);
+                int year = selectedCalendar.get(Calendar.YEAR);
+                int month = selectedCalendar.get(Calendar.MONTH);
+                int dayOfMonth = selectedCalendar.get(Calendar.DAY_OF_MONTH);
+                intent.putExtra("year", year);
+                intent.putExtra("month", month);
+                intent.putExtra("dayOfMonth", dayOfMonth);
+                startActivityForResult(intent, CALENDAR_PICKER_REQUEST);
+            }
+        });
+
 
         /* Set up Recycler View */
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.freeFriendsRecyclerView);
@@ -158,8 +184,14 @@ public class MainActivity extends AppCompatActivity
                         GenericTypeIndicator<HashMap<String, User>> t = new GenericTypeIndicator<HashMap<String, User>>() {};
                         HashMap<String, User> allUsers = dataSnapshot.getValue(t);
                         freeFriends.clear();
+                        adapter.notifyDataSetChanged();
+
+                        int selectedDay = selectedCalendar.get(Calendar.DAY_OF_YEAR);
+                        int selectedHour = selectedCalendar.get(Calendar.HOUR_OF_DAY);
+                        int selectedMinute = selectedCalendar.get(Calendar.MINUTE);
 
                         int selectedTime = selectedHour * 60 + selectedMinute;
+
                         for (Map.Entry<String, User> entry : allUsers.entrySet()) {
                             String userId = entry.getKey();
                             User user = entry.getValue();
@@ -192,16 +224,23 @@ public class MainActivity extends AppCompatActivity
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             // Create a new instance of TimePickerDialog and return it
+            int selectedHour = selectedCalendar.get(Calendar.HOUR_OF_DAY);
+            int selectedMinute = selectedCalendar.get(Calendar.MINUTE);
             return new TimePickerDialog(getActivity(), this, selectedHour, selectedMinute,
                     DateFormat.is24HourFormat(getActivity()));
         }
 
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            selectedHour = hourOfDay;
-            selectedMinute = minute;
+            // update selected calendar object
+            selectedCalendar.set(selectedCalendar.get(Calendar.YEAR),
+                    selectedCalendar.get(Calendar.MONTH),
+                    selectedCalendar.get(Calendar.DAY_OF_MONTH),
+                    hourOfDay, minute, 0);
+            int selectedHour = selectedCalendar.get(Calendar.HOUR_OF_DAY);
+            int selectedMinute = selectedCalendar.get(Calendar.MINUTE);
+            // change the dummy user to invoke onDataChange
             FirebaseDatabase database = FirebaseDatabase.getInstance();
             DatabaseReference dbRef = database.getReference();
-            // change the dummy user to invoke onDataChange
             dummyUserIsFree = !dummyUserIsFree;
             dbRef.child("users").child("dummy").child("isFree").setValue(dummyUserIsFree);
             // change text view for time button
@@ -214,6 +253,35 @@ public class MainActivity extends AppCompatActivity
     public void showTimePickerDialog(View v) {
         DialogFragment timePickerFragment = new TimePickerFragment();
         timePickerFragment.show(getSupportFragmentManager(), "timePicker");
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == CALENDAR_PICKER_REQUEST) {
+
+            if (resultCode == RESULT_CONFIRM) {
+                selectedCalendar.set(
+                        data.getIntExtra("year", selectedCalendar.get(Calendar.YEAR)),
+                        data.getIntExtra("month", selectedCalendar.get(Calendar.MONTH)),
+                        data.getIntExtra("dayOfMonth", selectedCalendar.get(Calendar.DAY_OF_MONTH)),
+                        selectedCalendar.get(Calendar.HOUR_OF_DAY),
+                        selectedCalendar.get(Calendar.HOUR_OF_DAY), 0);
+
+                // change text of date button
+                Button dateButton = findViewById(R.id.dateButton_main);
+                Date selectedDate = new Date(selectedCalendar.get(Calendar.YEAR),
+                        selectedCalendar.get(Calendar.MONTH), selectedCalendar.get(Calendar.DAY_OF_MONTH));
+                dateButton.setText(dateFormat.format(selectedDate));
+
+                // change the dummy user to invoke onDataChange
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference dbRef = database.getReference();
+                dummyUserIsFree = !dummyUserIsFree;
+                dbRef.child("users").child("dummy").child("isFree").setValue(dummyUserIsFree);
+            } else if (requestCode == RESULT_CANCEL) {
+                // Do nothing
+            }
+        }
     }
 
     @Override

@@ -10,9 +10,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".WelcomeActivity"
+            android:name=".CalenderPickerActivity"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
+        <activity
+            android:name=".WelcomeActivity"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity android:name=".NewEventActivity" />
         <activity
             android:name=".SingleFriendEventsActivity"

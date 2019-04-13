@@ -25,7 +25,7 @@
         android:id="@+id/bottomBar_main"
         android:layout_width="0dp"
         android:layout_height="60dp"
-        android:background="@drawable/rectangle"
+        android:background="@drawable/rectangle_primary_orange"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -53,13 +53,12 @@
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="8dp"
         android:background="@color/colorWhite"
-        android:text="9pm"
+        android:onClick="showTimePickerDialog"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/bottomBar_main"
         app:layout_constraintStart_toEndOf="@+id/dateButton_main"
-        app:layout_constraintTop_toTopOf="@+id/bottomBar_main"
-        android:onClick="showTimePickerDialog"/>
+        app:layout_constraintTop_toTopOf="@+id/bottomBar_main" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_main"
