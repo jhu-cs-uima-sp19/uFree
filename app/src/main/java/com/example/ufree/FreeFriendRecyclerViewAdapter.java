@@ -58,7 +58,7 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
         User freeFriend = freeFriends.get(userIds[position]);
         holder.freeFriendname.setText(freeFriend.getFirstName() + " " + freeFriend.getLastName());
         Calendar calendar = java.util.Calendar.getInstance();
-        Time time = new Time(freeFriend.getEndHour(), freeFriend.getEndHour(), 0);
+        Time time = new Time(freeFriend.getEndHour(), freeFriend.getEndMinute(), 0);
         DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
         holder.freeTimeTextView.setText(timeFormat.format(time));
     }

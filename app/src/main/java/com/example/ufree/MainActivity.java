@@ -20,6 +20,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.TimePicker;
 
 import com.google.firebase.database.DataSnapshot;
@@ -29,6 +30,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
+import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -41,6 +44,11 @@ public class MainActivity extends AppCompatActivity
     User currentUser;
     boolean checkedAvailability;
     HashMap<String, User> freeFriends = new HashMap<String, User>();
+    static int selectedDay;
+    static int selectedHour;
+    static int selectedMinute;
+    static java.text.DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
+    static boolean dummyUserIsFree = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,9 +104,9 @@ public class MainActivity extends AppCompatActivity
                         // if user has been asked for availability, do NOT ask again
                         if (!checkedAvailability) {
                             Calendar calendar = Calendar.getInstance();
-                            int currentDay = calendar.DAY_OF_YEAR;
-                            int currentHour = calendar.HOUR_OF_DAY;
-                            int currentMinute = calendar.MINUTE;
+                            int currentDay = calendar.get(Calendar.DAY_OF_YEAR);
+                            int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+                            int currentMinute = calendar.get(Calendar.MINUTE);
                             int currentTime = currentHour * 60 + currentMinute;
                             // if user is free and end time does not exceed current time, do NOT ask for availability
                             // else show welcome screen
@@ -119,6 +127,18 @@ public class MainActivity extends AppCompatActivity
                 }
         );
 
+        /* Set time machine to be current time */
+        Calendar calendar = Calendar.getInstance();
+        selectedDay = calendar.get(Calendar.DAY_OF_YEAR);
+        selectedHour = calendar.get(Calendar.HOUR_OF_DAY);
+        selectedMinute = calendar.get(Calendar.MINUTE);
+        Log.d("time", "current day: " + selectedDay);
+        Log.d("time", "current hour: " + selectedHour);
+        Log.d("time", "current minute: " + selectedMinute);
+        Button timeButton = findViewById(R.id.timeButton_main);
+        Time selectedTime = new Time(selectedHour, selectedMinute, 0);
+        timeButton.setText(timeFormat.format(selectedTime));
+
         /* Set up Recycler View */
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.freeFriendsRecyclerView);
         recyclerView.setHasFixedSize(true);
@@ -128,29 +148,30 @@ public class MainActivity extends AppCompatActivity
         final FreeFriendRecyclerViewAdapter adapter = new FreeFriendRecyclerViewAdapter(freeFriends);
         recyclerView.setAdapter(adapter);
 
+        // Set up dummy user
+        dbRef.child("users").child("dummy").child("isFree").setValue(dummyUserIsFree);
+
         dbRef.child("users").addValueEventListener(
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         GenericTypeIndicator<HashMap<String, User>> t = new GenericTypeIndicator<HashMap<String, User>>() {};
                         HashMap<String, User> allUsers = dataSnapshot.getValue(t);
-                        Calendar calendar = Calendar.getInstance();
-                        // TODO: enable time machine selection
-                        int selectDay = calendar.DAY_OF_YEAR;
-                        int selectHour = calendar.HOUR_OF_DAY;
-                        int selectMinute = calendar.MINUTE;
-                        int selectTime = selectHour * 60 + selectMinute;
+                        freeFriends.clear();
+
+                        int selectedTime = selectedHour * 60 + selectedMinute;
                         for (Map.Entry<String, User> entry : allUsers.entrySet()) {
                             String userId = entry.getKey();
                             User user = entry.getValue();
                             if (user != null && user.getEmail() != null
-                                    && !user.getEmail().equals(currentUser.getEmail()) && user.getIsFree()) {
-                                if ((user.getEndDay() > selectDay)
-                                        || (user.getEndDay() == selectDay && user.getEndTime() >= selectTime)) {
+                                    // skip the current user and dummy user
+                                    && !user.getEmail().equals(currentUser.getEmail())
+                                    && !user.getEmail().equals("dummy")
+                                    && user.getIsFree()) {
+                                if ((user.getEndDay() > selectedDay)
+                                        || (user.getEndDay() == selectedDay && user.getEndTime() >= selectedTime)) {
                                     freeFriends.put(userId, new User(user));
                                     adapter.notifyDataSetChanged();
-                                } else {
-                                    dbRef.child("users").child(userId).child("isFree").setValue(false);
                                 }
                             }
                         }
@@ -163,7 +184,6 @@ public class MainActivity extends AppCompatActivity
                 }
         );
 
-
     }
 
     public static class TimePickerFragment extends DialogFragment
@@ -171,18 +191,23 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-            // Use the current time as the default values for the picker
-            final Calendar c = Calendar.getInstance();
-            int hour = c.get(Calendar.HOUR_OF_DAY);
-            int minute = c.get(Calendar.MINUTE);
-
             // Create a new instance of TimePickerDialog and return it
-            return new TimePickerDialog(getActivity(), this, hour, minute,
+            return new TimePickerDialog(getActivity(), this, selectedHour, selectedMinute,
                     DateFormat.is24HourFormat(getActivity()));
         }
 
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            // Do something with the time chosen by the user
+            selectedHour = hourOfDay;
+            selectedMinute = minute;
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
+            DatabaseReference dbRef = database.getReference();
+            // change the dummy user to invoke onDataChange
+            dummyUserIsFree = !dummyUserIsFree;
+            dbRef.child("users").child("dummy").child("isFree").setValue(dummyUserIsFree);
+            // change text view for time button
+            Button timeButton = getActivity().findViewById(R.id.timeButton_main);
+            Time selectedTime = new Time(selectedHour, selectedMinute, 0);
+            timeButton.setText(timeFormat.format(selectedTime));
         }
     }
 

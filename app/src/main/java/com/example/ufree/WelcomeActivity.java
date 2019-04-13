@@ -99,14 +99,15 @@ public class WelcomeActivity extends AppCompatActivity {
                         DatabaseReference dbRef = database.getReference();
 
                         // TODO: get user id
+
                         String userId = "minqitest";
 
                         // calculate start and end time
                         Calendar calendar = Calendar.getInstance();
                         // TODO: integrate year as part of free time
-                        int startDay = calendar.DAY_OF_YEAR;
-                        int startHour = calendar.HOUR_OF_DAY;
-                        int startMinute = calendar.MINUTE;
+                        int startDay = calendar.get(Calendar.DAY_OF_YEAR);
+                        int startHour = calendar.get(Calendar.HOUR_OF_DAY);
+                        int startMinute = calendar.get(Calendar.MINUTE);
 
                         SeekBar seekbar = popupView.findViewById(R.id.seekBar_welcome);
                         int freeMinute = (int)((seekbar.getProgress() * 23.5 / 100 + 0.5) * 60);
