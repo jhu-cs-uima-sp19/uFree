@@ -11,9 +11,12 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 public class WelcomeActivity extends AppCompatActivity {
+
+    View popupView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +30,7 @@ public class WelcomeActivity extends AppCompatActivity {
                 // inflate the layout of the popup window
                 LayoutInflater inflater = (LayoutInflater)
                         getSystemService(LAYOUT_INFLATER_SERVICE);
-                View popupView = inflater.inflate(R.layout.popup_window, null);
+                popupView = inflater.inflate(R.layout.popup_window, null);
 
                 // create the popup window
                 int width = LinearLayout.LayoutParams.WRAP_CONTENT;
@@ -38,18 +41,40 @@ public class WelcomeActivity extends AppCompatActivity {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     popupWindow.setElevation(20);
                 }
-                // show the popup window
-                // which view you pass in doesn't matter, it is only used for the window tolken
+                // show the popup window with shadow
                 popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
                 popupWindow.setBackgroundDrawable(new ColorDrawable(Color.WHITE));
-                // dismiss the popup window when touched
-                /*popupView.setOnTouchListener(new View.OnTouchListener() {
+
+                // set up seek bar
+                SeekBar seekbar = popupView.findViewById(R.id.seekBar_welcome);
+                seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    int currentProgress;
+                    TextView currentProgressTextView = popupView.findViewById(R.id.currentProgressTextView_welcome);
+
                     @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        popupWindow.dismiss();
-                        return true;
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        currentProgress = progress;
+                        double currentHours = currentProgress * 23.5 / 100 + 0.5;
+                        String text = getString(R.string.currentProgressText_welcome, currentHours);
+                        currentProgressTextView.setText(text);
                     }
-                });*/
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                        double currentHours = currentProgress * 23.5 / 100 + 0.5;
+                        String text = getString(R.string.currentProgressText_welcome, currentHours);
+                        currentProgressTextView.setText(text);
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                        double currentHours = currentProgress * 23.5 / 100 + 0.5;
+                        String text = getString(R.string.currentProgressText_welcome, currentHours);
+                        currentProgressTextView.setText(text);
+                    }
+                });
+
+                // set up onclick method for CANCEL
                 TextView cancel = popupView.findViewById(R.id.cancel_welcome);
                 cancel.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -57,6 +82,8 @@ public class WelcomeActivity extends AppCompatActivity {
                         popupWindow.dismiss();
                     }
                 });
+
+
             }
         });
 

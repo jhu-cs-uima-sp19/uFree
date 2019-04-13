@@ -2,7 +2,7 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/relativeLayout"
+    android:id="@+id/popupWindowLayout_welcome"
     android:layout_width="350dp"
     android:layout_height="200dp"
     android:background="@color/colorWhite">
@@ -22,7 +22,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <SeekBar
-        android:id="@+id/seekBar"
+        android:id="@+id/seekBar_welcome"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -40,7 +40,7 @@
         android:layout_marginStart="8dp"
         android:text="0.5 hour"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/seekBar" />
+        app:layout_constraintTop_toBottomOf="@+id/seekBar_welcome" />
 
     <TextView
         android:id="@+id/largestProgressTextView_welcome"
@@ -49,7 +49,7 @@
         android:layout_marginEnd="8dp"
         android:text="24 hours"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/seekBar" />
+        app:layout_constraintTop_toBottomOf="@+id/seekBar_welcome" />
 
     <TextView
         android:id="@+id/currentProgressTextView_welcome"
@@ -63,7 +63,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/seekBar" />
+        app:layout_constraintTop_toBottomOf="@+id/seekBar_welcome" />
 
     <TextView
         android:id="@+id/cancel_welcome"

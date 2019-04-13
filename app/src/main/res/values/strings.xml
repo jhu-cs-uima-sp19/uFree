@@ -16,4 +16,6 @@
     <string name="close">Close</string>
     <string name="changeStatus_nav">Free now till</string>
 
+    <string name="currentProgressText_welcome">%1$.1f hours</string>
+
 </resources>
