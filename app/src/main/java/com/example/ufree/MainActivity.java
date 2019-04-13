@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        //fab.setVisibility(View.GONE);
+        fab.setVisibility(View.GONE);
 
         /* Set up navigation drawer */
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -151,6 +151,7 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.search_main) {
+            // TODO: implement search function
             return true;
         }
 
