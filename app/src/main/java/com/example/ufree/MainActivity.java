@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.example.ufree.FreeFriend.FreeFriendContent;
 import com.google.firebase.FirebaseApp;
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity
 
     private FirebaseAuth.AuthStateListener authStateListener;
     private FirebaseAuth auth;
+    private FirebaseUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +54,7 @@ public class MainActivity extends AppCompatActivity
 
         auth = FirebaseAuth.getInstance();
 
-        /*final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        user = FirebaseAuth.getInstance().getCurrentUser();
 
         authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -63,7 +65,7 @@ public class MainActivity extends AppCompatActivity
                     finish();
                 }
             }
-        };*/
+        };
 
         /* Set up App bar */
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -108,9 +110,23 @@ public class MainActivity extends AppCompatActivity
                     public void onListFragmentInteraction(FreeFriendContent.FreeFriend item) { }
                 });
         recyclerView.setAdapter(mAdapter);
+
+        TextView logOutButton = (TextView) findViewById(R.id.logout_nav);
+        logOutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+
+                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putBoolean("loggedIn", false);
+                editor.commit();
+
+                startActivity(new Intent(MainActivity.this, LogIn.class));
+                finish();
+            }
+        });
     }
-
-
 
     @Override
     public void onBackPressed() {

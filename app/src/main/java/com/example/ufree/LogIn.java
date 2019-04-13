@@ -107,6 +107,10 @@ public class LogIn extends AppCompatActivity implements LoaderCallbacks<Cursor> 
         mProgressView = findViewById(R.id.login_progress);
     }
 
+    @Override
+    public void onBackPressed() {
+    }
+
     /**
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
