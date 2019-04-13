@@ -5,6 +5,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,11 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.Calendar;
 
 public class WelcomeActivity extends AppCompatActivity {
 
@@ -83,6 +89,52 @@ public class WelcomeActivity extends AppCompatActivity {
                     }
                 });
 
+                // set up onclick method for CONFIRM
+                TextView confirm = popupView.findViewById(R.id.confirm_welcome);
+                confirm.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // initialize firebase
+                        FirebaseDatabase database = FirebaseDatabase.getInstance();
+                        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
+                        // TODO: get user id
+                        String userId = "minqitest";
+
+                        // calculate start and end time
+                        Calendar calendar = Calendar.getInstance();
+                        // TODO: integrate year as part of free time
+                        int startDay = calendar.DAY_OF_YEAR;
+                        int startHour = calendar.HOUR_OF_DAY;
+                        int startMinute = calendar.MINUTE;
+                        //Log.d("free time", "startDay: " + startDay);
+                        //Log.d("free time", "startHour: " + startHour);
+                        //Log.d("free time", "startMinute: " + startMinute);
+                        SeekBar seekbar = popupView.findViewById(R.id.seekBar_welcome);
+                        int freeMinute = (int)((seekbar.getProgress() * 23.5 / 100 + 0.5) * 60);
+                        //Log.d("free time", "freeMinute: " + freeMinute);
+
+                        int endDay = startDay;
+                        int endTime = startHour * 60 + startMinute + freeMinute;
+                        //Log.d("free time", "endTime: " + endTime);
+                        if (endTime >= 24 * 60) {
+                            endTime -= 24 * 60;
+                            endDay++;
+                        }
+
+                        int endHour = endTime / 60;
+                        int endMinute = endTime - endHour * 60;
+                        //Log.d("free time", "endDay: " + endDay);
+                        //Log.d("free time", "endHour: " + endHour);
+                        //Log.d("free time", "endMinute: " + endMinute);
+                        dbRef.child("users").child(userId).child("startDay").setValue(startDay);
+                        dbRef.child("users").child(userId).child("startHour").setValue(startHour);
+                        dbRef.child("users").child(userId).child("startMinute").setValue(startMinute);
+                        dbRef.child("users").child(userId).child("endDay").setValue(endDay);
+                        dbRef.child("users").child(userId).child("endHour").setValue(endHour);
+                        dbRef.child("users").child(userId).child("endMinute").setValue(endMinute);
+                        dbRef.child("users").child(userId).child("isFree").setValue(true);
+                    }
+                });
 
             }
         });
