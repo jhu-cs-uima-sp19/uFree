@@ -42,8 +42,11 @@ public class ProfileActivity extends AppCompatActivity
         EditText phoneEditView = (EditText) findViewById(R.id.phoneEditText_profile);
         phoneEditView.setEnabled(false);
 
-        EditText emailEditView = (EditText) findViewById(R.id.emailEditText_profile);
+        EditText emailEditView = (EditText) findViewById(R.id.nameEditText_profile);
         emailEditView.setEnabled(false);
+
+
+
     }
 
     @Override

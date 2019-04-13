@@ -16,27 +16,13 @@
         android:layout_marginTop="32dp"
         android:layout_marginEnd="8dp"
         android:background="@drawable/roundcorner"
-        android:src="@drawable/ic_account_circle_black_24dp"
+        app:srcCompat="@drawable/ic_account_circle_black_24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:src="@tools:sample/avatars"
         tools:srcCompat="@tools:sample/avatars[1]" />
 
-    <TextView
-        android:id="@+id/name_profile"
-        android:layout_width="wrap_content"
-        android:layout_height="25dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:text="Dave Fluid"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/changeNameTextView_profile"
-        tools:text="@tools:sample/full_names" />
 
 
     <!-- android:layout_alignBottom="@+id/textView5" -->
@@ -60,7 +46,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        app:layout_constraintStart_toEndOf="@+id/name_profile"
+        app:layout_constraintStart_toEndOf="@+id/nameEditText_profile"
         app:layout_constraintTop_toBottomOf="@+id/changeNameTextView_profile"
         app:srcCompat="@drawable/ic_edit_orange_24dp" />
 
@@ -179,25 +165,29 @@
         android:id="@+id/divider1_profile"
         style="@style/Divider"
         app:layout_constraintTop_toTopOf="@+id/guideline1_profile"
-        tools:layout_editor_absoluteX="0dp" />
+        tools:layout_editor_absoluteX="0dp"
+        tools:ignore="MissingConstraints" />
 
     <View
         android:id="@+id/divider2_profile"
         style="@style/Divider"
         app:layout_constraintTop_toTopOf="@+id/guideline2_profile"
-        tools:layout_editor_absoluteX="0dp" />
+        tools:layout_editor_absoluteX="0dp"
+        tools:ignore="MissingConstraints" />
 
     <View
         android:id="@+id/divider3_profile"
         style="@style/Divider"
         app:layout_constraintTop_toTopOf="@+id/guideline3_profile"
-        tools:layout_editor_absoluteX="0dp" />
+        tools:layout_editor_absoluteX="0dp"
+        tools:ignore="MissingConstraints" />
 
     <View
         android:id="@+id/divider4_profile"
         style="@style/Divider"
         app:layout_constraintTop_toTopOf="@+id/guideline4_profile"
-        tools:layout_editor_absoluteX="0dp" />
+        tools:layout_editor_absoluteX="0dp"
+        tools:ignore="MissingConstraints" />
 
     <EditText
         android:id="@+id/phoneEditText_profile"
@@ -215,19 +205,41 @@
         app:layout_constraintTop_toTopOf="@+id/guideline1_profile"
         tools:text="@tools:sample/us_phones" />
 
-    <EditText
-        android:id="@+id/emailEditText_profile"
+
+    <TextView
+        android:id="@+id/email_profile"
         android:layout_width="213dp"
         android:layout_height="27dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        android:background="@android:color/transparent"
         android:ems="10"
-        android:inputType="textEmailAddress"
         android:text="123@gmail.com"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline3_profile"
         app:layout_constraintStart_toEndOf="@+id/emailTextView_profile"
         app:layout_constraintTop_toTopOf="@+id/guideline2_profile" />
+
+
+
+
+
+    <EditText
+        android:id="@+id/nameEditText_profile"
+        android:layout_width="wrap_content"
+        android:layout_height="25dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/changeNameTextView_profile"
+        tools:text="@tools:sample/full_names"
+        android:background="@android:color/transparent"
+        android:inputType="text"
+       />
 
 </android.support.constraint.ConstraintLayout>
