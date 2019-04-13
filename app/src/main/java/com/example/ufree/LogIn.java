@@ -1,5 +1,3 @@
-// TODO. Update signed in thing in main: https://stackoverflow.com/questions/22526950/how-to-check-if-current-user-is-logged-in-android
-
 package com.example.ufree;
 
 import android.animation.Animator;
@@ -45,8 +43,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.Manifest.permission.READ_CONTACTS;
-
-// TODO. Add log out status
 
 /**
  * A login screen that offers login via email/password.

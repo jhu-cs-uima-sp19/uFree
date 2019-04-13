@@ -50,9 +50,8 @@ import com.google.firebase.auth.FirebaseAuth;
  */
 public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
+
+    // Keep track of the login task to ensure we can cancel it if requested.
     private UserLoginTask mAuthTask = null;
 
     // UI references.
@@ -313,19 +312,10 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        List<String> emails = new ArrayList<>();
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            emails.add(cursor.getString(ProfileQuery.ADDRESS));
-            cursor.moveToNext();
-        }
-    }
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {}
 
     @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
-
-    }
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {}
 
 
     private interface ProfileQuery {
@@ -360,8 +350,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
             try {
                 // Simulate network access.
                 Thread.sleep(2000);

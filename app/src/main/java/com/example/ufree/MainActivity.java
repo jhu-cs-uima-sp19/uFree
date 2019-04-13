@@ -30,10 +30,7 @@ import com.google.firebase.database.FirebaseDatabase;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private boolean loggedIn;
-
     private FirebaseAuth.AuthStateListener authStateListener;
-    private FirebaseAuth auth;
     private FirebaseUser user;
 
     @Override
@@ -41,14 +38,11 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // initialize firebase
+        // initialize Firebase
         FirebaseApp.initializeApp(MainActivity.this);
         FirebaseDatabase database = FirebaseDatabase.getInstance();
 
-        auth = FirebaseAuth.getInstance();
-
         user = FirebaseAuth.getInstance().getCurrentUser();
-
         authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
