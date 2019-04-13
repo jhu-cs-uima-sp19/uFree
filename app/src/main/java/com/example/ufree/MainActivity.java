@@ -16,13 +16,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.example.ufree.FreeFriend.FreeFriendContent;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity
@@ -111,16 +111,11 @@ public class MainActivity extends AppCompatActivity
         /* Set up Recycler View */
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.freeFriendsRecyclerView);
         recyclerView.setHasFixedSize(true);
-
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        // sample freind data
-        RecyclerView.Adapter mAdapter = new FreeFriendRecyclerViewAdapter(FreeFriendContent.FREE_FREINDS_LIST,
-                new FreeFriendFragment.OnListFragmentInteractionListener() {
-                    public void onListFragmentInteraction(FreeFriendContent.FreeFriend item) { }
-                });
-        recyclerView.setAdapter(mAdapter);
+        FreeFriendRecyclerViewAdapter adapter = new FreeFriendRecyclerViewAdapter(new ArrayList<User>());
+        recyclerView.setAdapter(adapter);
     }
 
 
