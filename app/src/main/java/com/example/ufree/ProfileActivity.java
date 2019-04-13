@@ -1,5 +1,6 @@
 package com.example.ufree;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -113,13 +115,20 @@ public class ProfileActivity extends AppCompatActivity
                     nameEditView.setEnabled(true);
                 }
                 else if(nameEditView.isEnabled()){
-                    String value = nameEditView.getText().toString();
+                    String value = nameEditView.getText().toString().trim();
                     String[] splited = value.split("\\s+");
+                    if(splited.length < 2){
+                        Toast.makeText(getBaseContext(), "Please Include Both First And Last Name", Toast.LENGTH_LONG).show();
+                    }
+                    else if(splited.length > 2){
+                        Toast.makeText(getBaseContext(), "Please Include Only First And Last Name", Toast.LENGTH_LONG).show();
+                    }
+                    else {
+                        mDatabase.child("users").child(userId).child("firstName").setValue(splited[0]);
+                        mDatabase.child("users").child(userId).child("lastName").setValue(splited[1]);
 
-                    mDatabase.child("users").child(userId).child("firstName").setValue(splited[0]);
-                    mDatabase.child("users").child(userId).child("lastName").setValue(splited[1]);
-
-                    nameEditView.setEnabled(false);
+                        nameEditView.setEnabled(false);
+                    }
                 }
             }
         });
@@ -138,25 +147,49 @@ public class ProfileActivity extends AppCompatActivity
                     phoneEditView.setEnabled(true);
                 }
                 else if(phoneEditView.isEnabled()){
-                    String value = phoneEditView.getText().toString();
-
-                    mDatabase.child("users").child(userId).child("phone").setValue(value);
-
-
-                    phoneEditView.setEnabled(false);
+                    String value = phoneEditView.getText().toString().trim();
+                    if(value.length() == 0){
+                        Toast.makeText(getBaseContext(), "Please Enter a Phone Number", Toast.LENGTH_LONG).show();
+                    }
+                    else {
+                        mDatabase.child("users").child(userId).child("phone").setValue(value);
+                        phoneEditView.setEnabled(false);
+                    }
                 }
             }
         });
 
         deleteAccount.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putBoolean("loggedIn", false);
-                editor.commit();
-                Intent intent = new Intent(this, LogIn.class);
-                startActivity(intent);
-                mDatabase.child("users").child(userId).removeValue();
+
+                AlertDialog.Builder alert = new AlertDialog.Builder(ProfileActivity.this);
+                alert.setTitle("Delete");
+                alert.setMessage("Are you sure to delete you account?");
+                alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putBoolean("loggedIn", false);
+                        editor.commit();
+                        mDatabase.child("users").child(userId).removeValue();
+                        Intent intent = new Intent(this, LogIn.class);
+                        startActivity(intent);
+                        dialog.dismiss();
+                    }
+                });
+
+                alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+                alert.show();
+
 
             }
         });
