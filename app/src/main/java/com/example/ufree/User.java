@@ -17,7 +17,7 @@ public class User {
         this.firstName = n;
         this.lastName = l;
         this.phone = p;
-        this.email = e.replaceAll("[^a-zA-Z0-9]", "");
+        this.email = e;
         this.isFree = false;
     }
 
