@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.ufree.FreeFriend.FreeFriendContent;
@@ -37,14 +38,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        loggedIn = pref.getBoolean("loggedIn", false);
-        if (!loggedIn) {
-            Intent intent = new Intent(this, LogIn.class);
-            startActivity(intent);
-        }
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -66,6 +59,11 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         };
+
+        if (user == null) {
+            startActivity(new Intent(MainActivity.this, LogIn.class));
+            finish();
+        }
 
         /* Set up App bar */
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -104,7 +102,7 @@ public class MainActivity extends AppCompatActivity
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        // sample freind data
+        // sample friend data
         RecyclerView.Adapter mAdapter = new FreeFriendRecyclerViewAdapter(FreeFriendContent.FREE_FREINDS_LIST,
                 new FreeFriendFragment.OnListFragmentInteractionListener() {
                     public void onListFragmentInteraction(FreeFriendContent.FreeFriend item) { }
@@ -116,12 +114,16 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(MainActivity.this, LogIn.class));
+                finish();
+            }
+        });
 
-                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putBoolean("loggedIn", false);
-                editor.commit();
-
+        ImageView exitButton = (ImageView) findViewById(R.id.exitImageView_nav);
+        exitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
                 startActivity(new Intent(MainActivity.this, LogIn.class));
                 finish();
             }

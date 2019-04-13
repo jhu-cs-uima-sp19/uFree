@@ -60,7 +60,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
     private EditText mLastNameView;
     private AutoCompleteTextView mEmailView;
     private EditText mPhoneNumberView;
-    private TextView mBirthdayView;
     private EditText mPasswordView;
     private EditText mConfirmPasswordView;
 
@@ -79,8 +78,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
     private String lastName;
     private String email;
     private String phoneNumber;
-    private String birthday;
-    String password;
+    private String password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -387,10 +385,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
                                     Toast.makeText(SignUp.this, "Sign Up Failed" + task.getException(), Toast.LENGTH_LONG).show();
                                 } else {
                                     dbRef.child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(firstName, lastName, phoneNumber, email));
-                                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                                    SharedPreferences.Editor editor = pref.edit();
-                                    editor.putBoolean("loggedIn", true);
-                                    editor.commit();
                                     startActivity(new Intent(SignUp.this, MainActivity.class));
                                     finish();
                                 }
