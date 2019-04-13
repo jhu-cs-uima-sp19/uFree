@@ -92,7 +92,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
         mLastNameView =(EditText) findViewById(R.id.last_name);
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         mPhoneNumberView = (EditText) findViewById(R.id.phone_number);
-        mBirthdayView = (TextView) findViewById(R.id.birthday);
         mPasswordView = (EditText) findViewById(R.id.password);
         mConfirmPasswordView = (EditText) findViewById(R.id.confirm_password);
 
@@ -110,25 +109,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
-    }
-
-    public void onClick(View v) {
-        final TextView birthdayTextView = (TextView) findViewById(R.id.birthday);
-
-        Calendar calendar = Calendar.getInstance().getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-        DatePickerDialog datePickerDialog = new DatePickerDialog(SignUp.this,
-                new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                        birthdayTextView.setText((month  + 1) + "/" + day + "/" + year);
-                    }
-                }, year, month, day);
-
-        datePickerDialog.show();
     }
 
     private void changeProfilePic() {
@@ -179,7 +159,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
         mLastNameView.setError(null);
         mEmailView.setError(null);
         mPhoneNumberView.setError(null);
-        mBirthdayView.setError(null);
         mPasswordView.setError(null);
         mConfirmPasswordView.setError(null);
 
@@ -188,7 +167,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
         lastName = mLastNameView.getText().toString().trim();
         email = mEmailView.getText().toString().trim();
         phoneNumber =  mPhoneNumberView.getText().toString().trim();
-        birthday = mBirthdayView.getText().toString().trim();
         password = mPasswordView.getText().toString().trim();
         String confirmPassword = mConfirmPasswordView.getText().toString().trim();
 
@@ -234,12 +212,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
             cancel = true;
         }
 
-        if (TextUtils.isEmpty(birthday)) {
-            mBirthdayView.setError((getString(R.string.error_invalid_field)));
-            focusView = mBirthdayView;
-            cancel = true;
-        }
-
         // Check for a valid password, if the user entered one.
         if (TextUtils.isEmpty(password)) {
             mPasswordView.setError(getString(R.string.error_field_required));
@@ -268,7 +240,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
         } else {
             showProgress(true);
 
-            mAuthTask = new UserLoginTask(firstName, lastName, email, phoneNumber, birthday, password);
+            mAuthTask = new UserLoginTask(firstName, lastName, email, phoneNumber, password);
             mAuthTask.execute((Void) null);
         }
     }
@@ -378,15 +350,13 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
         private final String lastName;
         private final String email;
         private final String phoneNumber;
-        private final String birthday;
         private final String password;
 
-        UserLoginTask(String iFirstName, String iLastName, String iEmail, String iPhoneNumber, String iBirthday, String iPassword) {
+        UserLoginTask(String iFirstName, String iLastName, String iEmail, String iPhoneNumber, String iPassword) {
             firstName = iFirstName;
             lastName = iLastName;
             email = iEmail;
             phoneNumber = iPhoneNumber;
-            birthday = iBirthday;
             password = iPassword;
         }
 
@@ -416,7 +386,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
                                 if (!task.isSuccessful()) {
                                     Toast.makeText(SignUp.this, "Sign Up Failed" + task.getException(), Toast.LENGTH_LONG).show();
                                 } else {
-                                    dbRef.child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(firstName, lastName, phoneNumber, birthday, 0, 0));
+                                    dbRef.child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(firstName, lastName, phoneNumber, email));
                                     SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                                     SharedPreferences.Editor editor = pref.edit();
                                     editor.putBoolean("loggedIn", true);

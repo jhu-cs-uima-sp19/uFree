@@ -9,18 +9,16 @@ public class User {
     private String firstName;
     private String lastName;
     private String phone;
-    private String birthday;
-    private Integer startMinute;
-    private Integer startHour;
+    private String email;
+    private boolean isFree;
     private ArrayList<String> friends = new ArrayList<>();
 
-    public User(String n, String l, String p, String b, Integer sm, Integer sh) {
+    public User(String n, String l, String p, String e) {
         this.firstName = n;
         this.lastName = l;
         this.phone = p;
-        this.birthday = b;
-        this.startMinute = sm;
-        this.startHour = sh;
+        this.email = e.replaceAll("[^a-zA-Z0-9]", "");
+        this.isFree = false;
     }
 
     public String getFirstName() {
@@ -33,15 +31,9 @@ public class User {
         return this.phone;
     }
 
-    public String getBirthday() {return this.birthday; }
+    public String getEmail() { return this.email; }
 
-    public Integer getStartMinute() {
-        return this.startMinute;
-    }
-
-    public Integer getStartHour() {
-        return this.startHour;
-    }
+    public boolean getIsFree() { return this.isFree; }
 
     public ArrayList<String> getFriends() {
         return this.friends;

@@ -96,20 +96,6 @@
 
             </android.support.design.widget.TextInputLayout>
 
-            <TextView
-                android:id="@+id/birthday"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="?attr/editTextBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:hint="@string/prompt_birthday"
-                android:onClick="onClick"
-                android:textAppearance="?android:attr/textAppearanceMediumInverse"
-                android:textColor="?attr/editTextColor" />
-
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
