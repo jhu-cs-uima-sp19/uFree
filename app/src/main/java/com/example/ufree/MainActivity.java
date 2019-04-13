@@ -2,6 +2,7 @@ package com.example.ufree;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,16 +21,21 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    User user;
+    User currentUser;
     boolean checkedAvailability;
+    HashMap<String, User> freeFriends = new HashMap<String, User>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +58,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        // TODO: suppress warning
         fab.setVisibility(View.GONE);
 
         /* Set up navigation drawer */
@@ -69,7 +76,7 @@ public class MainActivity extends AppCompatActivity
         /* Check if need to ask user availability */
         // initialize firebase
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference dbRef = database.getReference();
+        final DatabaseReference dbRef = database.getReference();
         // TODO: get user id
         String userId = "minqitest";
         // Record if user has been asked for availability
@@ -79,8 +86,8 @@ public class MainActivity extends AppCompatActivity
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        user = dataSnapshot.getValue(User.class);
-                        Log.d("user", user.toString());
+                        currentUser = dataSnapshot.getValue(User.class);
+                        Log.d("user", currentUser.toString());
                         // if user has been asked for availability, do NOT ask again
                         if (!checkedAvailability) {
                             Calendar calendar = Calendar.getInstance();
@@ -90,9 +97,9 @@ public class MainActivity extends AppCompatActivity
                             int currentTime = currentHour * 60 + currentMinute;
                             // if user is free and end time does not exceed current time, do NOT ask for availability
                             // else show welcome screen
-                            if (!(user.getIsFree()
-                                    && ((user.getEndDay() > currentDay)
-                                    || user.getEndDay() == currentDay && user.getEndTime() >= currentTime))) {
+                            if (!(currentUser.getIsFree()
+                                    && ((currentUser.getEndDay() > currentDay)
+                                    || (currentUser.getEndDay() == currentDay && currentUser.getEndTime() >= currentTime)))) {
                                 Intent intent = new Intent(getApplicationContext(), WelcomeActivity.class);
                                 startActivity(intent);
                             }
@@ -102,8 +109,7 @@ public class MainActivity extends AppCompatActivity
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
-                        // Getting Post failed, log a message
-                        Log.w("firebase", "loadUser:onCancelled", databaseError.toException());
+                        Log.w("firebase", "loadUserFreeTime:onCancelled", databaseError.toException());
                     }
                 }
         );
@@ -114,8 +120,45 @@ public class MainActivity extends AppCompatActivity
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        FreeFriendRecyclerViewAdapter adapter = new FreeFriendRecyclerViewAdapter(new ArrayList<User>());
+        final FreeFriendRecyclerViewAdapter adapter = new FreeFriendRecyclerViewAdapter(freeFriends);
         recyclerView.setAdapter(adapter);
+
+        dbRef.child("users").addValueEventListener(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        GenericTypeIndicator<HashMap<String, User>> t = new GenericTypeIndicator<HashMap<String, User>>() {};
+                        HashMap<String, User> allUsers = dataSnapshot.getValue(t);
+                        Calendar calendar = Calendar.getInstance();
+                        // TODO: enable time machine selection
+                        int selectDay = calendar.DAY_OF_YEAR;
+                        int selectHour = calendar.HOUR_OF_DAY;
+                        int selectMinute = calendar.MINUTE;
+                        int selectTime = selectHour * 60 + selectMinute;
+                        for (Map.Entry<String, User> entry : allUsers.entrySet()) {
+                            String userId = entry.getKey();
+                            User user = entry.getValue();
+                            if (user != null && user.getEmail() != null
+                                    && !user.getEmail().equals(currentUser.getEmail()) && user.getIsFree()) {
+                                if ((user.getEndDay() > selectDay)
+                                        || (user.getEndDay() == selectDay && user.getEndTime() >= selectTime)) {
+                                    freeFriends.put(userId, new User(user));
+                                    adapter.notifyDataSetChanged();
+                                } else {
+                                    dbRef.child("users").child(userId).child("isFree").setValue(false);
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Log.w("firebase", "loadFreeFriends:onCancelled", databaseError.toException());
+                    }
+                }
+        );
+
+
     }
 
 

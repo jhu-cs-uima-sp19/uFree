@@ -1,10 +1,10 @@
 package com.example.ufree;
 
 public class User {
+    private String email;
     private String firstName;
     private String lastName;
-    // TODO: is phone a long?
-    private long phone;
+    private String phone;
     private int startDay;
     private int startHour;
     private int startMinute;
@@ -17,6 +17,24 @@ public class User {
         // Default constructor required for calls to DataSnapshot.getValue(com.example.ufree.User.class)
     }
 
+    public User(User that) {
+        this.email = that.email;
+        this.firstName = that.firstName;
+        this.lastName = that.lastName;
+        this.phone = that.phone;
+        this.startDay = that.startDay;
+        this.startHour = that.startHour;
+        this.startMinute = that.startMinute;
+        this.endDay = that.endDay;
+        this.endHour = that.endHour;
+        this.endMinute = that.endMinute;
+        this.isFree = that.isFree;
+    }
+
+    public String getEmail() {
+        return this.email;
+    }
+
     public String getFirstName() {
         return this.firstName;
     }
@@ -25,7 +43,7 @@ public class User {
         return this.lastName;
     }
 
-    public long getPhone() {
+    public String getPhone() {
         return this.phone;
     }
 
@@ -63,7 +81,7 @@ public class User {
 
 
     public String toString() {
-        return "User name: " + this.firstName + " " + this.lastName
+        return "User email: " + this.email + "\nname: " + this.firstName + " " + this.lastName
                 + "\nphone : " + this.phone + "\nisFree: " + this.isFree
                 + "\nstartTime: " + this.startDay + ", " + this.startHour + ", " + this.startMinute
                 + "\nendTime: " + this.endDay + ", " + this.endHour + ", " + this.endMinute + "\n";

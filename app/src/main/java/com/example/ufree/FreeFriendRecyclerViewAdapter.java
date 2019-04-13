@@ -1,6 +1,5 @@
 package com.example.ufree;
 
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,11 +7,18 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.sql.Time;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 
 public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFriendRecyclerViewAdapter.FreeFriendHolder> {
 
-    private final List<User> freeFriends;
+    private final HashMap<String, User> freeFriends;
+    private String[] userIds;
 
     public static class FreeFriendHolder extends RecyclerView.ViewHolder {
         public ImageView profilePic;
@@ -32,8 +38,9 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
     }
 
 
-    public FreeFriendRecyclerViewAdapter(List<User> myFreeFriends) {
+    public FreeFriendRecyclerViewAdapter(HashMap<String, User> myFreeFriends) {
         freeFriends = myFreeFriends;
+        userIds = myFreeFriends.keySet().toArray(new String[myFreeFriends.size()]);
     }
 
 
@@ -46,9 +53,14 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
 
     @Override
     public void onBindViewHolder(FreeFriendHolder holder, int position) {
-        User freeFriend = freeFriends.get(position);
-        holder.freeFriendname.setText("Test Name");
-        holder.freeTimeTextView.setText("1am");
+        // TODO: reduce memory usage here
+        userIds = freeFriends.keySet().toArray(new String[freeFriends.size()]);
+        User freeFriend = freeFriends.get(userIds[position]);
+        holder.freeFriendname.setText(freeFriend.getFirstName() + " " + freeFriend.getLastName());
+        Calendar calendar = java.util.Calendar.getInstance();
+        Time time = new Time(freeFriend.getEndHour(), freeFriend.getEndHour(), 0);
+        DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
+        holder.freeTimeTextView.setText(timeFormat.format(time));
     }
 
     @Override
