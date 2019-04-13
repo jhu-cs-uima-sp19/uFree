@@ -1,7 +1,10 @@
 package com.example.ufree;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.view.View;
@@ -13,7 +16,21 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import org.w3c.dom.Text;
 
 public class ProfileActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -38,12 +55,111 @@ public class ProfileActivity extends AppCompatActivity
         // set Profile to be selected
         navigationView.getMenu().getItem(4).setChecked(true);
 
+
+
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        final DatabaseReference mDatabase = database.getInstance().getReference();
+        final FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        //final DatabaseReference nameDB = mDatabase.child().xxx;
+        //final DatabaseReference phoneDB = mDatabase.child().xxx;
+
+
+
+
+
         // disable edit text
-        EditText phoneEditView = (EditText) findViewById(R.id.phoneEditText_profile);
+        final EditText phoneEditView = (EditText) findViewById(R.id.phoneEditText_profile);
         phoneEditView.setEnabled(false);
 
-        EditText emailEditView = (EditText) findViewById(R.id.nameEditText_profile);
-        emailEditView.setEnabled(false);
+        final EditText nameEditView = (EditText) findViewById(R.id.nameEditText_profile);
+        nameEditView.setEnabled(false);
+
+        final TextView emailTV = findViewById(R.id.email_profile);
+
+        Button deleteAccount = findViewById(R.id.deleteAccountButton_profile);
+
+        ImageView userNameButton = findViewById(R.id.editNameButton_profile);
+        ImageView phoneButton = findViewById(R.id.editPhoneButton_profile);
+        ImageView passButton = findViewById(R.id.changePasswordButton_profile);
+
+
+//testing!!!!!
+        ///change this!!!!!!
+        //change!
+        final String userId = "minqitest1";
+
+
+        FirebaseDatabase.getInstance().getReference().child("users").child(userId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String displayName = dataSnapshot.getValue(User.class).getFirstName() + " " + dataSnapshot.getValue(User.class).getLastName();
+                nameEditView.setText(displayName);
+                phoneEditView.setText(dataSnapshot.getValue(User.class).getPhone());
+                emailTV.setText(dataSnapshot.getValue(User.class).getEmail());
+
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
+
+
+        userNameButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if(!nameEditView.isEnabled()){
+                    nameEditView.setEnabled(true);
+                }
+                else if(nameEditView.isEnabled()){
+                    String value = nameEditView.getText().toString();
+                    String[] splited = value.split("\\s+");
+
+                    mDatabase.child("users").child(userId).child("firstName").setValue(splited[0]);
+                    mDatabase.child("users").child(userId).child("lastName").setValue(splited[1]);
+
+                    nameEditView.setEnabled(false);
+                }
+            }
+        });
+
+        passButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                String email = emailTV.getText().toString();
+                mAuth.sendPasswordResetEmail(email);
+                Toast.makeText(getBaseContext(), "Reset Email Sent", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        phoneButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if(!phoneEditView.isEnabled()){
+                    phoneEditView.setEnabled(true);
+                }
+                else if(phoneEditView.isEnabled()){
+                    String value = phoneEditView.getText().toString();
+
+                    mDatabase.child("users").child(userId).child("phone").setValue(value);
+
+
+                    phoneEditView.setEnabled(false);
+                }
+            }
+        });
+
+        deleteAccount.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putBoolean("loggedIn", false);
+                editor.commit();
+                Intent intent = new Intent(this, LogIn.class);
+                startActivity(intent);
+                mDatabase.child("users").child(userId).removeValue();
+
+            }
+        });
 
 
 
