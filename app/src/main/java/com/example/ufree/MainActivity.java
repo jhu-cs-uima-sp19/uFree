@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,10 +17,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.ufree.FreeFriend.FreeFriendContent;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    User user;
+    boolean checkedAvailability;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +66,48 @@ public class MainActivity extends AppCompatActivity
         // set Who's Free to be selected
         navigationView.getMenu().getItem(0).setChecked(true);
 
+        /* Check if need to ask user availability */
+        // initialize firebase
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference dbRef = database.getReference();
+        // TODO: get user id
+        String userId = "minqitest";
+        // Record if user has been asked for availability
+        checkedAvailability = false;
+
+        dbRef.child("users").child(userId).addValueEventListener(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        user = dataSnapshot.getValue(User.class);
+                        Log.d("user", user.toString());
+                        // if user has been asked for availability, do NOT ask again
+                        if (!checkedAvailability) {
+                            Calendar calendar = Calendar.getInstance();
+                            int currentDay = calendar.DAY_OF_YEAR;
+                            int currentHour = calendar.HOUR_OF_DAY;
+                            int currentMinute = calendar.MINUTE;
+                            int currentTime = currentHour * 60 + currentMinute;
+                            // if user is free and end time does not exceed current time, do NOT ask for availability
+                            // else show welcome screen
+                            if (!(user.getIsFree()
+                                    && ((user.getEndDay() > currentDay)
+                                    || user.getEndDay() == currentDay && user.getEndTime() >= currentTime))) {
+                                Intent intent = new Intent(getApplicationContext(), WelcomeActivity.class);
+                                startActivity(intent);
+                            }
+                            checkedAvailability = true;
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        // Getting Post failed, log a message
+                        Log.w("firebase", "loadUser:onCancelled", databaseError.toException());
+                    }
+                }
+        );
+
         /* Set up Recycler View */
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.freeFriendsRecyclerView);
         recyclerView.setHasFixedSize(true);
@@ -69,11 +121,6 @@ public class MainActivity extends AppCompatActivity
                     public void onListFragmentInteraction(FreeFriendContent.FreeFriend item) { }
                 });
         recyclerView.setAdapter(mAdapter);
-
-        // initialize firebase
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-
-
     }
 
 
@@ -122,9 +169,9 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(this, EventsActivity.class);
             startActivity(intent);
         } else if (id == R.id.friends_nav) {
-
+            // TODO: implement friend activity
         } else if (id == R.id.calendar_nav) {
-
+            // TODO: implement calendar activity
         } else if (id == R.id.profile_nav) {
             Intent intent = new Intent(this, ProfileActivity.class);
             startActivity(intent);
