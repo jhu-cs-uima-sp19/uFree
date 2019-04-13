@@ -24,6 +24,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,7 +34,11 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
@@ -159,8 +164,7 @@ public class LogIn extends AppCompatActivity implements LoaderCallbacks<Cursor> 
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() >= 6;
     }
 
     /**
@@ -258,23 +262,7 @@ public class LogIn extends AppCompatActivity implements LoaderCallbacks<Cursor> 
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-            return false;
+            return true;
         }
 
         @Override
@@ -284,13 +272,22 @@ public class LogIn extends AppCompatActivity implements LoaderCallbacks<Cursor> 
 
             if (success) {
                 // Launch Who's Free activity on success
-                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putBoolean("loggedIn", true);
-                editor.commit();
-
-                Intent intent = new Intent(LogIn.this, MainActivity.class);
-                startActivity(intent);
+                auth.signInWithEmailAndPassword(mEmail, mPassword)
+                        .addOnCompleteListener(LogIn.this, new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (!task.isSuccessful()) {
+                                    Toast.makeText(LogIn.this, "Sign Up Failed" + task.getException(), Toast.LENGTH_LONG).show();
+                                } else {
+                                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                                    SharedPreferences.Editor editor = pref.edit();
+                                    editor.putBoolean("loggedIn", true);
+                                    editor.commit();
+                                    startActivity(new Intent(LogIn.this, MainActivity.class));
+                                    finish();
+                                }
+                            }
+                        });
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();

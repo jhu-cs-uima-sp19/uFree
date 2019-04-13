@@ -5,7 +5,9 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -415,8 +417,12 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
                                     Toast.makeText(SignUp.this, "Sign Up Failed" + task.getException(), Toast.LENGTH_LONG).show();
                                 } else {
                                     dbRef.child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(firstName, lastName, phoneNumber, birthday, 0, 0));
-                                    //TODO. Logged in system
+                                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                                    SharedPreferences.Editor editor = pref.edit();
+                                    editor.putBoolean("loggedIn", true);
+                                    editor.commit();
                                     startActivity(new Intent(SignUp.this, MainActivity.class));
+                                    finish();
                                 }
                             }
                         });

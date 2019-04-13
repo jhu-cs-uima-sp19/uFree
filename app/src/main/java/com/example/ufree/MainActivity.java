@@ -36,12 +36,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        /*SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         loggedIn = pref.getBoolean("loggedIn", false);
         if (!loggedIn) {
             Intent intent = new Intent(this, LogIn.class);
             startActivity(intent);
-        }*/
+        }
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity
 
         auth = FirebaseAuth.getInstance();
 
-        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        /*final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity
                     finish();
                 }
             }
-        };
+        };*/
 
         /* Set up App bar */
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
