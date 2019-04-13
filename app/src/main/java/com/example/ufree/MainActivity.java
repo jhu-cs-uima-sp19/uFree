@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,6 +19,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.ufree.FreeFriend.FreeFriendContent;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity
@@ -25,18 +30,40 @@ public class MainActivity extends AppCompatActivity
 
     private boolean loggedIn;
 
+    private FirebaseAuth.AuthStateListener authStateListener;
+    private FirebaseAuth auth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        /*SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         loggedIn = pref.getBoolean("loggedIn", false);
         if (!loggedIn) {
             Intent intent = new Intent(this, LogIn.class);
             startActivity(intent);
-        }
+        }*/
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // initialize firebase
+        FirebaseApp.initializeApp(MainActivity.this);
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+        auth = FirebaseAuth.getInstance();
+
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        authStateListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user == null) {
+                    startActivity(new Intent(MainActivity.this, LogIn.class));
+                    finish();
+                }
+            }
+        };
 
         /* Set up App bar */
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -81,11 +108,6 @@ public class MainActivity extends AppCompatActivity
                     public void onListFragmentInteraction(FreeFriendContent.FreeFriend item) { }
                 });
         recyclerView.setAdapter(mAdapter);
-
-        // initialize firebase
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-
-
     }
 
 
@@ -128,6 +150,9 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.whosFree_nav) {
             // SHOULD NOT DO ANYTHING
+            // Handle the camera action
+            /*Intent intent = new Intent(this, SignUp.class);
+            startActivity(intent);*/
         } else if (id == R.id.events_nav) {
             Intent intent = new Intent(this, EventsActivity.class);
             startActivity(intent);

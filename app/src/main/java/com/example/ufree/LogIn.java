@@ -34,6 +34,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,27 +71,30 @@ public class LogIn extends AppCompatActivity implements LoaderCallbacks<Cursor> 
     private View mProgressView;
     private View mLoginFormView;
 
+    private FirebaseAuth auth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in);
+
+        auth = FirebaseAuth.getInstance();
+
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-
         mPasswordView = (EditText) findViewById(R.id.password);
-
         Button logInButton = (Button) findViewById(R.id.log_in_button);
+        Button signUpButton = (Button) findViewById(R.id.sign_up_button);
+
         logInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
             }
         });
-        
-        Button signUpButton = (Button) findViewById(R.id.sign_up_button);
         signUpButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                //startActivity(new Intent(this, SignUp.class));
+                startActivity(new Intent(LogIn.this, SignUp.class));
             }
         });
 
