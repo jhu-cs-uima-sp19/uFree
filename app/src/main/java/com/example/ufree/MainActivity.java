@@ -83,6 +83,7 @@ public class MainActivity extends AppCompatActivity
                 if (user == null) {
                     startActivity(new Intent(MainActivity.this, LogIn.class));
                     finish();
+                    return;
                 }
             }
         };
@@ -90,10 +91,13 @@ public class MainActivity extends AppCompatActivity
         if (user == null) {
             startActivity(new Intent(MainActivity.this, LogIn.class));
             finish();
+            return;
         }
 
         // TODO: DIRECTLY GET USER ID FROM DATABASE
-        user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            Log.d("debug", "user is null, but the program should quit");
+        }
         String temp = user.getEmail().replaceAll("@", "");
         userId = temp.replaceAll("\\.", "");
 
