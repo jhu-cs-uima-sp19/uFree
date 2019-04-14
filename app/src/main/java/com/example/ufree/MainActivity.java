@@ -1,7 +1,10 @@
 package com.example.ufree;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,17 +17,47 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.ufree.FreeFriend.FreeFriendContent;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private FirebaseAuth.AuthStateListener authStateListener;
+    private FirebaseUser user;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // initialize Firebase
+        FirebaseApp.initializeApp(MainActivity.this);
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        authStateListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user == null) {
+                    startActivity(new Intent(MainActivity.this, LogIn.class));
+                    finish();
+                }
+            }
+        };
+
+        if (user == null) {
+            startActivity(new Intent(MainActivity.this, LogIn.class));
+            finish();
+        }
 
         /* Set up App bar */
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -63,28 +96,39 @@ public class MainActivity extends AppCompatActivity
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        // sample freind data
+        // sample friend data
         RecyclerView.Adapter mAdapter = new FreeFriendRecyclerViewAdapter(FreeFriendContent.FREE_FREINDS_LIST,
                 new FreeFriendFragment.OnListFragmentInteractionListener() {
                     public void onListFragmentInteraction(FreeFriendContent.FreeFriend item) { }
                 });
         recyclerView.setAdapter(mAdapter);
 
-        // initialize firebase
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        TextView logOutButton = (TextView) findViewById(R.id.logout_nav);
+        logOutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(MainActivity.this, LogIn.class));
+                finish();
+            }
+        });
 
-
+        ImageView exitButton = (ImageView) findViewById(R.id.exitImageView_nav);
+        exitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(MainActivity.this, LogIn.class));
+                finish();
+            }
+        });
     }
-
-
 
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
         }
     }
 
@@ -118,6 +162,9 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.whosFree_nav) {
             // SHOULD NOT DO ANYTHING
+            // Handle the camera action
+            /*Intent intent = new Intent(this, SignUp.class);
+            startActivity(intent);*/
         } else if (id == R.id.events_nav) {
             Intent intent = new Intent(this, EventsActivity.class);
             startActivity(intent);
