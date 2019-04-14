@@ -21,10 +21,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.ToggleButton;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -35,17 +35,16 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.sql.Time;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    User currentUser;
+    static User currentUser;
+    static String userId = "minqitest";
     boolean checkedAvailability;
     HashMap<String, User> freeFriends = new HashMap<String, User>();
     static Calendar selectedCalendar;
@@ -98,7 +97,7 @@ public class MainActivity extends AppCompatActivity
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         final DatabaseReference dbRef = database.getReference();
         // TODO: get user id
-        String userId = "minqitest";
+
         // Record if user has been asked for availability
         checkedAvailability = false;
 
@@ -127,13 +126,13 @@ public class MainActivity extends AppCompatActivity
                             checkedAvailability = true;
                         }
 
-                        /* Set up navigation header */
+                        /* Display user info in navigation header */
                         TextView nameTextView = findViewById(R.id.name_nav);
                         TextView emailTextView = findViewById(R.id.email_nav);
                         nameTextView.setText(currentUser.getFirstName() + " " + currentUser.getLastName());
                         emailTextView.setText(currentUser.getEmail());
                         Switch toggle = findViewById(R.id.toggle_nav);
-                        Button currentStatusButton = findViewById(R.id.currentStatusButton_nav);
+                        Button currentStatusButton = findViewById(R.id.timeButton_nav);
                         if (currentUser.getIsFree()) {
                             toggle.setChecked(true);
                             Time t = new Time(currentUser.getEndHour(), currentUser.getEndMinute(), 0);
@@ -237,9 +236,20 @@ public class MainActivity extends AppCompatActivity
                 }
         );
 
+        // Set up listener for toggle and time button in nav drawer
+        Switch toggleNav = findViewById(R.id.toggle_nav);
+        Button currentStatusButton = findViewById(R.id.timeButton_nav);
+        toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                dbRef.child("users").child(userId).child("isFree").setValue(isChecked);
+            }
+        });
+
+
     }
 
-    public static class TimePickerFragment extends DialogFragment
+    // Time picker for time button at ** bottom **
+    public static class TimePickerFragmentBottom extends DialogFragment
             implements TimePickerDialog.OnTimeSetListener {
 
         @Override
@@ -271,9 +281,44 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void showTimePickerDialog(View v) {
-        DialogFragment timePickerFragment = new TimePickerFragment();
-        timePickerFragment.show(getSupportFragmentManager(), "timePicker");
+    public void showTimePickerDialogBottom(View v) {
+        DialogFragment timePickerFragment = new TimePickerFragmentBottom();
+        timePickerFragment.show(getSupportFragmentManager(), "timePickerBottom");
+    }
+
+
+
+    // Time picker for time button in the ** nav drawer **
+    public static class TimePickerFragmentNav extends DialogFragment
+            implements TimePickerDialog.OnTimeSetListener {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Create a new instance of TimePickerDialog and return it
+            int endHour = currentUser.getEndHour();
+            int endMinute = currentUser.getEndMinute();
+            return new TimePickerDialog(getActivity(), this, endHour, endMinute,
+                    DateFormat.is24HourFormat(getActivity()));
+        }
+
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            // update selected calendar object
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
+            DatabaseReference dbRef = database.getReference();
+            dbRef.child("users").child(userId).child("endHour").setValue(hourOfDay);
+            dbRef.child("users").child(userId).child("endMinute").setValue(minute);
+
+            // TODO: Cannot set time less than current, enable change date
+            // change text view for time button
+            Button timeButton = getActivity().findViewById(R.id.timeButton_nav);
+            Time selectedTime = new Time(hourOfDay, minute, 0);
+            timeButton.setText(timeFormat.format(selectedTime));
+        }
+    }
+
+    public void showTimePickerDialogNav(View v) {
+        DialogFragment timePickerFragment = new TimePickerFragmentNav();
+        timePickerFragment.show(getSupportFragmentManager(), "timePickerNav");
     }
 
     @Override
