@@ -51,8 +51,7 @@ public class MainActivity extends AppCompatActivity
     static User currentUser;
     private FirebaseAuth.AuthStateListener authStateListener;
     private FirebaseUser user;
-    // TODO
-    static String userId = "minqitest";
+    static String userId;
     boolean checkedAvailability;
     HashMap<String, User> freeFriends = new HashMap<String, User>();
     static Calendar selectedCalendar;
@@ -90,6 +89,11 @@ public class MainActivity extends AppCompatActivity
             finish();
         }
 
+        // TODO: DIRECTLY GET USER ID FROM DATABASE
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        String temp = user.getEmail().replaceAll("@", "");
+        userId = temp.replaceAll("\\.", "");
+
         /* Set up App bar */
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -124,7 +128,6 @@ public class MainActivity extends AppCompatActivity
         /* Check if need to ask user availability */
         // initialize firebase
         final DatabaseReference dbRef = database.getReference();
-        // TODO: get user id
 
         // Record if user has been asked for availability
         checkedAvailability = false;
@@ -133,42 +136,52 @@ public class MainActivity extends AppCompatActivity
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        currentUser = dataSnapshot.getValue(User.class);
+                        if (dataSnapshot.exists()) {
+                            currentUser = dataSnapshot.getValue(User.class);
+                            Log.d("test", "here" + currentUser.toString());
 
-                        Log.d("user", currentUser.toString());
-                        // if user has been asked for availability, do NOT ask again
-                        if (!checkedAvailability) {
-                            Calendar calendar = Calendar.getInstance();
-                            int currentDay = calendar.get(Calendar.DAY_OF_YEAR);
-                            int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
-                            int currentMinute = calendar.get(Calendar.MINUTE);
-                            int currentTime = currentHour * 60 + currentMinute;
-                            // if user is free and end time does not exceed current time, do NOT ask for availability
-                            // else show welcome screen
-                            if (!(currentUser.getIsFree()
-                                    && ((currentUser.getEndDay() > currentDay)
-                                    || (currentUser.getEndDay() == currentDay && currentUser.getEndTime() >= currentTime)))) {
-                                Intent intent = new Intent(getApplicationContext(), WelcomeActivity.class);
-                                startActivity(intent);
+                            // if user has been asked for availability, do NOT ask again
+                            if (!checkedAvailability) {
+                                Calendar calendar = Calendar.getInstance();
+                                int currentDay = calendar.get(Calendar.DAY_OF_YEAR);
+                                int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+                                int currentMinute = calendar.get(Calendar.MINUTE);
+                                int currentTime = currentHour * 60 + currentMinute;
+                                // if user is free and end time does not exceed current time, do NOT ask for availability
+                                // else show welcome screen
+                                if (!(currentUser.getIsFree()
+                                        && ((currentUser.getEndDay() > currentDay)
+                                        || (currentUser.getEndDay() == currentDay && currentUser.getEndTime() >= currentTime)))) {
+                                    Intent intent = new Intent(getApplicationContext(), WelcomeActivity.class);
+                                    startActivity(intent);
+                                }
+                                checkedAvailability = true;
                             }
-                            checkedAvailability = true;
-                        }
 
-                        /* Display user info in navigation header */
-                        TextView nameTextView = findViewById(R.id.name_nav);
-                        TextView emailTextView = findViewById(R.id.email_nav);
-                        nameTextView.setText(currentUser.getFullName());
-                        emailTextView.setText(currentUser.getEmail());
-                        Switch toggle = findViewById(R.id.toggle_nav);
-                        Button currentStatusButton = findViewById(R.id.timeButton_nav);
-                        if (currentUser.getIsFree()) {
-                            toggle.setChecked(true);
-                            Time t = new Time(currentUser.getEndHour(), currentUser.getEndMinute(), 0);
-                            currentStatusButton.setText(timeFormat.format(t));
+                            if (currentUser != null) {
+                                /* Display user info in navigation header */
+                                TextView nameTextView = findViewById(R.id.name_nav);
+                                TextView emailTextView = findViewById(R.id.email_nav);
+                                Log.d("test", "here" + currentUser.toString());
+                                nameTextView.setText(currentUser.getFullName());
+                                emailTextView.setText(currentUser.getEmail());
+                                Switch toggle = findViewById(R.id.toggle_nav);
+                                Button currentStatusButton = findViewById(R.id.timeButton_nav);
+                                if (currentUser.getIsFree()) {
+                                    toggle.setChecked(true);
+                                    Time t = new Time(currentUser.getEndHour(), currentUser.getEndMinute(), 0);
+                                    currentStatusButton.setText(timeFormat.format(t));
+                                } else {
+                                    toggle.setChecked(false);
+                                    Date d = new Date();
+                                    currentStatusButton.setText(timeFormat.format(d));
+                                }
+                            } else {
+                                Log.d("debug", "currentUser is null");
+                            }
                         } else {
-                            toggle.setChecked(false);
-                            Date d = new Date();
-                            currentStatusButton.setText(timeFormat.format(d));
+                            startActivity(new Intent(MainActivity.this, LogIn.class));
+                            finish();
                         }
                     }
 
@@ -240,20 +253,26 @@ public class MainActivity extends AppCompatActivity
 
                         int selectedTime = selectedHour * 60 + selectedMinute;
 
-                        for (Map.Entry<String, User> entry : allUsers.entrySet()) {
-                            String userId = entry.getKey();
-                            User user = entry.getValue();
-                            if (user != null && user.getEmail() != null
-                                    // skip the current user and dummy user
-                                    && !user.getEmail().equals(currentUser.getEmail())
-                                    && !user.getEmail().equals("dummy")
-                                    && user.getIsFree()) {
-                                if ((user.getEndDay() > selectedDay)
-                                        || (user.getEndDay() == selectedDay && user.getEndTime() >= selectedTime)) {
-                                    freeFriends.put(userId, new User(user));
-                                    adapter.notifyDataSetChanged();
+                        // TODO: change to get userId?
+                        if (currentUser != null) {
+                            for (Map.Entry<String, User> entry : allUsers.entrySet()) {
+                                String userId = entry.getKey();
+                                User user = entry.getValue();
+                                if (user != null && user.getEmail() != null
+                                        // skip the current user and dummy user
+                                        && !user.getEmail().equals(currentUser.getEmail())
+                                        && !user.getEmail().equals("dummy")
+                                        && user.getIsFree()) {
+                                    if ((user.getEndDay() > selectedDay)
+                                            || (user.getEndDay() == selectedDay && user.getEndTime() >= selectedTime)) {
+                                        freeFriends.put(userId, new User(user));
+                                        adapter.notifyDataSetChanged();
+                                    }
                                 }
                             }
+                        } else {
+                            startActivity(new Intent(MainActivity.this, LogIn.class));
+                            finish();
                         }
                     }
 
@@ -376,16 +395,12 @@ public class MainActivity extends AppCompatActivity
                 // Do nothing
             }
         }
+    }
 
-        ImageView exitButton = (ImageView) findViewById(R.id.exitImageView_nav);
-        exitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(MainActivity.this, LogIn.class));
-                finish();
-            }
-        });
+    public void signOut(View view) {
+        FirebaseAuth.getInstance().signOut();
+        startActivity(new Intent(MainActivity.this, LogIn.class));
+        finish();
     }
 
     @Override

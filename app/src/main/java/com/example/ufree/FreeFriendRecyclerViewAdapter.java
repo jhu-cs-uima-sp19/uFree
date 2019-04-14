@@ -68,7 +68,7 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
         // TODO: reduce memory usage here
         userIds = freeFriends.keySet().toArray(new String[freeFriends.size()]);
         User freeFriend = freeFriends.get(userIds[position]);
-        holder.freeFriendname.setText(freeFriend.getFirstName() + " " + freeFriend.getLastName());
+        holder.freeFriendname.setText(freeFriend.getFullName());
         Calendar calendar = java.util.Calendar.getInstance();
         Time time = new Time(freeFriend.getEndHour(), freeFriend.getEndMinute(), 0);
         DateFormat timeFormat = new SimpleDateFormat("hh:mm a");

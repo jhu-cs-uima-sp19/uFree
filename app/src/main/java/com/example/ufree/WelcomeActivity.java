@@ -15,6 +15,8 @@ import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -23,11 +25,20 @@ import java.util.Calendar;
 public class WelcomeActivity extends AppCompatActivity {
 
     View popupView;
+    private FirebaseUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
+
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        final DatabaseReference mDatabase = database.getInstance().getReference();
+        final FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        // TODO: DIRECTLY GET USER ID FROM DATABASE
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        String temp = user.getEmail().replaceAll("@", "");
+        final String userId = temp.replaceAll("\\.", "");
 
         ImageView yes = (ImageView) findViewById(R.id.yes_welcome);
         yes.setOnClickListener(new View.OnClickListener() {
@@ -98,10 +109,6 @@ public class WelcomeActivity extends AppCompatActivity {
                         FirebaseDatabase database = FirebaseDatabase.getInstance();
                         DatabaseReference dbRef = database.getReference();
 
-                        // TODO: get user id
-
-                        String userId = "minqitest";
-
                         // calculate start and end time
                         Calendar calendar = Calendar.getInstance();
                         // TODO: integrate year as part of free time
@@ -132,6 +139,7 @@ public class WelcomeActivity extends AppCompatActivity {
                         dbRef.child("users").child(userId).child("endMinute").setValue(endMinute);
                         dbRef.child("users").child(userId).child("isFree").setValue(true);
 
+                        popupWindow.dismiss();
                         finish();
                     }
                 });
@@ -146,8 +154,6 @@ public class WelcomeActivity extends AppCompatActivity {
                 // initialize firebase
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();
-                // TODO: get user id
-                String userId = "minqitest";
                 dbRef.child("users").child(userId).child("isFree").setValue(false);
                 finish();
             }
