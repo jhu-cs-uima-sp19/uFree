@@ -22,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -30,6 +31,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -55,10 +58,10 @@ public class MainActivity extends AppCompatActivity
     boolean checkedAvailability;
     HashMap<String, User> freeFriends = new HashMap<String, User>();
     static Calendar selectedCalendar;
-    static java.text.DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
-    static java.text.DateFormat dateFormat = new SimpleDateFormat("MMM dd, EEE");
     static boolean dummyUserIsFree = true;
 
+    static final java.text.DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
+    static final java.text.DateFormat dateFormat = new SimpleDateFormat("MMM dd, EEE");
     static final int CALENDAR_PICKER_REQUEST = 1;
     static final int RESULT_CANCEL = 0;
     static final int RESULT_CONFIRM = 1;
@@ -138,7 +141,7 @@ public class MainActivity extends AppCompatActivity
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
                             currentUser = dataSnapshot.getValue(User.class);
-                            Log.d("test", "here" + currentUser.toString());
+                            Log.d("test", "Getting user info\n" + currentUser.toString());
 
                             // if user has been asked for availability, do NOT ask again
                             if (!checkedAvailability) {
@@ -158,26 +161,23 @@ public class MainActivity extends AppCompatActivity
                                 checkedAvailability = true;
                             }
 
-                            if (currentUser != null) {
-                                /* Display user info in navigation header */
-                                TextView nameTextView = findViewById(R.id.name_nav);
-                                TextView emailTextView = findViewById(R.id.email_nav);
-                                Log.d("test", "here" + currentUser.toString());
+                            /* Display user info in navigation header */
+                            NavigationView navigationView = findViewById(R.id.nav_view);
+                            View navHeader = navigationView.getHeaderView(0);
+                            if (navHeader != null) {
+                                TextView nameTextView = navHeader.findViewById(R.id.name_nav);
+                                TextView emailTextView = navHeader.findViewById(R.id.email_nav);
                                 nameTextView.setText(currentUser.getFullName());
                                 emailTextView.setText(currentUser.getEmail());
                                 Switch toggle = findViewById(R.id.toggle_nav);
                                 Button currentStatusButton = findViewById(R.id.timeButton_nav);
-                                if (currentUser.getIsFree()) {
-                                    toggle.setChecked(true);
-                                    Time t = new Time(currentUser.getEndHour(), currentUser.getEndMinute(), 0);
-                                    currentStatusButton.setText(timeFormat.format(t));
-                                } else {
-                                    toggle.setChecked(false);
-                                    Date d = new Date();
-                                    currentStatusButton.setText(timeFormat.format(d));
-                                }
+                                toggle.setChecked(currentUser.getIsFree());
+                                Time t = new Time(currentUser.getEndHour(), currentUser.getEndMinute(), 0);
+                                currentStatusButton.setText(timeFormat.format(t));
                             } else {
-                                Log.d("debug", "currentUser is null");
+                                Log.d("debug", "Nav view is null");
+                                Log.d("debug", "Nav view: " + navigationView);
+                                Log.d("debug", "Nav header: " + navHeader);
                             }
                         } else {
                             startActivity(new Intent(MainActivity.this, LogIn.class));
@@ -291,7 +291,33 @@ public class MainActivity extends AppCompatActivity
                 dbRef.child("users").child(userId).child("isFree").setValue(isChecked);
             }
         });
+        currentStatusButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogFragment timePickerFragment = new TimePickerFragmentNav();
+                timePickerFragment.show(getSupportFragmentManager(), "timePickerNav");
+            }
+        });
 
+        // Set up listener for log out
+        ImageView exitImageView = findViewById(R.id.exitImageView_nav);
+        TextView logoutTextView = findViewById(R.id.logout_nav);
+        exitImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(MainActivity.this, LogIn.class));
+                finish();
+            }
+        });
+        logoutTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(MainActivity.this, LogIn.class));
+                finish();
+            }
+        });
 
     }
 
@@ -333,8 +359,6 @@ public class MainActivity extends AppCompatActivity
         timePickerFragment.show(getSupportFragmentManager(), "timePickerBottom");
     }
 
-
-
     // Time picker for time button in the ** nav drawer **
     public static class TimePickerFragmentNav extends DialogFragment
             implements TimePickerDialog.OnTimeSetListener {
@@ -349,23 +373,31 @@ public class MainActivity extends AppCompatActivity
         }
 
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            // update selected calendar object
-            FirebaseDatabase database = FirebaseDatabase.getInstance();
-            DatabaseReference dbRef = database.getReference();
-            dbRef.child("users").child(userId).child("endHour").setValue(hourOfDay);
-            dbRef.child("users").child(userId).child("endMinute").setValue(minute);
+            Calendar calendar = Calendar.getInstance();
+            int currentDay = calendar.get(Calendar.DAY_OF_YEAR);
+            int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+            int currentMinute = calendar.get(Calendar.MINUTE);
+            int currentTime = currentHour * 60 + currentMinute;
+            int endDay = currentUser.getEndDay();
+            // if user set free time less than current time
+            if (currentDay == endDay && currentTime >= hourOfDay * 60 + minute) {
+                Toast.makeText(getContext(), "You cannot set free time before current time", Toast.LENGTH_LONG).show();
+                DialogFragment timePickerFragment = new TimePickerFragmentNav();
+                timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
+            } else {
+                // update selected calendar object
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference dbRef = database.getReference();
+                dbRef.child("users").child(userId).child("endHour").setValue(hourOfDay);
+                dbRef.child("users").child(userId).child("endMinute").setValue(minute);
 
-            // TODO: Cannot set time less than current, enable change date
-            // change text view for time button
-            Button timeButton = getActivity().findViewById(R.id.timeButton_nav);
-            Time selectedTime = new Time(hourOfDay, minute, 0);
-            timeButton.setText(timeFormat.format(selectedTime));
+                // TODO: enable change date
+                // change text view for time button
+                Button timeButton = getActivity().findViewById(R.id.timeButton_nav);
+                Time selectedTime = new Time(hourOfDay, minute, 0);
+                timeButton.setText(timeFormat.format(selectedTime));
+            }
         }
-    }
-
-    public void showTimePickerDialogNav(View v) {
-        DialogFragment timePickerFragment = new TimePickerFragmentNav();
-        timePickerFragment.show(getSupportFragmentManager(), "timePickerNav");
     }
 
     @Override
@@ -395,12 +427,6 @@ public class MainActivity extends AppCompatActivity
                 // Do nothing
             }
         }
-    }
-
-    public void signOut(View view) {
-        FirebaseAuth.getInstance().signOut();
-        startActivity(new Intent(MainActivity.this, LogIn.class));
-        finish();
     }
 
     @Override
