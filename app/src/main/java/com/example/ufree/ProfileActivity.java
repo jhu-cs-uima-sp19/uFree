@@ -31,6 +31,8 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -76,6 +78,9 @@ public class ProfileActivity extends AppCompatActivity
 
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         final DatabaseReference dbRef = database.getInstance().getReference();
+        final DatabaseReference mDatabase2 = database.getReference("users");
+
+
         final FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
 
@@ -90,6 +95,7 @@ public class ProfileActivity extends AppCompatActivity
 
         Button deleteAccount = findViewById(R.id.deleteAccountButton_profile);
 
+        final View passView = findViewById(R.id.ChangePassView);
         final ImageView userNameButton = findViewById(R.id.editNameButton_profile);
         final ImageView phoneButton = findViewById(R.id.editPhoneButton_profile);
         ImageView passButton = findViewById(R.id.changePasswordButton_profile);
@@ -201,13 +207,23 @@ public class ProfileActivity extends AppCompatActivity
             }
         });
 
-        passButton.setOnClickListener(new View.OnClickListener() {
+
+        passView.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 String email = emailTV.getText().toString();
                 mAuth.sendPasswordResetEmail(email);
                 Toast.makeText(getBaseContext(), "Reset Email Sent", Toast.LENGTH_LONG).show();
             }
         });
+
+
+       /* passButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                String email = emailTV.getText().toString();
+                mAuth.sendPasswordResetEmail(email);
+                Toast.makeText(getBaseContext(), "Reset Email Sent", Toast.LENGTH_LONG).show();
+            }
+        });*/
 
         phoneButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -240,15 +256,26 @@ public class ProfileActivity extends AppCompatActivity
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                        SharedPreferences.Editor editor = pref.edit();
-                        editor.putBoolean("loggedIn", false);
-                        editor.commit();
+                        mDatabase2.child(userId).removeValue();
+
+                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                        user.delete()
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            Toast.makeText(ProfileActivity.this, "Delete success", Toast.LENGTH_LONG).show();
+                                        }
+                                    }
+                                });
+
                         dbRef.child("users").child(userId).removeValue();
+
                         Intent intent = new Intent(getApplicationContext(), LogIn.class);
                         startActivity(intent);
                         dialog.dismiss();
                         finish();
+                        return;
                     }
                 });
 
