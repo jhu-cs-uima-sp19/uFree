@@ -9,7 +9,7 @@
     <string name="title_activity_log_in">Log in</string>
     <string name="title_activity_sign_up">Sign Up</string>
     <!-- Strings related to login and sign up-->
-    <string name="prompt_first_name">First Name</string>
+    <string name="prompt_full_name">Full Name</string>
     <string name="prompt_last_name">Last Name</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_phone_number">Phone Number</string>

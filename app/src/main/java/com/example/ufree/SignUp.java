@@ -55,8 +55,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
     private UserLoginTask mAuthTask = null;
 
     // UI references.
-    private EditText mFirstNameView;
-    private EditText mLastNameView;
+    private EditText mFullNameView;
     private AutoCompleteTextView mEmailView;
     private EditText mPhoneNumberView;
     private EditText mPasswordView;
@@ -73,8 +72,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
 
     private FirebaseAuth auth;
 
-    private String firstName;
-    private String lastName;
+    private String fullName;
     private String email;
     private String phoneNumber;
     private String password;
@@ -85,8 +83,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
         setContentView(R.layout.activity_sign_up);
 
         // Set up the sign up form.
-        mFirstNameView = (EditText) findViewById(R.id.first_name);
-        mLastNameView =(EditText) findViewById(R.id.last_name);
+        mFullNameView = (EditText) findViewById(R.id.full_name);
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         mPhoneNumberView = (EditText) findViewById(R.id.phone_number);
         mPasswordView = (EditText) findViewById(R.id.password);
@@ -152,16 +149,14 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
         }
 
         // Reset errors.
-        mFirstNameView.setError(null);
-        mLastNameView.setError(null);
+        mFullNameView.setError(null);
         mEmailView.setError(null);
         mPhoneNumberView.setError(null);
         mPasswordView.setError(null);
         mConfirmPasswordView.setError(null);
 
         // Store values at the time of the sign up attempt.
-        firstName = mFirstNameView.getText().toString().trim();
-        lastName = mLastNameView.getText().toString().trim();
+        fullName = mFullNameView.getText().toString().trim();
         email = mEmailView.getText().toString().trim();
         phoneNumber =  mPhoneNumberView.getText().toString().trim();
         password = mPasswordView.getText().toString().trim();
@@ -171,24 +166,13 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
         View focusView = null;
 
         // Check for valid first name
-        if (TextUtils.isEmpty(firstName)) {
-            mFirstNameView.setError(getString(R.string.error_field_required));
-            focusView = mFirstNameView;
+        if (TextUtils.isEmpty(fullName)) {
+            mFullNameView.setError(getString(R.string.error_field_required));
+            focusView = mFullNameView;
             cancel = true;
-        } else if (!isFirstNameValid(firstName)) {
-            mFirstNameView.setError(String.format(getString(R.string.error_invalid_field), "first name"));
-            focusView = mFirstNameView;
-            cancel = true;
-        }
-
-        // Check for valid last name
-        if (TextUtils.isEmpty(lastName)) {
-            mLastNameView.setError(getString(R.string.error_field_required));
-            focusView = mLastNameView;
-            cancel = true;
-        } else if (!isFirstNameValid(lastName)) {
-            mLastNameView.setError(String.format(getString(R.string.error_invalid_field), "last name"));
-            focusView = mLastNameView;
+        } else if (!isFullNameValid(fullName)) {
+            mFullNameView.setError(String.format(getString(R.string.error_invalid_field), "first name"));
+            focusView = mFullNameView;
             cancel = true;
         }
 
@@ -237,13 +221,13 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
         } else {
             showProgress(true);
 
-            mAuthTask = new UserLoginTask(firstName, lastName, email, phoneNumber, password);
+            mAuthTask = new UserLoginTask(fullName, email, phoneNumber, password);
             mAuthTask.execute((Void) null);
         }
     }
 
-    private boolean isFirstNameValid(String firstName) {
-        return firstName.length() > 1;
+    private boolean isFullNameValid(String fullName) {
+        return fullName.length() > 1;
     }
 
     private boolean isEmailValid(String email) {
@@ -334,15 +318,13 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String firstName;
-        private final String lastName;
+        private final String fullName;
         private final String email;
         private final String phoneNumber;
         private final String password;
 
-        UserLoginTask(String iFirstName, String iLastName, String iEmail, String iPhoneNumber, String iPassword) {
-            firstName = iFirstName;
-            lastName = iLastName;
+        UserLoginTask(String iFullName, String iEmail, String iPhoneNumber, String iPassword) {
+            fullName = iFullName;
             email = iEmail;
             phoneNumber = iPhoneNumber;
             password = iPassword;
@@ -372,7 +354,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
                                 if (!task.isSuccessful()) {
                                     Toast.makeText(SignUp.this, "Sign Up Failed" + task.getException(), Toast.LENGTH_LONG).show();
                                 } else {
-                                    dbRef.child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(firstName, lastName, phoneNumber, email));
+                                    dbRef.child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(fullName, phoneNumber, email));
                                     startActivity(new Intent(SignUp.this, MainActivity.class));
                                     finish();
                                 }

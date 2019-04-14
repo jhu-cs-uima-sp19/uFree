@@ -6,26 +6,20 @@ import java.util.ArrayList;
  * manages database user elements
  */
 public class User {
-    private String firstName;
-    private String lastName;
+    private String fullName;
     private String phone;
     private String email;
     private boolean isFree;
     private ArrayList<String> friends = new ArrayList<>();
 
-    public User(String n, String l, String p, String e) {
-        this.firstName = n;
-        this.lastName = l;
+    public User(String n, String p, String e) {
+        this.fullName = n;
         this.phone = p;
         this.email = e;
         this.isFree = false;
     }
 
-    public String getFirstName() {
-        return this.firstName;
-    }
-
-    public String getLastName() {return this.lastName; }
+    public String getFirstName() { return this.fullName; }
 
     public String getPhone() {
         return this.phone;
