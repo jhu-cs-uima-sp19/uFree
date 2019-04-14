@@ -80,8 +80,8 @@ public class ProfileActivity extends AppCompatActivity
 
         Button deleteAccount = findViewById(R.id.deleteAccountButton_profile);
 
-        ImageView userNameButton = findViewById(R.id.editNameButton_profile);
-        ImageView phoneButton = findViewById(R.id.editPhoneButton_profile);
+        final ImageView userNameButton = findViewById(R.id.editNameButton_profile);
+        final ImageView phoneButton = findViewById(R.id.editPhoneButton_profile);
         ImageView passButton = findViewById(R.id.changePasswordButton_profile);
 
 
@@ -113,6 +113,7 @@ public class ProfileActivity extends AppCompatActivity
             public void onClick(View v) {
                 if(!nameEditView.isEnabled()){
                     nameEditView.setEnabled(true);
+                    userNameButton.setImageResource(R.drawable.ic_check_orange_24dp);
                 }
                 else if(nameEditView.isEnabled()){
                     String value = nameEditView.getText().toString().trim();
@@ -124,10 +125,9 @@ public class ProfileActivity extends AppCompatActivity
                         Toast.makeText(getBaseContext(), "Please Include Only First And Last Name", Toast.LENGTH_LONG).show();
                     }
                     else {
-                        mDatabase.child("users").child(userId).child("firstName").setValue(splited[0]);
-                        mDatabase.child("users").child(userId).child("lastName").setValue(splited[1]);
-
+                        mDatabase.child("users").child(userId).child("fullName").setValue(value);
                         nameEditView.setEnabled(false);
+                        userNameButton.setImageResource(R.drawable.ic_edit_orange_24dp);
                     }
                 }
             }
@@ -145,6 +145,7 @@ public class ProfileActivity extends AppCompatActivity
             public void onClick(View v) {
                 if(!phoneEditView.isEnabled()){
                     phoneEditView.setEnabled(true);
+                    phoneButton.setImageResource(R.drawable.ic_check_orange_24dp);
                 }
                 else if(phoneEditView.isEnabled()){
                     String value = phoneEditView.getText().toString().trim();
@@ -154,6 +155,7 @@ public class ProfileActivity extends AppCompatActivity
                     else {
                         mDatabase.child("users").child(userId).child("phone").setValue(value);
                         phoneEditView.setEnabled(false);
+                        phoneButton.setImageResource(R.drawable.ic_edit_orange_24dp);
                     }
                 }
             }
@@ -174,8 +176,8 @@ public class ProfileActivity extends AppCompatActivity
                         editor.putBoolean("loggedIn", false);
                         editor.commit();
                         mDatabase.child("users").child(userId).removeValue();
-                        Intent intent = new Intent(this, LogIn.class);
-                        startActivity(intent);
+                        //Intent intent = new Intent(this, LogIn.class);
+                        //startActivity(intent);
                         dialog.dismiss();
                     }
                 });
