@@ -94,4 +94,5 @@ public class User {
                 + "\nstartTime: " + this.startDay + ", " + this.startHour + ", " + this.startMinute
                 + "\nendTime: " + this.endDay + ", " + this.endHour + ", " + this.endMinute + "\n";
     }
+
 }
