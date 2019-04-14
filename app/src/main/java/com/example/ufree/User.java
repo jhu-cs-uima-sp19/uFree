@@ -16,6 +16,20 @@ public class User {
         // Default constructor required for calls to DataSnapshot.getValue(com.example.ufree.User.class)
     }
 
+    // Constructor for sign up
+    public User(String n, String p, String e) {
+        this.fullName = n;
+        this.phone = p;
+        this.email = e;
+        this.isFree = false;
+        this.startDay = 0;
+        this.startHour = 0;
+        this.startMinute = 0;
+        this.endDay = 0;
+        this.endHour = 0;
+        this.endMinute = 0;
+    }
+
     public User(User that) {
         this.email = that.email;
         this.fullName = that.fullName;
