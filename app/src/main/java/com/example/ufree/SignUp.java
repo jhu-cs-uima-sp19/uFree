@@ -171,7 +171,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
             focusView = mFullNameView;
             cancel = true;
         } else if (!isFullNameValid(fullName)) {
-            mFullNameView.setError(String.format(getString(R.string.error_invalid_field), "first name"));
+            mFullNameView.setError(String.format(getString(R.string.error_invalid_field), "full name"));
             focusView = mFullNameView;
             cancel = true;
         }

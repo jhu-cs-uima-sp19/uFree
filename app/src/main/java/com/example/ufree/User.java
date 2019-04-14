@@ -19,7 +19,7 @@ public class User {
         this.isFree = false;
     }
 
-    public String getFirstName() { return this.fullName; }
+    public String getFullName() { return this.fullName; }
 
     public String getPhone() {
         return this.phone;
