@@ -251,11 +251,12 @@ public class EventsActivity extends AppCompatActivity
         } else if (id == R.id.events_nav) {
             // SHOULD NOT DO ANYTHING
         } else if (id == R.id.friends_nav) {
-
+            // TODO: implement friend activity
         } else if (id == R.id.calendar_nav) {
-
+            // TODO: implement calendar activity
         } else if (id == R.id.profile_nav) {
-
+            Intent intent = new Intent(this, ProfileActivity.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
