@@ -193,10 +193,11 @@ public class ProfileActivity extends AppCompatActivity
                                 });
 
                         mDatabase.child("users").child(userId).removeValue();
-                    //    Intent intent = new Intent(this, LogIn.class);
-                     //   startActivity(intent);
+                        Intent intent = new Intent(ProfileActivity.this, LogIn.class);
+                        startActivity(intent);
                         dialog.dismiss();
                         finish();
+                        return;
                     }
                 });
 
