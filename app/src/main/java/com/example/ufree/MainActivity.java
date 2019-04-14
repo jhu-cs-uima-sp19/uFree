@@ -7,13 +7,13 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.view.GravityCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +28,11 @@ import android.widget.TimePicker;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import android.widget.ImageView;
+import android.widget.TextView;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
@@ -44,6 +49,9 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     static User currentUser;
+    private FirebaseAuth.AuthStateListener authStateListener;
+    private FirebaseUser user;
+    // TODO
     static String userId = "minqitest";
     boolean checkedAvailability;
     HashMap<String, User> freeFriends = new HashMap<String, User>();
@@ -60,6 +68,27 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // initialize Firebase
+        FirebaseApp.initializeApp(MainActivity.this);
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        authStateListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user == null) {
+                    startActivity(new Intent(MainActivity.this, LogIn.class));
+                    finish();
+                }
+            }
+        };
+
+        if (user == null) {
+            startActivity(new Intent(MainActivity.this, LogIn.class));
+            finish();
+        }
 
         /* Set up App bar */
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -94,7 +123,6 @@ public class MainActivity extends AppCompatActivity
 
         /* Check if need to ask user availability */
         // initialize firebase
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
         final DatabaseReference dbRef = database.getReference();
         // TODO: get user id
 
@@ -129,7 +157,7 @@ public class MainActivity extends AppCompatActivity
                         /* Display user info in navigation header */
                         TextView nameTextView = findViewById(R.id.name_nav);
                         TextView emailTextView = findViewById(R.id.email_nav);
-                        nameTextView.setText(currentUser.getFirstName() + " " + currentUser.getLastName());
+                        nameTextView.setText(currentUser.getFullName());
                         emailTextView.setText(currentUser.getEmail());
                         Switch toggle = findViewById(R.id.toggle_nav);
                         Button currentStatusButton = findViewById(R.id.timeButton_nav);
@@ -348,6 +376,16 @@ public class MainActivity extends AppCompatActivity
                 // Do nothing
             }
         }
+
+        ImageView exitButton = (ImageView) findViewById(R.id.exitImageView_nav);
+        exitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(MainActivity.this, LogIn.class));
+                finish();
+            }
+        });
     }
 
     @Override
@@ -355,8 +393,6 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
         }
     }
 

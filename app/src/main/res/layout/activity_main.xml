@@ -41,6 +41,7 @@
                 android:textAlignment="viewStart"
                 android:textColor="#000000"
                 android:textStyle="bold"
+                android:onClick="onClick"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/exitImageView_nav"
                 app:layout_constraintTop_toTopOf="@+id/guideline" />
@@ -52,6 +53,7 @@
                 android:layout_marginStart="4dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
+                android:onClick="onClick"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/guideline"
