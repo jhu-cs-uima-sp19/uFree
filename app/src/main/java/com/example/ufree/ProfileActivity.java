@@ -1,12 +1,16 @@
 package com.example.ufree;
 
+import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -18,12 +22,17 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -34,11 +43,15 @@ import com.google.firebase.database.ValueEventListener;
 
 import org.w3c.dom.Text;
 
+import java.sql.Time;
+import java.util.Calendar;
+
 public class ProfileActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private FirebaseUser user;
-    private User currentUser;
+    static private User currentUser;
+    static String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +62,7 @@ public class ProfileActivity extends AppCompatActivity
         // set up title of app bar
         getSupportActionBar().setTitle("Profile");
 
+        /* Set up navigation drawer */
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -63,13 +77,11 @@ public class ProfileActivity extends AppCompatActivity
 
 
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
-        final DatabaseReference mDatabase = database.getInstance().getReference();
+        final DatabaseReference dbRef = database.getInstance().getReference();
+        final DatabaseReference mDatabase2 = database.getReference("users");
+
+
         final FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        //final DatabaseReference nameDB = mDatabase.child().xxx;
-        //final DatabaseReference phoneDB = mDatabase.child().xxx;
-
-
-
 
 
         // disable edit text
@@ -83,6 +95,7 @@ public class ProfileActivity extends AppCompatActivity
 
         Button deleteAccount = findViewById(R.id.deleteAccountButton_profile);
 
+        final View passView = findViewById(R.id.ChangePassView);
         final ImageView userNameButton = findViewById(R.id.editNameButton_profile);
         final ImageView phoneButton = findViewById(R.id.editPhoneButton_profile);
         ImageView passButton = findViewById(R.id.changePasswordButton_profile);
@@ -91,9 +104,9 @@ public class ProfileActivity extends AppCompatActivity
         // TODO: DIRECTLY GET USER ID FROM DATABASE
         user = FirebaseAuth.getInstance().getCurrentUser();
         String temp = user.getEmail().replaceAll("@", "");
-        final String userId = temp.replaceAll("\\.", "");
+        userId = temp.replaceAll("\\.", "");
 
-        FirebaseDatabase.getInstance().getReference().child("users").child(userId).addValueEventListener(new ValueEventListener() {
+        dbRef.child("users").child(userId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
@@ -102,6 +115,28 @@ public class ProfileActivity extends AppCompatActivity
                     nameEditView.setText(displayName);
                     phoneEditView.setText(dataSnapshot.getValue(User.class).getPhone());
                     emailTV.setText(dataSnapshot.getValue(User.class).getEmail());
+
+                    /* Display user info in navigation header */
+                    NavigationView navigationView = findViewById(R.id.nav_view);
+                    View navHeader = navigationView.getHeaderView(0);
+                    if (navHeader != null) {
+                        TextView nameTextView = navHeader.findViewById(R.id.name_nav);
+                        TextView emailTextView = navHeader.findViewById(R.id.email_nav);
+                        nameTextView.setText(currentUser.getFullName());
+                        emailTextView.setText(currentUser.getEmail());
+                        Switch toggle = findViewById(R.id.toggle_nav);
+                        Button currentStatusButton = findViewById(R.id.timeButton_nav);
+                        toggle.setChecked(currentUser.getIsFree());
+                        Time t = new Time(currentUser.getEndHour(), currentUser.getEndMinute(), 0);
+                        currentStatusButton.setText(MainActivity.timeFormat.format(t));
+                    } else {
+                        Log.d("debug", "Nav view is null");
+                        Log.d("debug", "Nav view: " + navigationView);
+                        Log.d("debug", "Nav header: " + navHeader);
+                    }
+                } else {
+                    startActivity(new Intent(ProfileActivity.this, LogIn.class));
+                    finish();
                 }
             }
             @Override
@@ -112,6 +147,41 @@ public class ProfileActivity extends AppCompatActivity
 
 
 
+        // Set up listener for toggle and time button in nav drawer
+        Switch toggleNav = findViewById(R.id.toggle_nav);
+        Button currentStatusButton = findViewById(R.id.timeButton_nav);
+        toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                dbRef.child("users").child(userId).child("isFree").setValue(isChecked);
+            }
+        });
+        currentStatusButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogFragment timePickerFragment = new ProfileActivity.TimePickerFragmentNav();
+                timePickerFragment.show(getSupportFragmentManager(), "timePickerNav");
+            }
+        });
+
+        // Set up listener for log out in nav drawer
+        ImageView exitImageView = findViewById(R.id.exitImageView_nav);
+        TextView logoutTextView = findViewById(R.id.logout_nav);
+        exitImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(ProfileActivity.this, LogIn.class));
+                finish();
+            }
+        });
+        logoutTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(ProfileActivity.this, LogIn.class));
+                finish();
+            }
+        });
 
         userNameButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -129,7 +199,7 @@ public class ProfileActivity extends AppCompatActivity
                         Toast.makeText(getBaseContext(), "Please Include Only First And Last Name", Toast.LENGTH_LONG).show();
                     }
                     else {
-                        mDatabase.child("users").child(userId).child("fullName").setValue(value);
+                        dbRef.child("users").child(userId).child("fullName").setValue(value);
                         nameEditView.setEnabled(false);
                         userNameButton.setImageResource(R.drawable.ic_edit_orange_24dp);
                     }
@@ -137,13 +207,23 @@ public class ProfileActivity extends AppCompatActivity
             }
         });
 
-        passButton.setOnClickListener(new View.OnClickListener() {
+
+        passView.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 String email = emailTV.getText().toString();
                 mAuth.sendPasswordResetEmail(email);
                 Toast.makeText(getBaseContext(), "Reset Email Sent", Toast.LENGTH_LONG).show();
             }
         });
+
+
+       /* passButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                String email = emailTV.getText().toString();
+                mAuth.sendPasswordResetEmail(email);
+                Toast.makeText(getBaseContext(), "Reset Email Sent", Toast.LENGTH_LONG).show();
+            }
+        });*/
 
         phoneButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -157,7 +237,7 @@ public class ProfileActivity extends AppCompatActivity
                         Toast.makeText(getBaseContext(), "Please Enter a Phone Number", Toast.LENGTH_LONG).show();
                     }
                     else {
-                        mDatabase.child("users").child(userId).child("phone").setValue(value);
+                        dbRef.child("users").child(userId).child("phone").setValue(value);
                         phoneEditView.setEnabled(false);
                         phoneButton.setImageResource(R.drawable.ic_edit_orange_24dp);
                     }
@@ -176,15 +256,26 @@ public class ProfileActivity extends AppCompatActivity
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                        SharedPreferences.Editor editor = pref.edit();
-                        editor.putBoolean("loggedIn", false);
-                        editor.commit();
-                        mDatabase.child("users").child(userId).removeValue();
+                        mDatabase2.child(userId).removeValue();
+
+                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                        user.delete()
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            Toast.makeText(ProfileActivity.this, "Delete success", Toast.LENGTH_LONG).show();
+                                        }
+                                    }
+                                });
+
+                        dbRef.child("users").child(userId).removeValue();
+
                         Intent intent = new Intent(getApplicationContext(), LogIn.class);
                         startActivity(intent);
                         dialog.dismiss();
                         finish();
+                        return;
                     }
                 });
 
@@ -205,6 +296,56 @@ public class ProfileActivity extends AppCompatActivity
 
 
     }
+
+    // Time picker for time button in the ** nav drawer **
+    public static class TimePickerFragmentNav extends DialogFragment
+            implements TimePickerDialog.OnTimeSetListener {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Create a new instance of TimePickerDialog and return it
+            // TODO: DIRECTLY GET USER ID FROM DATABASE
+            int endHour = 0;
+            int endMinute = 0;
+            if (currentUser != null) {
+                endHour = currentUser.getEndHour();
+                endMinute = currentUser.getEndMinute();
+            } else {
+                Log.d("debug", "current user is null from time picker in nav drawer");
+            }
+            return new TimePickerDialog(getActivity(), this, endHour, endMinute,
+                    DateFormat.is24HourFormat(getActivity()));
+        }
+
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            Calendar calendar = Calendar.getInstance();
+            int currentDay = calendar.get(Calendar.DAY_OF_YEAR);
+            int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+            int currentMinute = calendar.get(Calendar.MINUTE);
+            int currentTime = currentHour * 60 + currentMinute;
+            int endDay = currentUser.getEndDay();
+            // if user set free time less than current time
+            if (currentDay == endDay && currentTime >= hourOfDay * 60 + minute) {
+                Toast.makeText(getContext(), "You cannot set free time before current time", Toast.LENGTH_LONG).show();
+                DialogFragment timePickerFragment = new ProfileActivity.TimePickerFragmentNav();
+                timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
+            } else {
+                // update selected calendar object
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference dbRef = database.getReference();
+                dbRef.child("users").child(userId).child("endHour").setValue(hourOfDay);
+                dbRef.child("users").child(userId).child("endMinute").setValue(minute);
+                Log.d("debug", "user id is null");
+
+                // TODO: enable change date
+                // change text view for time button
+                Button timeButton = getActivity().findViewById(R.id.timeButton_nav);
+                Time selectedTime = new Time(hourOfDay, minute, 0);
+                timeButton.setText(MainActivity.timeFormat.format(selectedTime));
+            }
+        }
+    }
+
 
     @Override
     public void onBackPressed() {
