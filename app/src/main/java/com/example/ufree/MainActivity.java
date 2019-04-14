@@ -212,9 +212,7 @@ public class MainActivity extends AppCompatActivity
 
         // Set up date button
         Button dateButton = findViewById(R.id.dateButton_main);
-        Date selectedDate = new Date(selectedCalendar.get(Calendar.YEAR),
-                selectedCalendar.get(Calendar.MONTH), selectedCalendar.get(Calendar.DAY_OF_MONTH));
-        dateButton.setText(dateFormat.format(selectedDate));
+        dateButton.setText(dateFormat.format(selectedCalendar.getTime()));
         dateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -418,10 +416,7 @@ public class MainActivity extends AppCompatActivity
 
                 // change text of date button
                 Button dateButton = findViewById(R.id.dateButton_main);
-                Date selectedDate = new Date(selectedCalendar.get(Calendar.YEAR),
-                        selectedCalendar.get(Calendar.MONTH), selectedCalendar.get(Calendar.DAY_OF_MONTH));
-                dateButton.setText(dateFormat.format(selectedDate));
-
+                dateButton.setText(dateFormat.format(selectedCalendar.getTime()));
                 // change the dummy user to invoke onDataChange
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();
