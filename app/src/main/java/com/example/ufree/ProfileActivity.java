@@ -6,8 +6,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -40,6 +38,9 @@ import org.w3c.dom.Text;
 
 public class ProfileActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private FirebaseUser user;
+    private User currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,25 +86,26 @@ public class ProfileActivity extends AppCompatActivity
 
         Button deleteAccount = findViewById(R.id.deleteAccountButton_profile);
 
-        ImageView userNameButton = findViewById(R.id.editNameButton_profile);
-        ImageView phoneButton = findViewById(R.id.editPhoneButton_profile);
+        final ImageView userNameButton = findViewById(R.id.editNameButton_profile);
+        final ImageView phoneButton = findViewById(R.id.editPhoneButton_profile);
         ImageView passButton = findViewById(R.id.changePasswordButton_profile);
 
 
-//testing!!!!!
-        ///change this!!!!!!
-        //change!
-        final String userId = "tianyueufreecom";
-
+        // TODO: DIRECTLY GET USER ID FROM DATABASE
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        String temp = user.getEmail().replaceAll("@", "");
+        final String userId = temp.replaceAll("\\.", "");
 
         FirebaseDatabase.getInstance().getReference().child("users").child(userId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                String displayName = dataSnapshot.getValue(User.class).getFirstName() + " " + dataSnapshot.getValue(User.class).getLastName();
-                nameEditView.setText(displayName);
-                phoneEditView.setText(dataSnapshot.getValue(User.class).getPhone());
-                emailTV.setText(dataSnapshot.getValue(User.class).getEmail());
-
+                if (dataSnapshot.exists()) {
+                    currentUser = dataSnapshot.getValue(User.class);
+                    String displayName = currentUser.getFullName();
+                    nameEditView.setText(displayName);
+                    phoneEditView.setText(dataSnapshot.getValue(User.class).getPhone());
+                    emailTV.setText(dataSnapshot.getValue(User.class).getEmail());
+                }
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -118,6 +120,7 @@ public class ProfileActivity extends AppCompatActivity
             public void onClick(View v) {
                 if(!nameEditView.isEnabled()){
                     nameEditView.setEnabled(true);
+                    userNameButton.setImageResource(R.drawable.ic_check_orange_24dp);
                 }
                 else if(nameEditView.isEnabled()){
                     String value = nameEditView.getText().toString().trim();
@@ -129,10 +132,9 @@ public class ProfileActivity extends AppCompatActivity
                         Toast.makeText(getBaseContext(), "Please Include Only First And Last Name", Toast.LENGTH_LONG).show();
                     }
                     else {
-                        mDatabase.child("users").child(userId).child("firstName").setValue(splited[0]);
-                        mDatabase.child("users").child(userId).child("lastName").setValue(splited[1]);
-
+                        mDatabase.child("users").child(userId).child("fullName").setValue(value);
                         nameEditView.setEnabled(false);
+                        userNameButton.setImageResource(R.drawable.ic_edit_orange_24dp);
                     }
                 }
             }
@@ -150,6 +152,7 @@ public class ProfileActivity extends AppCompatActivity
             public void onClick(View v) {
                 if(!phoneEditView.isEnabled()){
                     phoneEditView.setEnabled(true);
+                    phoneButton.setImageResource(R.drawable.ic_check_orange_24dp);
                 }
                 else if(phoneEditView.isEnabled()){
                     String value = phoneEditView.getText().toString().trim();
@@ -159,11 +162,13 @@ public class ProfileActivity extends AppCompatActivity
                     else {
                         mDatabase.child("users").child(userId).child("phone").setValue(value);
                         phoneEditView.setEnabled(false);
+                        phoneButton.setImageResource(R.drawable.ic_edit_orange_24dp);
                     }
                 }
             }
         });
 
+        // TODO: Delete account from authentication, not just from database
         deleteAccount.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
@@ -174,7 +179,6 @@ public class ProfileActivity extends AppCompatActivity
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
                         mDatabase2.child(userId).removeValue();
 
                         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -183,13 +187,16 @@ public class ProfileActivity extends AppCompatActivity
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
-                                            Log.d(TAG, "User account deleted.");
+                                            Toast.makeText(ProfileActivity.this, "Delete success", Toast.LENGTH_LONG).show();
                                         }
                                     }
                                 });
+
+                        mDatabase.child("users").child(userId).removeValue();
                     //    Intent intent = new Intent(this, LogIn.class);
                      //   startActivity(intent);
                         dialog.dismiss();
+                        finish();
                     }
                 });
 

@@ -1,86 +1,83 @@
 package com.example.ufree;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.ufree.FreeFriendFragment.OnListFragmentInteractionListener;
-import com.example.ufree.FreeFriend.FreeFriendContent.FreeFriend;
-
+import java.sql.Time;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 
-/**
- * {@link RecyclerView.Adapter} that can display a {@link FreeFriend} and makes a call to the
- * specified {@link OnListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
- */
-public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFriendRecyclerViewAdapter.ViewHolder> {
+public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFriendRecyclerViewAdapter.FreeFriendHolder> {
 
-    private final List<FreeFriend> freeFriends;
-    private final OnListFragmentInteractionListener mListener;
+    private final HashMap<String, User> freeFriends;
+    private String[] userIds;
+    private Context context;
 
-    public FreeFriendRecyclerViewAdapter(List<FreeFriend> items, OnListFragmentInteractionListener listener) {
-        freeFriends = items;
-        mListener = listener;
+    public static class FreeFriendHolder extends RecyclerView.ViewHolder {
+        public ImageView profilePic;
+        public TextView freeFriendname;
+        public ImageView timeIcon;
+        public TextView tillTextView;
+        public TextView freeTimeTextView;
+
+        public FreeFriendHolder(View v) {
+            super(v);
+            profilePic = v.findViewById(R.id.profilePic_main);
+            freeFriendname = v.findViewById(R.id.freeFriendName_main);
+            timeIcon = v.findViewById(R.id.timeIcon_main);
+            tillTextView = v.findViewById(R.id.tillTextView_main);
+            freeTimeTextView = v.findViewById(R.id.freeTimeTextView_main);
+        }
     }
 
+
+    public FreeFriendRecyclerViewAdapter(HashMap<String, User> myFreeFriends, Context context) {
+        this.freeFriends = myFreeFriends;
+        this.userIds = myFreeFriends.keySet().toArray(new String[myFreeFriends.size()]);
+        this.context = context;
+    }
+
+
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public FreeFriendHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_freefriend, parent, false);
-        return new ViewHolder(view);
+        view.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(view.getContext(), SingleFriendEventsActivity.class);
+                // TODO: add intent to display correct single event information
+                context.startActivity(intent);
+            }
+        });
+        return new FreeFriendHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mItem = freeFriends.get(position);
-        holder.mIdView.setText(freeFriends.get(position).id);
-        holder.mContentView.setText(freeFriends.get(position).content);
-
-        holder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
-                }
-            }
-        });
+    public void onBindViewHolder(FreeFriendHolder holder, int position) {
+        // TODO: reduce memory usage here
+        userIds = freeFriends.keySet().toArray(new String[freeFriends.size()]);
+        User freeFriend = freeFriends.get(userIds[position]);
+        holder.freeFriendname.setText(freeFriend.getFullName());
+        Calendar calendar = java.util.Calendar.getInstance();
+        Time time = new Time(freeFriend.getEndHour(), freeFriend.getEndMinute(), 0);
+        DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
+        holder.freeTimeTextView.setText(timeFormat.format(time));
     }
 
     @Override
     public int getItemCount() {
         return freeFriends.size();
-    }
-
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public final View mView;
-        public final TextView mIdView;
-        public final TextView mContentView;
-        public FreeFriend mItem;
-
-        public ViewHolder(View view) {
-            super(view);
-            mView = view;
-            mIdView = (TextView) view.findViewById(R.id.item_number);
-            mContentView = (TextView) view.findViewById(R.id.content);
-        }
-
-        @Override
-        public String toString() {
-            return super.toString() + " '" + mContentView.getText() + "'";
-        }
-
-        // TODO: Figure out how to enable onClick in Recycler View
-        @Override
-        public void onClick(View view) {
-            Intent intent = new Intent(mView.getContext(), SingleFriendEventsActivity.class);
-            mView.getContext().startActivity(intent);
-        }
     }
 
 }

@@ -15,11 +15,10 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="8dp"
-        android:background="@drawable/roundcorner"
-        app:srcCompat="@drawable/ic_account_circle_black_24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_account_circle_black_24dp"
         tools:src="@tools:sample/avatars"
         tools:srcCompat="@tools:sample/avatars[1]" />
 
@@ -200,6 +199,7 @@
         android:ems="10"
         android:inputType="phone"
         android:text="(410) 000-0000"
+        android:textColor="@android:color/black"
         app:layout_constraintBottom_toTopOf="@+id/guideline2_profile"
         app:layout_constraintStart_toEndOf="@+id/phoneTextView_profile"
         app:layout_constraintTop_toTopOf="@+id/guideline1_profile"
@@ -208,21 +208,17 @@
 
     <TextView
         android:id="@+id/email_profile"
-        android:layout_width="213dp"
+        android:layout_width="300dp"
         android:layout_height="27dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:ems="10"
-        android:text="123@gmail.com"
         android:textColor="@android:color/black"
         android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline3_profile"
         app:layout_constraintStart_toEndOf="@+id/emailTextView_profile"
         app:layout_constraintTop_toTopOf="@+id/guideline2_profile" />
-
-
-
 
 
     <EditText
@@ -232,14 +228,14 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
+        android:background="@android:color/transparent"
+        android:inputType="text"
+        android:textColor="@android:color/black"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/changeNameTextView_profile"
-        tools:text="@tools:sample/full_names"
-        android:background="@android:color/transparent"
-        android:inputType="text"
-       />
+        tools:text="@tools:sample/full_names" />
 
 </android.support.constraint.ConstraintLayout>
