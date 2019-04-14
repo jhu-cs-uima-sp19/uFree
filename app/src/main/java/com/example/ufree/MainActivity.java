@@ -21,7 +21,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.ToggleButton;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -104,6 +107,7 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         currentUser = dataSnapshot.getValue(User.class);
+
                         Log.d("user", currentUser.toString());
                         // if user has been asked for availability, do NOT ask again
                         if (!checkedAvailability) {
@@ -121,6 +125,23 @@ public class MainActivity extends AppCompatActivity
                                 startActivity(intent);
                             }
                             checkedAvailability = true;
+                        }
+
+                        /* Set up navigation header */
+                        TextView nameTextView = findViewById(R.id.name_nav);
+                        TextView emailTextView = findViewById(R.id.email_nav);
+                        nameTextView.setText(currentUser.getFirstName() + " " + currentUser.getLastName());
+                        emailTextView.setText(currentUser.getEmail());
+                        Switch toggle = findViewById(R.id.toggle_nav);
+                        Button currentStatusButton = findViewById(R.id.currentStatusButton_nav);
+                        if (currentUser.getIsFree()) {
+                            toggle.setChecked(true);
+                            Time t = new Time(currentUser.getEndHour(), currentUser.getEndMinute(), 0);
+                            currentStatusButton.setText(timeFormat.format(t));
+                        } else {
+                            toggle.setChecked(false);
+                            Date d = new Date();
+                            currentStatusButton.setText(timeFormat.format(d));
                         }
                     }
 
