@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -25,7 +26,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -61,6 +65,7 @@ public class ProfileActivity extends AppCompatActivity
 
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         final DatabaseReference mDatabase = database.getInstance().getReference();
+        final DatabaseReference mDatabase2 = database.getReference("users");
         final FirebaseAuth mAuth = FirebaseAuth.getInstance();
         //final DatabaseReference nameDB = mDatabase.child().xxx;
         //final DatabaseReference phoneDB = mDatabase.child().xxx;
@@ -88,7 +93,7 @@ public class ProfileActivity extends AppCompatActivity
 //testing!!!!!
         ///change this!!!!!!
         //change!
-        final String userId = "minqitest1";
+        final String userId = "tianyueufreecom";
 
 
         FirebaseDatabase.getInstance().getReference().child("users").child(userId).addValueEventListener(new ValueEventListener() {
@@ -169,13 +174,21 @@ public class ProfileActivity extends AppCompatActivity
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                        SharedPreferences.Editor editor = pref.edit();
-                        editor.putBoolean("loggedIn", false);
-                        editor.commit();
-                        mDatabase.child("users").child(userId).removeValue();
-                        Intent intent = new Intent(this, LogIn.class);
-                        startActivity(intent);
+
+                        mDatabase2.child(userId).removeValue();
+
+                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                        user.delete()
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            Log.d(TAG, "User account deleted.");
+                                        }
+                                    }
+                                });
+                    //    Intent intent = new Intent(this, LogIn.class);
+                     //   startActivity(intent);
                         dialog.dismiss();
                     }
                 });
