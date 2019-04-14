@@ -86,6 +86,7 @@ public class ProfileActivity extends AppCompatActivity
 
         Button deleteAccount = findViewById(R.id.deleteAccountButton_profile);
 
+        final View passView = findViewById(R.id.ChangePassView);
         final ImageView userNameButton = findViewById(R.id.editNameButton_profile);
         final ImageView phoneButton = findViewById(R.id.editPhoneButton_profile);
         ImageView passButton = findViewById(R.id.changePasswordButton_profile);
@@ -140,13 +141,23 @@ public class ProfileActivity extends AppCompatActivity
             }
         });
 
-        passButton.setOnClickListener(new View.OnClickListener() {
+
+        passView.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 String email = emailTV.getText().toString();
                 mAuth.sendPasswordResetEmail(email);
                 Toast.makeText(getBaseContext(), "Reset Email Sent", Toast.LENGTH_LONG).show();
             }
         });
+
+
+       /* passButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                String email = emailTV.getText().toString();
+                mAuth.sendPasswordResetEmail(email);
+                Toast.makeText(getBaseContext(), "Reset Email Sent", Toast.LENGTH_LONG).show();
+            }
+        });*/
 
         phoneButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
