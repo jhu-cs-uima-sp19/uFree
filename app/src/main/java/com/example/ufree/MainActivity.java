@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -162,9 +163,6 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.whosFree_nav) {
             // SHOULD NOT DO ANYTHING
-            // Handle the camera action
-            /*Intent intent = new Intent(this, SignUp.class);
-            startActivity(intent);*/
         } else if (id == R.id.events_nav) {
             Intent intent = new Intent(this, EventsActivity.class);
             startActivity(intent);

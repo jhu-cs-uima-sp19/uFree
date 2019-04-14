@@ -6,9 +6,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -26,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -36,6 +36,9 @@ import org.w3c.dom.Text;
 
 public class ProfileActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private FirebaseUser user;
+    private User currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,14 +88,16 @@ public class ProfileActivity extends AppCompatActivity
         ImageView passButton = findViewById(R.id.changePasswordButton_profile);
 
 
-        // TODO: get current user id
-        final String userId = "michaelbloomberggmailcom";
-
+        // TODO: DIRECTLY GET USER ID FROM DATABASE
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        String temp = user.getEmail().replaceAll("@", "");
+        final String userId = temp.replaceAll("\\.", "");
 
         FirebaseDatabase.getInstance().getReference().child("users").child(userId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                String displayName = dataSnapshot.getValue(User.class).getFullName();
+                currentUser = dataSnapshot.getValue(User.class);
+                String displayName = currentUser.getFullName();
                 nameEditView.setText(displayName);
                 phoneEditView.setText(dataSnapshot.getValue(User.class).getPhone());
                 emailTV.setText(dataSnapshot.getValue(User.class).getEmail());
@@ -174,9 +179,10 @@ public class ProfileActivity extends AppCompatActivity
                         editor.putBoolean("loggedIn", false);
                         editor.commit();
                         mDatabase.child("users").child(userId).removeValue();
-                        //Intent intent = new Intent(this, LogIn.class);
-                        //startActivity(intent);
+                        Intent intent = new Intent(getApplicationContext(), LogIn.class);
+                        startActivity(intent);
                         dialog.dismiss();
+                        finish();
                     }
                 });
 
