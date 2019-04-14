@@ -4,6 +4,8 @@ import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
@@ -45,6 +47,7 @@ public class EventsActivity extends AppCompatActivity
 
     static User currentUser;
     private FirebaseUser user;
+    private FirebaseAuth.AuthStateListener authStateListener;
     static String userId;
 
     @Override
@@ -68,6 +71,10 @@ public class EventsActivity extends AppCompatActivity
 
         // TODO: DIRECTLY GET USER ID FROM DATABASE
         user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            startActivity(new Intent(this, LogIn.class));
+            finish();
+        }
         String temp = user.getEmail().replaceAll("@", "");
         userId = temp.replaceAll("\\.", "");
 
@@ -87,45 +94,42 @@ public class EventsActivity extends AppCompatActivity
         // set Events to be selected
         navigationView.getMenu().getItem(1).setChecked(true);
 
+        dbRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    currentUser = dataSnapshot.getValue(User.class);
+                    Log.d("test", "Getting user info\n" + currentUser.toString());
 
-        dbRef.child("users").child(userId).addValueEventListener(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            currentUser = dataSnapshot.getValue(User.class);
-                            Log.d("test", "Getting user info\n" + currentUser.toString());
-
-                            /* Display user info in navigation header */
-                            NavigationView navigationView = findViewById(R.id.nav_view);
-                            View navHeader = navigationView.getHeaderView(0);
-                            if (navHeader != null) {
-                                TextView nameTextView = navHeader.findViewById(R.id.name_nav);
-                                TextView emailTextView = navHeader.findViewById(R.id.email_nav);
-                                nameTextView.setText(currentUser.getFullName());
-                                emailTextView.setText(currentUser.getEmail());
-                                Switch toggle = findViewById(R.id.toggle_nav);
-                                Button currentStatusButton = findViewById(R.id.timeButton_nav);
-                                toggle.setChecked(currentUser.getIsFree());
-                                Time t = new Time(currentUser.getEndHour(), currentUser.getEndMinute(), 0);
-                                currentStatusButton.setText(MainActivity.timeFormat.format(t));
-                            } else {
-                                Log.d("debug", "Nav view is null");
-                                Log.d("debug", "Nav view: " + navigationView);
-                                Log.d("debug", "Nav header: " + navHeader);
-                            }
-                        } else {
-                            startActivity(new Intent(EventsActivity.this, LogIn.class));
-                            finish();
-                        }
+                    /* Display user info in navigation header */
+                    NavigationView navigationView = findViewById(R.id.nav_view);
+                    View navHeader = navigationView.getHeaderView(0);
+                    if (navHeader != null) {
+                        TextView nameTextView = navHeader.findViewById(R.id.name_nav);
+                        TextView emailTextView = navHeader.findViewById(R.id.email_nav);
+                        nameTextView.setText(currentUser.getFullName());
+                        emailTextView.setText(currentUser.getEmail());
+                        Switch toggle = findViewById(R.id.toggle_nav);
+                        Button currentStatusButton = findViewById(R.id.timeButton_nav);
+                        toggle.setChecked(currentUser.getIsFree());
+                        Time t = new Time(currentUser.getEndHour(), currentUser.getEndMinute(), 0);
+                        currentStatusButton.setText(MainActivity.timeFormat.format(t));
+                    } else {
+                        Log.d("debug", "Nav view is null");
+                        Log.d("debug", "Nav view: " + navigationView);
+                        Log.d("debug", "Nav header: " + navHeader);
                     }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.w("firebase", "loadUserFreeTime:onCancelled", databaseError.toException());
-                    }
+                } else {
+                    startActivity(new Intent(EventsActivity.this, LogIn.class));
+                    finish();
                 }
-        );
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.w("firebase", "loadUserFreeTime:onCancelled", databaseError.toException());
+            }
+        });
 
         // Set up listener for toggle and time button in nav drawer
         Switch toggleNav = findViewById(R.id.toggle_nav);
@@ -172,8 +176,15 @@ public class EventsActivity extends AppCompatActivity
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             // Create a new instance of TimePickerDialog and return it
-            int endHour = currentUser.getEndHour();
-            int endMinute = currentUser.getEndMinute();
+            // TODO: DIRECTLY GET USER ID FROM DATABASE
+            int endHour = 0;
+            int endMinute = 0;
+            if (currentUser != null) {
+                endHour = currentUser.getEndHour();
+                endMinute = currentUser.getEndMinute();
+            } else {
+                Log.d("debug", "current user is null from time picker in nav drawer");
+            }
             return new TimePickerDialog(getActivity(), this, endHour, endMinute,
                     DateFormat.is24HourFormat(getActivity()));
         }
@@ -184,18 +195,32 @@ public class EventsActivity extends AppCompatActivity
             int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
             int currentMinute = calendar.get(Calendar.MINUTE);
             int currentTime = currentHour * 60 + currentMinute;
-            int endDay = currentUser.getEndDay();
+            int endDay = currentDay;
+            // TODO: figure out why current user is null
+            if (currentUser != null) {
+                endDay = currentUser.getEndDay();
+            } else {
+                Log.d("debug", "current user is null from time picker in nav drawer");
+            }
             // if user set free time less than current time
             if (currentDay == endDay && currentTime >= hourOfDay * 60 + minute) {
                 Toast.makeText(getContext(), "You cannot set free time before current time", Toast.LENGTH_LONG).show();
-                DialogFragment timePickerFragment = new MainActivity.TimePickerFragmentNav();
+                DialogFragment timePickerFragment = new EventsActivity.TimePickerFragmentNav();
                 timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
             } else {
                 // update selected calendar object
+                // TODO: figure out why user id is null
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();
-                dbRef.child("users").child(userId).child("endHour").setValue(hourOfDay);
-                dbRef.child("users").child(userId).child("endMinute").setValue(minute);
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                String temp = user.getEmail().replaceAll("@", "");
+                userId = temp.replaceAll("\\.", "");
+                if (userId != null) {
+                    dbRef.child("users").child(userId).child("endHour").setValue(hourOfDay);
+                    dbRef.child("users").child(userId).child("endMinute").setValue(minute);
+                } else {
+                    Log.d("debug", "user id is null");
+                }
 
                 // TODO: enable change date
                 // change text view for time button
