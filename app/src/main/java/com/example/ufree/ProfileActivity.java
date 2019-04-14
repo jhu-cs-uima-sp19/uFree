@@ -96,12 +96,13 @@ public class ProfileActivity extends AppCompatActivity
         FirebaseDatabase.getInstance().getReference().child("users").child(userId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                currentUser = dataSnapshot.getValue(User.class);
-                String displayName = currentUser.getFullName();
-                nameEditView.setText(displayName);
-                phoneEditView.setText(dataSnapshot.getValue(User.class).getPhone());
-                emailTV.setText(dataSnapshot.getValue(User.class).getEmail());
-
+                if (dataSnapshot.exists()) {
+                    currentUser = dataSnapshot.getValue(User.class);
+                    String displayName = currentUser.getFullName();
+                    nameEditView.setText(displayName);
+                    phoneEditView.setText(dataSnapshot.getValue(User.class).getPhone());
+                    emailTV.setText(dataSnapshot.getValue(User.class).getEmail());
+                }
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -164,6 +165,7 @@ public class ProfileActivity extends AppCompatActivity
             }
         });
 
+        // TODO: Delete account from authentication, not just from database
         deleteAccount.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
