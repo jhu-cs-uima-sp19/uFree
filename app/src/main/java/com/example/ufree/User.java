@@ -2,8 +2,7 @@ package com.example.ufree;
 
 public class User {
     private String email;
-    private String firstName;
-    private String lastName;
+    private String fullName;
     private String phone;
     private int startDay;
     private int startHour;
@@ -19,8 +18,7 @@ public class User {
 
     public User(User that) {
         this.email = that.email;
-        this.firstName = that.firstName;
-        this.lastName = that.lastName;
+        this.fullName = that.fullName;
         this.phone = that.phone;
         this.startDay = that.startDay;
         this.startHour = that.startHour;
@@ -35,12 +33,8 @@ public class User {
         return this.email;
     }
 
-    public String getFirstName() {
-        return this.firstName;
-    }
-
-    public String getLastName() {
-        return this.lastName;
+    public String getFullName() {
+        return this.fullName;
     }
 
     public String getPhone() {
@@ -81,7 +75,7 @@ public class User {
 
 
     public String toString() {
-        return "User email: " + this.email + "\nname: " + this.firstName + " " + this.lastName
+        return "User email: " + this.email + "\nname: " + this.fullName
                 + "\nphone : " + this.phone + "\nisFree: " + this.isFree
                 + "\nstartTime: " + this.startDay + ", " + this.startHour + ", " + this.startMinute
                 + "\nendTime: " + this.endDay + ", " + this.endHour + ", " + this.endMinute + "\n";

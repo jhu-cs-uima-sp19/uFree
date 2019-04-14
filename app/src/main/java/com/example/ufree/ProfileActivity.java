@@ -85,16 +85,14 @@ public class ProfileActivity extends AppCompatActivity
         ImageView passButton = findViewById(R.id.changePasswordButton_profile);
 
 
-//testing!!!!!
-        ///change this!!!!!!
-        //change!
-        final String userId = "minqitest1";
+        // TODO: get current user id
+        final String userId = "michaelbloomberggmailcom";
 
 
         FirebaseDatabase.getInstance().getReference().child("users").child(userId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                String displayName = dataSnapshot.getValue(User.class).getFirstName() + " " + dataSnapshot.getValue(User.class).getLastName();
+                String displayName = dataSnapshot.getValue(User.class).getFullName();
                 nameEditView.setText(displayName);
                 phoneEditView.setText(dataSnapshot.getValue(User.class).getPhone());
                 emailTV.setText(dataSnapshot.getValue(User.class).getEmail());
