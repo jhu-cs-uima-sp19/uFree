@@ -116,22 +116,24 @@ public class EventsActivity extends AppCompatActivity
     //database queries in the callback for our database query
     private void callBack() {
         //System.out.println("events array of size: " + eventRefs.size());
-        for (long id : eventRefs.values()) {
-            //System.out.println(id);
-            //initialize the counter
-            if (id != -1 && id != -2) {
-                dbref.child("events").child(String.valueOf(id)).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        Event e = dataSnapshot.getValue(Event.class);
-                        events.add(e);
-                        recyclerAdapter.notifyDataSetChanged();
-                    }
+        if (eventRefs.size() > 0) {
+            for (long id : eventRefs.values()) {
+                //System.out.println(id);
+                //initialize the counter
+                if (id != -1 && id != -2) {
+                    dbref.child("events").child(String.valueOf(id)).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            Event e = dataSnapshot.getValue(Event.class);
+                            events.add(e);
+                            recyclerAdapter.notifyDataSetChanged();
+                        }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                    }
-                });
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                        }
+                    });
+                }
             }
         }
     }
@@ -197,7 +199,7 @@ public class EventsActivity extends AppCompatActivity
 
         if (selectedItemDescription != null && selectedItemLocation != null) {
             Long id = Long.valueOf(String.valueOf(selectedItemId.getText()));
-            Intent intent = new Intent(this, NewEventActivity.class);
+            Intent intent = new Intent(this, ViewEventActivity.class);
             Bundle extras = new Bundle();
             extras.putLong("id", id);
             intent.putExtras(extras);
