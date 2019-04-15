@@ -1,6 +1,7 @@
 package com.example.ufree;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.SystemClock;
@@ -42,11 +43,14 @@ public class EventsActivity extends AppCompatActivity
     private DatabaseReference dbref;
     private RecyclerView eventsRecyclerView;
     private ArrayList<Event> events = new ArrayList<>();
-    private Integer selectedEventID;
+    private HashMap<String, Long> eventRefs = new HashMap<>();
+    private String user;
+    CustomAdapter recyclerAdapter = new CustomAdapter(events);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         db = FirebaseDatabase.getInstance();
         dbref = db.getReference();
         setContentView(R.layout.activity_events);
@@ -78,42 +82,57 @@ public class EventsActivity extends AppCompatActivity
 
         //create recycler and set adapter
         eventsRecyclerView = findViewById(R.id.EventsRecyclerView);
-        final CustomAdapter recyclerAdapter = new CustomAdapter(events);
+
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         eventsRecyclerView.setLayoutManager(mLayoutManager);
         eventsRecyclerView.setItemAnimator(new DefaultItemAnimator());
         eventsRecyclerView.setAdapter(recyclerAdapter);
 
-        //initialize the counter
-        dbref.child("events").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                HashMap<String, HashMap<String, Object>> dbEvents =
-                        (HashMap<String, HashMap<String, Object>>) dataSnapshot.getValue();
+        SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
+        user = sp.getString("userID", "empty");
 
-                for (HashMap<String, Object> dbEvent : dbEvents.values()) {
-                    if (dbEvent != null) {
-                        System.out.println(dbEvent);
-                        Event e = new Event();
-                        e.description = (String) dbEvent.get("description");
-                        e.location = (String) dbEvent.get("location");
-                        e.time = (HashMap<String, Integer>) dbEvent.get("time");
-                        e.date = (HashMap<String, Integer>) dbEvent.get("date");
-                        e.id = Long.valueOf(String.valueOf(dbEvent.get("id")));
-                        events.add(e);
-                    }
+        if (user != "empty") {
 
+
+            dbref.child("users").child(user).child("events").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    System.out.println("found events!");
+                    eventRefs = (HashMap<String, Long>) dataSnapshot.getValue();
+                    callBack();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+        }
+
+    }
+
+    //This is horrendous style but it's what we're doing.
+    //let's stack asynchronous functions on top of asynchronous functions by placing
+    //database queries in the callback for our database query
+    private void callBack() {
+        System.out.println("events array of size: " + eventRefs.size());
+        for (long id : eventRefs.values()) {
+            System.out.println(id);
+            //initialize the counter
+            dbref.child("events").child(String.valueOf(id)).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    Event e = dataSnapshot.getValue(Event.class);
+                    events.add(e);
                     recyclerAdapter.notifyDataSetChanged();
                 }
 
-                HashMap<String, Object> m = (HashMap<String, Object>) dataSnapshot.getValue();
-                System.out.println(m.get("3"));
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-            }
-        });
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                }
+            });
+        }
     }
 
     @Override

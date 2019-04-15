@@ -6,14 +6,14 @@ import java.util.HashMap;
 
 /** Public class for handling Event database objects. */
 public class Event {
-    public ArrayList<Integer> participants;
+    public ArrayList<String> participants;
     public HashMap<String, Integer> date;
     public HashMap<String, Integer> time;
     public String location;
     public String description;
     public Long id;
 
-    public Event(ArrayList<Integer> invitees, HashMap<String, Integer> d,
+    public Event(ArrayList<String> invitees, HashMap<String, Integer> d,
                  HashMap<String, Integer> t, String l, String desc, Long i) {
         this.participants = invitees;
         this.date = d;
