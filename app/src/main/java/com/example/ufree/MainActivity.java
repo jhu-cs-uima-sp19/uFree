@@ -3,6 +3,7 @@ package com.example.ufree;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity
 
         // initialize Firebase
         FirebaseApp.initializeApp(MainActivity.this);
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
 
         user = FirebaseAuth.getInstance().getCurrentUser();
         authStateListener = new FirebaseAuth.AuthStateListener() {
@@ -95,6 +96,12 @@ public class MainActivity extends AppCompatActivity
         }
 
         // TODO: DIRECTLY GET USER ID FROM DATABASE
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            String temp = user.getEmail().replaceAll("@", "");
+            userId = temp.replaceAll("\\.", "");
+        }
+
         if (user == null) {
             Log.d("debug", "user is null, but the program should quit");
         }
@@ -118,7 +125,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         // TODO: suppress warning
-        fab.setVisibility(View.GONE);
+        //fab.setVisibility(View.GONE);
 
         /* Set up navigation drawer */
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -144,8 +151,15 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
+                            System.out.println(dataSnapshot.getValue());
                             currentUser = dataSnapshot.getValue(User.class);
-                            Log.d("test", "Getting user info\n" + currentUser.toString());
+                            SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
+                            SharedPreferences.Editor spEdit = sp.edit();
+                            spEdit.putString("userID", dataSnapshot.getKey());
+                            System.out.println(dataSnapshot.getKey());
+                            spEdit.apply();
+
+                            Log.d("test", "here" + currentUser.toString());
 
                             // if user has been asked for availability, do NOT ask again
                             if (!checkedAvailability) {
@@ -230,7 +244,7 @@ public class MainActivity extends AppCompatActivity
 
         /* Set up Recycler View */
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.freeFriendsRecyclerView);
-        recyclerView.setHasFixedSize(true);
+        recyclerView.setHasFixedSize(false);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 

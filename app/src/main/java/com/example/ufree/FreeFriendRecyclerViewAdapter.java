@@ -2,12 +2,15 @@ package com.example.ufree;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.sql.Time;
 import java.text.DateFormat;
@@ -29,6 +32,7 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
         public ImageView timeIcon;
         public TextView tillTextView;
         public TextView freeTimeTextView;
+        public TextView userIDTextView;
 
         public FreeFriendHolder(View v) {
             super(v);
@@ -37,6 +41,7 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
             timeIcon = v.findViewById(R.id.timeIcon_main);
             tillTextView = v.findViewById(R.id.tillTextView_main);
             freeTimeTextView = v.findViewById(R.id.freeTimeTextView_main);
+            userIDTextView = v.findViewById(R.id.freeFriendIDTextView);
         }
     }
 
@@ -49,14 +54,17 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
 
 
     @Override
-    public FreeFriendHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public FreeFriendHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_freefriend, parent, false);
         view.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), SingleFriendEventsActivity.class);
-                // TODO: add intent to display correct single event information
+                Bundle extras = new Bundle();
+                TextView ids = view.findViewById(R.id.freeFriendIDTextView);
+                extras.putString("friendEmail", String.valueOf(ids.getText()));
+                intent.putExtras(extras);
                 context.startActivity(intent);
             }
         });
@@ -69,6 +77,7 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
         userIds = freeFriends.keySet().toArray(new String[freeFriends.size()]);
         User freeFriend = freeFriends.get(userIds[position]);
         holder.freeFriendname.setText(freeFriend.getFullName());
+        holder.userIDTextView.setText(freeFriend.getEmail());
         Calendar calendar = java.util.Calendar.getInstance();
         Time time = new Time(freeFriend.getEndHour(), freeFriend.getEndMinute(), 0);
         DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
