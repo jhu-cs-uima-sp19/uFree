@@ -92,22 +92,21 @@ public class EventsActivity extends AppCompatActivity
         user = sp.getString("userID", "empty");
 
         if (user != "empty") {
+            if (dbref.child("users").child(user).child("events").getRoot() != null) {
+                dbref.child("users").child(user).child("events").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        System.out.println("found events!");
+                        eventRefs = (HashMap<String, Long>) dataSnapshot.getValue();
+                        callBack();
+                    }
 
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            dbref.child("users").child(user).child("events").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    System.out.println("found events!");
-                    eventRefs = (HashMap<String, Long>) dataSnapshot.getValue();
-                    callBack();
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-
+                    }
+                });
+            }
         }
 
     }
@@ -116,22 +115,24 @@ public class EventsActivity extends AppCompatActivity
     //let's stack asynchronous functions on top of asynchronous functions by placing
     //database queries in the callback for our database query
     private void callBack() {
-        System.out.println("events array of size: " + eventRefs.size());
+        //System.out.println("events array of size: " + eventRefs.size());
         for (long id : eventRefs.values()) {
-            System.out.println(id);
+            //System.out.println(id);
             //initialize the counter
-            dbref.child("events").child(String.valueOf(id)).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    Event e = dataSnapshot.getValue(Event.class);
-                    events.add(e);
-                    recyclerAdapter.notifyDataSetChanged();
-                }
+            if (id != -1 && id != -2) {
+                dbref.child("events").child(String.valueOf(id)).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        Event e = dataSnapshot.getValue(Event.class);
+                        events.add(e);
+                        recyclerAdapter.notifyDataSetChanged();
+                    }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                }
-            });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                    }
+                });
+            }
         }
     }
 
@@ -177,9 +178,10 @@ public class EventsActivity extends AppCompatActivity
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         } else if (id == R.id.friends_nav) {
-
+            //...
         } else if (id == R.id.profile_nav) {
-
+            Intent intent = new Intent(this, ProfileActivity.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

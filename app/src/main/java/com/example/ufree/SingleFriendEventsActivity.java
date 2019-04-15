@@ -103,22 +103,23 @@ public class SingleFriendEventsActivity extends AppCompatActivity {
     private void callBack() {
         System.out.println("events array of size: " + eventRefs.size());
         for (long id : eventRefs.values()) {
-            System.out.println(id);
-            //initialize the counter
-            dbref.child("events").child(String.valueOf(id)).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    Event e = dataSnapshot.getValue(Event.class);
-                    if (e.participants.contains(friendID)) {
-                        events.add(e);
-                        recyclerAdapter.notifyDataSetChanged();
+            //find commonality
+            if (id != -1 && id != -2) {
+                dbref.child("events").child(String.valueOf(id)).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        Event e = dataSnapshot.getValue(Event.class);
+                        if (e.participants.contains(friendID)) {
+                            events.add(e);
+                            recyclerAdapter.notifyDataSetChanged();
+                        }
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                }
-            });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                    }
+                });
+            }
         }
     }
 
