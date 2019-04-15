@@ -198,8 +198,10 @@ public class MainActivity extends AppCompatActivity
                                 Log.d("debug", "Nav header: " + navHeader);
                             }
                         } else {
+                            Log.d("debug", "data snapshot is null");
                             startActivity(new Intent(MainActivity.this, LogIn.class));
                             finish();
+                            return;
                         }
                     }
 
@@ -324,6 +326,7 @@ public class MainActivity extends AppCompatActivity
                 FirebaseAuth.getInstance().signOut();
                 startActivity(new Intent(MainActivity.this, LogIn.class));
                 finish();
+                return;
             }
         });
         logoutTextView.setOnClickListener(new View.OnClickListener() {
@@ -332,6 +335,7 @@ public class MainActivity extends AppCompatActivity
                 FirebaseAuth.getInstance().signOut();
                 startActivity(new Intent(MainActivity.this, LogIn.class));
                 finish();
+                return;
             }
         });
 
