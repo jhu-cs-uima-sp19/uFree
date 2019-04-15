@@ -1,9 +1,13 @@
 package com.example.ufree;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class User {
     private String email;
     private String fullName;
     private String phone;
+    public HashMap<String, Integer> events;
     private int startDay;
     private int startHour;
     private int startMinute;
@@ -17,7 +21,7 @@ public class User {
     }
 
     // Constructor for sign up
-    public User(String n, String p, String e) {
+    public User(String n, String p, String e, HashMap<String, Integer> eventsList) {
         this.fullName = n;
         this.phone = p;
         this.email = e;
@@ -28,6 +32,7 @@ public class User {
         this.endDay = 0;
         this.endHour = 0;
         this.endMinute = 0;
+        this.events = eventsList;
     }
 
     public User(User that) {
@@ -41,6 +46,7 @@ public class User {
         this.endHour = that.endHour;
         this.endMinute = that.endMinute;
         this.isFree = that.isFree;
+        this.events = that.events;
     }
 
     public String getEmail() {

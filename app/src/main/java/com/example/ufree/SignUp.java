@@ -38,6 +38,7 @@ import com.google.firebase.database.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -354,12 +355,20 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
                                 if (!task.isSuccessful()) {
                                     Toast.makeText(SignUp.this, "Sign Up Failed" + task.getException(), Toast.LENGTH_LONG).show();
                                 } else {
-                                    dbRef.child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(fullName, phoneNumber, email));
+                                    HashMap<String, Integer> eventIds = new HashMap<>();
+                                    eventIds.put("-1", -1);
+                                    eventIds.put("-2", -2);
+                                    dbRef.child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(fullName, phoneNumber, email, eventIds));
                                     startActivity(new Intent(SignUp.this, MainActivity.class));
                                     finish();
                                 }
                             }
                         });
+
+                SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
+                SharedPreferences.Editor spEdit = sp.edit();
+                spEdit.putString("userID", email);
+                spEdit.apply();
             } else {
                 mPasswordView.requestFocus();
             }
