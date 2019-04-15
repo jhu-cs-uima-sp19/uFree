@@ -32,6 +32,10 @@ uFree is an app to find friends who are available at the same times you are when
   - Implement time machine at the bottom. User can select time, and the list of available freinds change correspondingly.
 
 - Events
+  - Create Event Activity.
+  - Add recycler view to see a list of events.
+  - Can click on single item to see event detail.
+  - Add floating button to create a new event.
 
 - Profile
   - Implement function of changing name, phone number, password, and deleting account.
