@@ -13,13 +13,19 @@ import com.google.firebase.database.ValueEventListener;
 
 import org.w3c.dom.Text;
 
-import java.util.HashMap;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 public class ViewEventActivity extends AppCompatActivity {
 
     private FirebaseDatabase db;
     private DatabaseReference dbref;
     private long eventIdValue;
+    private String participants;
+   // private TextView dateView = findViewById(R.id.dateTextView);
+    private TextView timeView;
+    private TextView partsView;
+    private TextView dateView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,9 +34,10 @@ public class ViewEventActivity extends AppCompatActivity {
 
         final TextView locationView = findViewById(R.id.locationTextView);
         final TextView desciptionView = findViewById(R.id.descriptionTextView);
-        TextView dateView = findViewById(R.id.dateTextView);
-        TextView timeView = findViewById(R.id.timeTextView);
-        TextView friendsView = findViewById(R.id.partTextView);
+        partsView = findViewById(R.id.partTextView);
+        timeView = findViewById(R.id.timeTextView);
+        dateView = findViewById(R.id.dateTextView);
+
         //initialize our database objects
         db = FirebaseDatabase.getInstance();
         dbref = db.getReference();
@@ -49,6 +56,11 @@ public class ViewEventActivity extends AppCompatActivity {
                         if (e != null) {
                             locationView.setText(e.location);
                             desciptionView.setText(e.description);
+                            String time = e.time.get("hour") + ":" + e.time.get("minute");
+                            timeView.setText(time);
+                            String date = e.date.get("month") + "/" + e.date.get("day");
+                            getParticipants(e);
+                            dateView.setText(date);
                         }
                     }
 
@@ -57,6 +69,23 @@ public class ViewEventActivity extends AppCompatActivity {
                     }
                 });
             }
+        }
+    }
+
+    private void getParticipants(Event e) {
+        for (String id : e.participants) {
+            dbref.child("users").child(id).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    User u = dataSnapshot.getValue(User.class);
+                    String participantsText = String.valueOf(partsView.getText());
+                    participantsText += u.getFullName() + "\n";
+                    partsView.setText(participantsText);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {}
+            });
         }
     }
 }

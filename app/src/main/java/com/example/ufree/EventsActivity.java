@@ -144,28 +144,24 @@ public class EventsActivity extends AppCompatActivity
     //let's stack asynchronous functions on top of asynchronous functions by placing
     //database queries in the callback for our database query
     private void callBack() {
-        //System.out.println("events array of size: " + eventRefs.size());
-        if (eventRefs.size() > 0) {
-            for (long id : eventRefs.values()) {
-                //System.out.println(id);
-                //initialize the counter
-                if (id != -1 && id != -2) {
-                    dbref.child("events").child(String.valueOf(id)).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            Event e = dataSnapshot.getValue(Event.class);
-                            events.add(e);
-                            recyclerAdapter.notifyDataSetChanged();
-                        }
+        for (long id : eventRefs.values()) {
+            //System.out.println(id);
+            //initialize the counter
+            if (id != -1 && id != -2) {
+                dbref.child("events").child(String.valueOf(id)).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        Event e = dataSnapshot.getValue(Event.class);
+                        events.add(e);
+                        recyclerAdapter.notifyDataSetChanged();
+                    }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-                        }
-                    });
-                }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                    }
+                });
             }
         }
-
     }
 
 

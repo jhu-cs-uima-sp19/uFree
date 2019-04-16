@@ -264,10 +264,4 @@ public class NewEventActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void removeEventAction(View v) {
-        dbref.child("events").child(String.valueOf(eventIdValue)).removeValue();
-        //return to the events page
-        Intent intent = new Intent(this, EventsActivity.class);
-        startActivity(intent);
-    }
 }
