@@ -71,6 +71,7 @@ public class EventsActivity extends AppCompatActivity
     private HashMap<String, Long> eventRefs = new HashMap<>();
     private String user;
     CustomAdapter recyclerAdapter = new CustomAdapter(events);
+    private static User currentUser;
 
 
     @Override
@@ -138,6 +139,79 @@ public class EventsActivity extends AppCompatActivity
             }
         }
 
+        /* Set up navigation header */
+        dbref.child("users").child(user).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    currentUser = dataSnapshot.getValue(User.class);
+
+                    /* Display user info in navigation header */
+                    NavigationView navigationView = findViewById(R.id.nav_view);
+                    View navHeader = navigationView.getHeaderView(0);
+                    if (navHeader != null) {
+                        TextView nameTextView = navHeader.findViewById(R.id.name_nav);
+                        TextView emailTextView = navHeader.findViewById(R.id.email_nav);
+                        nameTextView.setText(currentUser.getFullName());
+                        emailTextView.setText(currentUser.getEmail());
+                        Switch toggle = findViewById(R.id.toggle_nav);
+                        Button currentStatusButton = findViewById(R.id.timeButton_nav);
+                        toggle.setChecked(currentUser.getIsFree());
+                        Time t = new Time(currentUser.getEndHour(), currentUser.getEndMinute(), 0);
+                        currentStatusButton.setText(MainActivity.timeFormat.format(t));
+                    } else {
+                        Log.d("debug", "Nav view is null");
+                        Log.d("debug", "Nav view: " + navigationView);
+                        Log.d("debug", "Nav header: " + navHeader);
+                    }
+                } else {
+                    // TODO: what should we do if data snap shot does not exist?
+                    startActivity(new Intent(EventsActivity.this, LogIn.class));
+                    finish();
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        // Set up listener for toggle and time button in nav drawer
+        Switch toggleNav = findViewById(R.id.toggle_nav);
+        Button currentStatusButton = findViewById(R.id.timeButton_nav);
+        toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                dbref.child("users").child(user).child("isFree").setValue(isChecked);
+            }
+        });
+        currentStatusButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogFragment timePickerFragment = new EventsActivity.TimePickerFragmentNav();
+                timePickerFragment.show(getSupportFragmentManager(), "timePickerNav");
+            }
+        });
+
+        // Set up listener for log out in nav drawer
+        ImageView exitImageView = findViewById(R.id.exitImageView_nav);
+        TextView logoutTextView = findViewById(R.id.logout_nav);
+        exitImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(EventsActivity.this, LogIn.class));
+                finish();
+            }
+        });
+        logoutTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(EventsActivity.this, LogIn.class));
+                finish();
+            }
+        });
+
     }
 
     //This is horrendous style but it's what we're doing.
@@ -163,6 +237,58 @@ public class EventsActivity extends AppCompatActivity
             }
         }
     }
+
+    // Time picker for time button in the ** nav drawer **
+    public static class TimePickerFragmentNav extends DialogFragment
+            implements TimePickerDialog.OnTimeSetListener {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Create a new instance of TimePickerDialog and return it
+            // TODO: DIRECTLY GET USER ID FROM DATABASE
+            int endHour = 0;
+            int endMinute = 0;
+            if (currentUser != null) {
+                endHour = currentUser.getEndHour();
+                endMinute = currentUser.getEndMinute();
+            } else {
+                Log.d("debug", "current user is null from time picker in nav drawer");
+            }
+            return new TimePickerDialog(getActivity(), this, endHour, endMinute,
+                    DateFormat.is24HourFormat(getActivity()));
+        }
+
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            Calendar calendar = Calendar.getInstance();
+            int currentDay = calendar.get(Calendar.DAY_OF_YEAR);
+            int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+            int currentMinute = calendar.get(Calendar.MINUTE);
+            int currentTime = currentHour * 60 + currentMinute;
+            int endDay = currentUser.getEndDay();
+            // if user set free time less than current time
+            if (currentDay == endDay && currentTime >= hourOfDay * 60 + minute) {
+                Toast.makeText(getContext(), "You cannot set free time before current time", Toast.LENGTH_LONG).show();
+                DialogFragment timePickerFragment = new EventsActivity.TimePickerFragmentNav();
+                timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
+            } else {
+                // update selected calendar object
+                SharedPreferences sp = getActivity().getSharedPreferences("User", MODE_PRIVATE);
+                String user = sp.getString("userID", "empty");
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference dbRef = database.getReference();
+                dbRef.child("users").child(user).child("endHour").setValue(hourOfDay);
+                dbRef.child("users").child(user).child("endMinute").setValue(minute);
+                Log.d("debug", "user id is null");
+
+                // TODO: enable change date
+                // change text view for time button
+                Button timeButton = getActivity().findViewById(R.id.timeButton_nav);
+                Time selectedTime = new Time(hourOfDay, minute, 0);
+                timeButton.setText(MainActivity.timeFormat.format(selectedTime));
+            }
+        }
+    }
+
 
 
     @Override
