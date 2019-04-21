@@ -190,7 +190,13 @@ public class NewEventActivity extends AppCompatActivity {
 
         //add the event to the database then increment the counter
         if (invitees.size() > 0) {
-            Event e = new Event(new ArrayList<String>(), invitees, date, time, location,
+            SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
+            String user = sp.getString("userID", "none");
+
+            ArrayList<String> participants = new ArrayList<>();
+            participants.add(user);
+
+            Event e = new Event(participants, invitees, date, time, location,
                     description, eventIdValue);
 
             dbref.child("events").child(String.valueOf(eventIdValue)).setValue(e);
@@ -201,11 +207,8 @@ public class NewEventActivity extends AppCompatActivity {
                 dbref.child("counters").child("events").setValue(counter);
             }
 
-            SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
-            String user = sp.getString("userID", "none");
-
             for (String u : invitees) {
-                dbref.child("users").child(u).child("events").child(String.valueOf(eventIdValue)).setValue(eventIdValue);
+                dbref.child("users").child(u).child("invites").child(String.valueOf(eventIdValue)).setValue(eventIdValue);
             }
 
             if (!user.equals("none")) {

@@ -1,8 +1,11 @@
 package com.example.ufree;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
@@ -15,6 +18,7 @@ import org.w3c.dom.Text;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ViewEventActivity extends AppCompatActivity {
 
@@ -22,15 +26,18 @@ public class ViewEventActivity extends AppCompatActivity {
     private DatabaseReference dbref;
     private long eventIdValue;
     private String participants;
-   // private TextView dateView = findViewById(R.id.dateTextView);
     private TextView timeView;
     private TextView partsView;
     private TextView dateView;
+    private String user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_event);
+
+        SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
+        user = sp.getString("userID", "empty");
 
         final TextView locationView = findViewById(R.id.locationTextView);
         final TextView desciptionView = findViewById(R.id.descriptionTextView);
@@ -87,5 +94,24 @@ public class ViewEventActivity extends AppCompatActivity {
                 public void onCancelled(@NonNull DatabaseError databaseError) {}
             });
         }
+    }
+
+    public void acceptInviteAction(View v) {
+        dbref.child("users").child(user).child("events").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                HashMap<String, Long> events = (HashMap<String, Long>) dataSnapshot.getValue();
+                events.put(String.valueOf(eventIdValue), eventIdValue);
+                dbref.child("users").child(user).child("events").setValue(events);
+                dbref.child("users").child(user).child("invites").child(String.valueOf(eventIdValue)).removeValue();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
+
+        Intent intent = new Intent(this, EventsActivity.class);
+        startActivity(intent);
     }
 }
