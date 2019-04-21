@@ -355,9 +355,11 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
                                 if (!task.isSuccessful()) {
                                     Toast.makeText(SignUp.this, "Sign Up Failed" + task.getException(), Toast.LENGTH_LONG).show();
                                 } else {
-                                    HashMap<String, Integer> eventIds = new HashMap<>();
-                                    eventIds.put("-1", -1);
-                                    eventIds.put("-2", -2);
+                                    HashMap<String, Long> eventIds = new HashMap<>();
+                                    long one = -1;
+                                    long two = -2;
+                                    eventIds.put("-1", one);
+                                    eventIds.put("-2", two);
                                     dbRef.child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(fullName, phoneNumber, email, eventIds));
                                     startActivity(new Intent(SignUp.this, MainActivity.class));
                                     finish();

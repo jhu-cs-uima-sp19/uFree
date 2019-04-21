@@ -19,6 +19,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.text.format.DateFormat;
+import android.util.EventLog;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -67,10 +68,14 @@ public class EventsActivity extends AppCompatActivity
     private FirebaseDatabase db;
     private DatabaseReference dbref;
     private RecyclerView eventsRecyclerView;
+    private RecyclerView invitesRecyclerView;
     private ArrayList<Event> events = new ArrayList<>();
+    private ArrayList<Event> invites = new ArrayList<>();
     private HashMap<String, Long> eventRefs = new HashMap<>();
+    private HashMap<String, Long> inviteRefs = new HashMap<>();
     private String user;
     CustomAdapter recyclerAdapter = new CustomAdapter(events);
+    CustomAdapter invitesRecyclerAdapter = new CustomAdapter(invites);
     private static User currentUser;
 
 
@@ -118,17 +123,25 @@ public class EventsActivity extends AppCompatActivity
         eventsRecyclerView.setItemAnimator(new DefaultItemAnimator());
         eventsRecyclerView.setAdapter(recyclerAdapter);
 
+        invitesRecyclerView = findViewById(R.id.InvitesRecyclerView);
+        RecyclerView.LayoutManager iLayoutManager = new LinearLayoutManager(getApplicationContext());
+        invitesRecyclerView.setLayoutManager(iLayoutManager);
+        invitesRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        invitesRecyclerView.setAdapter(invitesRecyclerAdapter);
+
         SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
         user = sp.getString("userID", "empty");
 
         if (user != "empty") {
             if (dbref.child("users").child(user).child("events").getRoot() != null) {
-                dbref.child("users").child(user).child("events").addListenerForSingleValueEvent(new ValueEventListener() {
+                dbref.child("users").child(user).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        System.out.println("found events!");
-                        eventRefs = (HashMap<String, Long>) dataSnapshot.getValue();
+                        User u = dataSnapshot.getValue(User.class);
+                        eventRefs = u.events;
+                        inviteRefs = u.invites;
                         callBack();
+                        invitesCallback();
                     }
 
                     @Override
@@ -233,6 +246,24 @@ public class EventsActivity extends AppCompatActivity
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
                     }
+                });
+            }
+        }
+    }
+
+    private void invitesCallback() {
+        for (long id : inviteRefs.values()) {
+            if (id != -1 && id != -2) {
+                dbref.child("events").child(String.valueOf(id)).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        Event e = dataSnapshot.getValue(Event.class);
+                        invites.add(e);
+                        invitesRecyclerAdapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {}
                 });
             }
         }

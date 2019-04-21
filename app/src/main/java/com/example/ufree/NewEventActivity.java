@@ -190,7 +190,8 @@ public class NewEventActivity extends AppCompatActivity {
 
         //add the event to the database then increment the counter
         if (invitees.size() > 0) {
-            Event e = new Event(invitees, date, time, location, description, eventIdValue);
+            Event e = new Event(new ArrayList<String>(), invitees, date, time, location,
+                    description, eventIdValue);
 
             dbref.child("events").child(String.valueOf(eventIdValue)).setValue(e);
 
@@ -238,12 +239,12 @@ public class NewEventActivity extends AppCompatActivity {
 
         if (dbref.child("users").child(userName) != null) {
             invitees.add(userName);
-            String invitees = String.valueOf(inviteesTextView.getText());
+            String inviteesStringVal = String.valueOf(inviteesTextView.getText());
             if (invitees.equals("attendees appear here")) {
                 inviteesTextView.setText(userName);
             } else {
-                invitees = invitees + ", " + email;
-                inviteesTextView.setText(invitees);
+                inviteesStringVal = inviteesStringVal + ", " + email;
+                inviteesTextView.setText(inviteesStringVal);
             }
         }
     }

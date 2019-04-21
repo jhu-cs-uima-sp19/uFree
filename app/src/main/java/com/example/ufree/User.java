@@ -7,7 +7,8 @@ public class User {
     private String email;
     private String fullName;
     private String phone;
-    public HashMap<String, Integer> events;
+    public HashMap<String, Long> events;
+    public HashMap<String, Long> invites;
     private int startDay;
     private int startHour;
     private int startMinute;
@@ -21,7 +22,7 @@ public class User {
     }
 
     // Constructor for sign up
-    public User(String n, String p, String e, HashMap<String, Integer> eventsList) {
+    public User(String n, String p, String e, HashMap<String, Long> eventsList) {
         this.fullName = n;
         this.phone = p;
         this.email = e;
