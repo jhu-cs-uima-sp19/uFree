@@ -15,10 +15,14 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ViewEventActivity"></activity>
+        <activity
+            android:name=".Friends"
+            android:label="@string/title_activity_friends"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".ViewEventActivity" />
         <activity
             android:name=".CalenderPickerActivity"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".WelcomeActivity"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -44,7 +48,7 @@
             android:name=".LogIn"
             android:label="@string/title_activity_log_in"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden"></activity>
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".SignUp"
             android:label="@string/title_activity_sign_up"

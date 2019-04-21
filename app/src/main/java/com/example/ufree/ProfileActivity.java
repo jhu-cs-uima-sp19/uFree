@@ -377,7 +377,8 @@ public class ProfileActivity extends AppCompatActivity
             Intent intent = new Intent(this, EventsActivity.class);
             startActivity(intent);
         } else if (id == R.id.friends_nav) {
-
+            Intent intent = new Intent(this, Friends.class);
+            startActivity(intent);
         } else if (id == R.id.calendar_nav) {
 
         } else if (id == R.id.profile_nav) {
