@@ -1,7 +1,9 @@
 package com.example.ufree;
 
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -23,6 +25,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -53,60 +56,30 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     static User currentUser;
-    private FirebaseAuth.AuthStateListener authStateListener;
-    private FirebaseUser user;
-    static String userId;
-    boolean checkedAvailability;
+    String userId;
+    static boolean checkedAvailability;
     HashMap<String, User> freeFriends = new HashMap<String, User>();
     static Calendar selectedCalendar;
     static boolean dummyUserIsFree = true;
 
     static final java.text.DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
     static final java.text.DateFormat dateFormat = new SimpleDateFormat("MMM dd, EEE");
-    static final int CALENDAR_PICKER_REQUEST = 1;
-    static final int RESULT_CANCEL = 0;
-    static final int RESULT_CONFIRM = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // initialize Firebase
-        FirebaseApp.initializeApp(MainActivity.this);
-        final FirebaseDatabase database = FirebaseDatabase.getInstance();
-
-        user = FirebaseAuth.getInstance().getCurrentUser();
-        authStateListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user == null) {
-                    startActivity(new Intent(MainActivity.this, LogIn.class));
-                    finish();
-                    return;
-                }
-            }
-        };
-
-        if (user == null) {
+        // get user id from Shared Preferences
+        SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
+        userId = sp.getString("userID", "dummy");
+        // if there is no user id in Shared Preferences, go back to log in
+        if (userId.equals("dummy")) {
+            Log.d("debug", "userId in Shared Preferences is null");
             startActivity(new Intent(MainActivity.this, LogIn.class));
             finish();
             return;
         }
-
-        // TODO: DIRECTLY GET USER ID FROM DATABASE
-        user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            String temp = user.getEmail().replaceAll("@", "");
-            userId = temp.replaceAll("\\.", "");
-        }
-
-        if (user == null) {
-            Log.d("debug", "user is null, but the program should quit");
-        }
-        String temp = user.getEmail().replaceAll("@", "");
-        userId = temp.replaceAll("\\.", "");
 
         /* Set up App bar */
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -114,6 +87,7 @@ public class MainActivity extends AppCompatActivity
         // set up title of app bar
         getSupportActionBar().setTitle("Who's Free");
 
+        // TODO: Set up correct listener for fab
         /* Set up floating add button */
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_main);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -139,8 +113,10 @@ public class MainActivity extends AppCompatActivity
         // set Who's Free to be selected
         navigationView.getMenu().getItem(0).setChecked(true);
 
+
         /* Check if need to ask user availability */
         // initialize firebase
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
         final DatabaseReference dbRef = database.getReference();
 
         // Record if user has been asked for availability
@@ -151,28 +127,16 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
-                            System.out.println(dataSnapshot.getValue());
                             currentUser = dataSnapshot.getValue(User.class);
-                            SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
-                            SharedPreferences.Editor spEdit = sp.edit();
-                            spEdit.putString("userID", dataSnapshot.getKey());
-                            System.out.println(dataSnapshot.getKey());
-                            spEdit.apply();
-
-                            Log.d("test", "here" + currentUser.toString());
 
                             // if user has been asked for availability, do NOT ask again
                             if (!checkedAvailability) {
-                                Calendar calendar = Calendar.getInstance();
-                                int currentDay = calendar.get(Calendar.DAY_OF_YEAR);
-                                int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
-                                int currentMinute = calendar.get(Calendar.MINUTE);
-                                int currentTime = currentHour * 60 + currentMinute;
+                                long now = Calendar.getInstance().getTimeInMillis();
+
                                 // if user is free and end time does not exceed current time, do NOT ask for availability
                                 // else show welcome screen
                                 if (!(currentUser.getIsFree()
-                                        && ((currentUser.getEndDay() > currentDay)
-                                        || (currentUser.getEndDay() == currentDay && currentUser.getEndTime() >= currentTime)))) {
+                                        && currentUser.getEndTime() >= now)) {
                                     Intent intent = new Intent(getApplicationContext(), WelcomeActivity.class);
                                     startActivity(intent);
                                 }
@@ -182,21 +146,17 @@ public class MainActivity extends AppCompatActivity
                             /* Display user info in navigation header */
                             NavigationView navigationView = findViewById(R.id.nav_view);
                             View navHeader = navigationView.getHeaderView(0);
-                            if (navHeader != null) {
-                                TextView nameTextView = navHeader.findViewById(R.id.name_nav);
-                                TextView emailTextView = navHeader.findViewById(R.id.email_nav);
-                                nameTextView.setText(currentUser.getFullName());
-                                emailTextView.setText(currentUser.getEmail());
-                                Switch toggle = findViewById(R.id.toggle_nav);
-                                Button currentStatusButton = findViewById(R.id.timeButton_nav);
-                                toggle.setChecked(currentUser.getIsFree());
-                                Time t = new Time(currentUser.getEndHour(), currentUser.getEndMinute(), 0);
-                                currentStatusButton.setText(timeFormat.format(t));
-                            } else {
-                                Log.d("debug", "Nav view is null");
-                                Log.d("debug", "Nav view: " + navigationView);
-                                Log.d("debug", "Nav header: " + navHeader);
-                            }
+                            TextView nameTextView = navHeader.findViewById(R.id.name_nav);
+                            TextView emailTextView = navHeader.findViewById(R.id.email_nav);
+                            nameTextView.setText(currentUser.getFullName());
+                            emailTextView.setText(currentUser.getEmail());
+                            Switch toggle = findViewById(R.id.toggle_nav);
+                            Button currentStatusButton = findViewById(R.id.timeButton_nav);
+                            toggle.setChecked(currentUser.getIsFree());
+                            // TODO: add date to nav drawer
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.setTimeInMillis(currentUser.getEndTime());
+                            currentStatusButton.setText(timeFormat.format(calendar.getTime()));
                         } else {
                             Log.d("debug", "data snapshot is null");
                             startActivity(new Intent(MainActivity.this, LogIn.class));
@@ -212,36 +172,16 @@ public class MainActivity extends AppCompatActivity
                 }
         );
 
+
         /* Set time machine to be current time */
         selectedCalendar = Calendar.getInstance();
-        int selectedDay = selectedCalendar.get(Calendar.DAY_OF_YEAR);
-        int selectedHour = selectedCalendar.get(Calendar.HOUR_OF_DAY);
-        int selectedMinute = selectedCalendar.get(Calendar.MINUTE);
-        Log.d("time", "current day: " + selectedDay);
-        Log.d("time", "current hour: " + selectedHour);
-        Log.d("time", "current minute: " + selectedMinute);
 
         // Set up time button
         Button timeButton = findViewById(R.id.timeButton_main);
-        Time selectedTime = new Time(selectedHour, selectedMinute, 0);
-        timeButton.setText(timeFormat.format(selectedTime));
-
+        timeButton.setText(timeFormat.format(selectedCalendar.getTime()));
         // Set up date button
         Button dateButton = findViewById(R.id.dateButton_main);
         dateButton.setText(dateFormat.format(selectedCalendar.getTime()));
-        dateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), CalenderPickerActivity.class);
-                int year = selectedCalendar.get(Calendar.YEAR);
-                int month = selectedCalendar.get(Calendar.MONTH);
-                int dayOfMonth = selectedCalendar.get(Calendar.DAY_OF_MONTH);
-                intent.putExtra("year", year);
-                intent.putExtra("month", month);
-                intent.putExtra("dayOfMonth", dayOfMonth);
-                startActivityForResult(intent, CALENDAR_PICKER_REQUEST);
-            }
-        });
 
 
         /* Set up Recycler View */
@@ -265,12 +205,6 @@ public class MainActivity extends AppCompatActivity
                         freeFriends.clear();
                         adapter.notifyDataSetChanged();
 
-                        int selectedDay = selectedCalendar.get(Calendar.DAY_OF_YEAR);
-                        int selectedHour = selectedCalendar.get(Calendar.HOUR_OF_DAY);
-                        int selectedMinute = selectedCalendar.get(Calendar.MINUTE);
-
-                        int selectedTime = selectedHour * 60 + selectedMinute;
-
                         // TODO: change to get userId?
                         if (currentUser != null) {
                             for (Map.Entry<String, User> entry : allUsers.entrySet()) {
@@ -281,8 +215,7 @@ public class MainActivity extends AppCompatActivity
                                         && !user.getEmail().equals(currentUser.getEmail())
                                         && !user.getEmail().equals("dummy")
                                         && user.getIsFree()) {
-                                    if ((user.getEndDay() > selectedDay)
-                                            || (user.getEndDay() == selectedDay && user.getEndTime() >= selectedTime)) {
+                                    if (selectedCalendar.getTimeInMillis() < user.getEndTime()) {
                                         freeFriends.put(userId, new User(user));
                                         adapter.notifyDataSetChanged();
                                     }
@@ -326,7 +259,6 @@ public class MainActivity extends AppCompatActivity
                 FirebaseAuth.getInstance().signOut();
                 startActivity(new Intent(MainActivity.this, LogIn.class));
                 finish();
-                return;
             }
         });
         logoutTextView.setOnClickListener(new View.OnClickListener() {
@@ -335,13 +267,12 @@ public class MainActivity extends AppCompatActivity
                 FirebaseAuth.getInstance().signOut();
                 startActivity(new Intent(MainActivity.this, LogIn.class));
                 finish();
-                return;
             }
         });
 
     }
 
-    // Time picker for time button at ** bottom **
+    // Time picker for time button at ** BOTTOM **
     public static class TimePickerFragmentBottom extends DialogFragment
             implements TimePickerDialog.OnTimeSetListener {
 
@@ -377,6 +308,48 @@ public class MainActivity extends AppCompatActivity
     public void showTimePickerDialogBottom(View v) {
         DialogFragment timePickerFragment = new TimePickerFragmentBottom();
         timePickerFragment.show(getSupportFragmentManager(), "timePickerBottom");
+    }
+
+    /* Date picker for date button at BOTTOM */
+    public static class DatePickerFragment extends DialogFragment
+            implements DatePickerDialog.OnDateSetListener {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the current date as the default date in the picker
+            int year = selectedCalendar.get(Calendar.YEAR);
+            int month = selectedCalendar.get(Calendar.MONTH);
+            int day = selectedCalendar.get(Calendar.DAY_OF_MONTH);
+
+            // Create a new instance of DatePickerDialog and return it
+            return new DatePickerDialog(getActivity(), this, year, month, day);
+        }
+
+        public void onDateSet(DatePicker view, int year, int month, int day) {
+            // Do something with the date chosen by the user
+            Calendar today = Calendar.getInstance();
+            Calendar chosen = Calendar.getInstance();
+            chosen.set(year, month, day);
+            int chosenDay = chosen.get(Calendar.DAY_OF_YEAR);
+            int nowDay = today.get(Calendar.DAY_OF_YEAR);
+            // the user can only choose today or tomorrow
+            if (chosenDay - nowDay <= 1
+            || ((nowDay == 365 || nowDay == 366) && chosenDay == 1 )) {
+                selectedCalendar.set(
+                        year, month, day,
+                        selectedCalendar.get(Calendar.HOUR_OF_DAY),
+                        selectedCalendar.get(Calendar.HOUR_OF_DAY), 0);
+            } else {
+                Toast.makeText(getContext(), "You can only select today or tomorrow", Toast.LENGTH_SHORT).show();
+                DialogFragment datePickerFragment = new DatePickerFragment();
+                datePickerFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
+            }
+        }
+    }
+
+    public void showDatePickerDialog(View v) {
+        DialogFragment newFragment = new DatePickerFragment();
+        newFragment.show(getSupportFragmentManager(), "datePicker");
     }
 
     // Time picker for time button in the ** nav drawer **
@@ -420,31 +393,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == CALENDAR_PICKER_REQUEST) {
-
-            if (resultCode == RESULT_CONFIRM) {
-                selectedCalendar.set(
-                        data.getIntExtra("year", selectedCalendar.get(Calendar.YEAR)),
-                        data.getIntExtra("month", selectedCalendar.get(Calendar.MONTH)),
-                        data.getIntExtra("dayOfMonth", selectedCalendar.get(Calendar.DAY_OF_MONTH)),
-                        selectedCalendar.get(Calendar.HOUR_OF_DAY),
-                        selectedCalendar.get(Calendar.HOUR_OF_DAY), 0);
-
-                // change text of date button
-                Button dateButton = findViewById(R.id.dateButton_main);
-                dateButton.setText(dateFormat.format(selectedCalendar.getTime()));
-                // change the dummy user to invoke onDataChange
-                FirebaseDatabase database = FirebaseDatabase.getInstance();
-                DatabaseReference dbRef = database.getReference();
-                dummyUserIsFree = !dummyUserIsFree;
-                dbRef.child("users").child("dummy").child("isFree").setValue(dummyUserIsFree);
-            } else if (requestCode == RESULT_CANCEL) {
-                // Do nothing
-            }
-        }
-    }
 
     @Override
     public void onBackPressed() {

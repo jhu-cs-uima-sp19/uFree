@@ -271,9 +271,10 @@ public class LogIn extends AppCompatActivity implements LoaderCallbacks<Cursor> 
             showProgress(false);
 
             if (success) {
+                // save user id in Shared Preferences
                 SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
                 SharedPreferences.Editor preferencesEditor = sp.edit();
-                preferencesEditor.putString("userID", "foo@bar.com");
+                preferencesEditor.putString("userID", mEmail.replaceAll("[^a-zA-Z0-9]", ""));
                 preferencesEditor.apply();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
