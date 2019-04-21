@@ -99,6 +99,7 @@ public class Search {
 
 
 
+
     //search list of all users based on name
    // final FirebaseDatabase database = FirebaseDatabase.getInstance();
    // final DatabaseReference dbref =database.getInstance().getReference("users").orderByChild("fullName")
@@ -114,3 +115,9 @@ public class Search {
 
 
 }
+
+
+//
+    final FirebaseDatabase database = FirebaseDatabase.getInstance();
+    final DatabaseReference dbref = database.getInstance().getReference("users");
+    dbref.child(userId).child("friends").setValue(0);
