@@ -90,7 +90,7 @@
     <string name="currentProgressText_welcome">%1$.1f hours</string>
     <string name="title_activity_friends">Friends</string>
 
-    <!-- Friends -->
+    <!-- FriendsActivity -->
     <string name="friend_requests">Friend Requests</string>
     <string name="friends">Friends</string>
 </resources>
