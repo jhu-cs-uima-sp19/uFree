@@ -2,6 +2,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_alignParentBottom="true">
@@ -56,13 +57,13 @@
             android:id="@+id/timeButton_nav"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:onClick="showTimePickerDialogNav"
+            android:text="12:00am"
             app:layout_constraintBottom_toTopOf="@+id/guideline3"
-            app:layout_constraintStart_toEndOf="@+id/changeStatusTextView_nav"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteX="109dp" />
 
         <Switch
             android:id="@+id/toggle_nav"
@@ -74,7 +75,7 @@
             android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toTopOf="@+id/guideline3"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/timeButton_nav"
+            app:layout_constraintStart_toEndOf="@+id/dateButton_nav"
             app:layout_constraintTop_toTopOf="parent" />
 
         <android.support.constraint.Guideline
@@ -90,6 +91,19 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             app:layout_constraintGuide_begin="60dp" />
+
+        <Button
+            android:id="@+id/dateButton_nav"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:onClick="changeDate"
+            android:text="@string/today_nav"
+            app:layout_constraintBottom_toTopOf="@+id/guideline3"
+            app:layout_constraintStart_toEndOf="@+id/timeButton_nav"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </android.support.constraint.ConstraintLayout>
 </RelativeLayout>

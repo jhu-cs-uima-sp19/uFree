@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     static User currentUser;
-    String userId;
+    static String userId;
     static boolean checkedAvailability;
     HashMap<String, User> freeFriends = new HashMap<String, User>();
     static Calendar selectedCalendar;
@@ -205,7 +205,6 @@ public class MainActivity extends AppCompatActivity
                         freeFriends.clear();
                         adapter.notifyDataSetChanged();
 
-                        // TODO: change to get userId?
                         if (currentUser != null) {
                             for (Map.Entry<String, User> entry : allUsers.entrySet()) {
                                 String userId = entry.getKey();
@@ -249,6 +248,15 @@ public class MainActivity extends AppCompatActivity
                 timePickerFragment.show(getSupportFragmentManager(), "timePickerNav");
             }
         });
+        Button dateButtonNav = findViewById(R.id.dateButton_nav);
+        Calendar today = Calendar.getInstance();
+        Calendar endTime = Calendar.getInstance();
+        endTime.setTimeInMillis(currentUser.getEndTime());
+        if (today.get(Calendar.DAY_OF_YEAR) == endTime.get(Calendar.DAY_OF_YEAR)) {
+            dateButtonNav.setText(getString(R.string.today_nav));
+        } else {
+            dateButtonNav.setText(getString(R.string.tomorrow_nav));
+        }
 
         // Set up listener for log out
         ImageView exitImageView = findViewById(R.id.exitImageView_nav);
@@ -310,6 +318,7 @@ public class MainActivity extends AppCompatActivity
         timePickerFragment.show(getSupportFragmentManager(), "timePickerBottom");
     }
 
+
     /* Date picker for date button at BOTTOM */
     public static class DatePickerFragment extends DialogFragment
             implements DatePickerDialog.OnDateSetListener {
@@ -352,28 +361,31 @@ public class MainActivity extends AppCompatActivity
         newFragment.show(getSupportFragmentManager(), "datePicker");
     }
 
-    // Time picker for time button in the ** nav drawer **
+    // Time picker for time button in the ** NAV DRAWER **
     public static class TimePickerFragmentNav extends DialogFragment
             implements TimePickerDialog.OnTimeSetListener {
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             // Create a new instance of TimePickerDialog and return it
-            int endHour = currentUser.getEndHour();
-            int endMinute = currentUser.getEndMinute();
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(currentUser.getEndTime());
+            int endHour = calendar.get(Calendar.HOUR_OF_DAY);
+            int endMinute = calendar.get(Calendar.MINUTE);
             return new TimePickerDialog(getActivity(), this, endHour, endMinute,
                     DateFormat.is24HourFormat(getActivity()));
         }
 
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            Calendar now = Calendar.getInstance();
+            int currentDay = now.get(Calendar.DAY_OF_YEAR);
+
             Calendar calendar = Calendar.getInstance();
-            int currentDay = calendar.get(Calendar.DAY_OF_YEAR);
-            int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
-            int currentMinute = calendar.get(Calendar.MINUTE);
-            int currentTime = currentHour * 60 + currentMinute;
-            int endDay = currentUser.getEndDay();
+            calendar.setTimeInMillis(currentUser.getEndTime());
+            int endDay = calendar.get(Calendar.DAY_OF_YEAR);
+
             // if user set free time less than current time
-            if (currentDay == endDay && currentTime >= hourOfDay * 60 + minute) {
+            if (currentDay == endDay && now.getTimeInMillis() >= calendar.getTimeInMillis()) {
                 Toast.makeText(getContext(), "You cannot set free time before current time", Toast.LENGTH_LONG).show();
                 DialogFragment timePickerFragment = new TimePickerFragmentNav();
                 timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
@@ -381,18 +393,49 @@ public class MainActivity extends AppCompatActivity
                 // update selected calendar object
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();
-                dbRef.child("users").child(userId).child("endHour").setValue(hourOfDay);
-                dbRef.child("users").child(userId).child("endMinute").setValue(minute);
 
-                // TODO: enable change date
+                calendar.set(calendar.get(Calendar.YEAR),
+                        calendar.get(Calendar.MONTH),
+                        calendar.get(Calendar.DAY_OF_MONTH),
+                        hourOfDay, minute);
+                dbRef.child("users").child(userId).child("endTime").setValue(calendar.getTimeInMillis());
+
                 // change text view for time button
                 Button timeButton = getActivity().findViewById(R.id.timeButton_nav);
-                Time selectedTime = new Time(hourOfDay, minute, 0);
-                timeButton.setText(timeFormat.format(selectedTime));
+                timeButton.setText(timeFormat.format(calendar.getTime()));
             }
         }
     }
 
+    // Date button in ** NAV DRAWER **
+    public void changeDate(View v) {
+        Button dateButtonNav = v.findViewById(R.id.dateButton_nav);
+        // today --> tomorrow
+        if (dateButtonNav.getText().toString().equals(getString(R.string.today_nav))) {
+            Calendar newEnd = Calendar.getInstance();
+            newEnd.setTimeInMillis(currentUser.getEndTime());
+            // add one day
+            newEnd.add(Calendar.DATE, 1);
+            // update end time in database
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
+            DatabaseReference dbRef = database.getReference();
+            dbRef.child("users").child(userId).child("endTime").setValue(newEnd.getTimeInMillis());
+            // change button text
+            dateButtonNav.setText(getString(R.string.tomorrow_nav));
+        } else {
+            // tomorrow --> today
+            Calendar newEnd = Calendar.getInstance();
+            newEnd.setTimeInMillis(currentUser.getEndTime());
+            // subtract one day
+            newEnd.add(Calendar.DATE, -1);
+            // update end time in database
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
+            DatabaseReference dbRef = database.getReference();
+            dbRef.child("users").child(userId).child("endTime").setValue(newEnd.getTimeInMillis());
+            // change button text
+            dateButtonNav.setText(getString(R.string.today_nav));
+        }
+    }
 
     @Override
     public void onBackPressed() {

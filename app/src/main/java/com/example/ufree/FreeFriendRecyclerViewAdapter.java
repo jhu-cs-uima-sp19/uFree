@@ -32,6 +32,7 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
         public ImageView timeIcon;
         public TextView tillTextView;
         public TextView freeTimeTextView;
+        public TextView freeDateTextView;
         public TextView userIDTextView;
 
         public FreeFriendHolder(View v) {
@@ -41,6 +42,7 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
             timeIcon = v.findViewById(R.id.timeIcon_main);
             tillTextView = v.findViewById(R.id.tillTextView_main);
             freeTimeTextView = v.findViewById(R.id.freeTimeTextView_main);
+            freeDateTextView = v.findViewById(R.id.freeDateTextView_main);
             userIDTextView = v.findViewById(R.id.freeFriendIDTextView);
         }
     }
@@ -78,10 +80,16 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
         User freeFriend = freeFriends.get(userIds[position]);
         holder.freeFriendname.setText(freeFriend.getFullName());
         holder.userIDTextView.setText(freeFriend.getEmail());
-        Calendar calendar = java.util.Calendar.getInstance();
-        Time time = new Time(freeFriend.getEndHour(), freeFriend.getEndMinute(), 0);
+        Calendar now = Calendar.getInstance();
+        Calendar endCalendar = java.util.Calendar.getInstance();
+        endCalendar.setTimeInMillis(freeFriend.getEndTime());
         DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
-        holder.freeTimeTextView.setText(timeFormat.format(time));
+        holder.freeTimeTextView.setText(timeFormat.format(endCalendar.getTime()));
+        if (now.get(Calendar.DAY_OF_YEAR) == endCalendar.get(Calendar.DAY_OF_YEAR)) {
+            holder.freeDateTextView.setText("today");
+        } else {
+            holder.freeDateTextView.setText("tomorrow");
+        }
     }
 
     @Override
