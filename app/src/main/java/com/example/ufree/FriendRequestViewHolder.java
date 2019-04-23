@@ -39,7 +39,6 @@ public class FriendRequestViewHolder extends RecyclerView.ViewHolder
 
         // If the entire row is clicked
         if (v.getId() == constraintLayout.getId()) {
-            Toast.makeText(v.getContext(), "Row pressed: " + String.valueOf(getAdapterPosition()), Toast.LENGTH_SHORT).show();
             String e = email.getText().toString();
             Intent i = new Intent(v.getContext(), FriendProfileActivity.class);
             i.putExtra("email", e);
