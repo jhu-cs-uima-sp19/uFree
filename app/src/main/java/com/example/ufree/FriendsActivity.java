@@ -3,6 +3,7 @@ package com.example.ufree;
 // TODO. Log out in nav drawer. Time in nav drawer
 
 import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -17,6 +18,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -45,6 +47,9 @@ public class FriendsActivity extends AppCompatActivity
     private String userId;
 
     public ArrayList<FriendRequestData> friendRequestData;
+
+    public ImageView accept;
+    public ImageView reject;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,9 +114,6 @@ public class FriendsActivity extends AppCompatActivity
                 }
 
                 // If user and incoming friends list are valid
-                //for (String key : incomingFriends.keySet()) {
-                  //  friendRequestData.add(new FriendRequestData(incomingFriends.get(key)));
-                //}
                 for (int i = 0; i < incomingFriends.size(); i++) {
                     friendRequestData.add(new FriendRequestData(incomingFriends.get(i)));
                 }
@@ -127,6 +129,9 @@ public class FriendsActivity extends AppCompatActivity
                         "Something went wrong.", Toast.LENGTH_LONG).show();
             }
         });
+
+        accept = (ImageView) findViewById(R.id.accept);
+        reject = (ImageView) findViewById(R.id.reject);
 
 
         // Add new friends
