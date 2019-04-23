@@ -33,7 +33,7 @@ import java.util.Calendar;
 
 public class WelcomeActivity extends AppCompatActivity {
 
-    View popupView;
+    static View popupView;
     private FirebaseUser user;
     static Calendar endCalendar;
     static String userId;
@@ -80,7 +80,7 @@ public class WelcomeActivity extends AppCompatActivity {
                 popupWindow.setBackgroundDrawable(new ColorDrawable(Color.WHITE));
 
                 // set up time picker for date button
-                Button timeButton = view.findViewById(R.id.timeButton_welcome);
+                Button timeButton = popupView.findViewById(R.id.timeButton_welcome);
                 timeButton.setText(MainActivity.timeFormat.format(endCalendar.getTime()));
                 timeButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -91,8 +91,8 @@ public class WelcomeActivity extends AppCompatActivity {
                 });
 
                 // set up date button
-                final Button dateButton = view.findViewById(R.id.dateButton_welcome);
-                dateButton.setText(MainActivity.dateFormat.format(endCalendar.getTime());
+                final Button dateButton = popupView.findViewById(R.id.dateButton_welcome);
+                dateButton.setText(getString(R.string.today_nav));
                 dateButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -178,6 +178,8 @@ public class WelcomeActivity extends AppCompatActivity {
                     endCalendar.get(Calendar.DAY_OF_MONTH),
                     hourOfDay, minute
             );
+            Button timeButton = popupView.findViewById(R.id.timeButton_welcome);
+            timeButton.setText(MainActivity.timeFormat.format(endCalendar.getTime()));
         }
     }
 
