@@ -342,12 +342,14 @@ public class MainActivity extends AppCompatActivity
             int chosenDay = chosen.get(Calendar.DAY_OF_YEAR);
             int nowDay = today.get(Calendar.DAY_OF_YEAR);
             // the user can only choose today or tomorrow
-            if (chosenDay - nowDay <= 1
+            if (chosenDay - nowDay == 1 || chosenDay == nowDay
             || ((nowDay == 365 || nowDay == 366) && chosenDay == 1 )) {
                 selectedCalendar.set(
                         year, month, day,
                         selectedCalendar.get(Calendar.HOUR_OF_DAY),
                         selectedCalendar.get(Calendar.HOUR_OF_DAY), 0);
+                Button dateButton = getActivity().findViewById(R.id.dateButton_main);
+                dateButton.setText(dateFormat.format(selectedCalendar.getTime()));
             } else {
                 Toast.makeText(getContext(), "You can only select today or tomorrow", Toast.LENGTH_SHORT).show();
                 DialogFragment datePickerFragment = new DatePickerFragment();
