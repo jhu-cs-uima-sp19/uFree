@@ -146,22 +146,31 @@ public class MainActivity extends AppCompatActivity
                             /* Display user info in navigation header */
                             NavigationView navigationView = findViewById(R.id.nav_view);
                             View navHeader = navigationView.getHeaderView(0);
+
                             TextView nameTextView = navHeader.findViewById(R.id.name_nav);
                             TextView emailTextView = navHeader.findViewById(R.id.email_nav);
                             nameTextView.setText(currentUser.getFullName());
                             emailTextView.setText(currentUser.getEmail());
+
                             Switch toggle = findViewById(R.id.toggle_nav);
-                            Button currentStatusButton = findViewById(R.id.timeButton_nav);
                             toggle.setChecked(currentUser.getIsFree());
-                            // TODO: add date to nav drawer
-                            Calendar calendar = Calendar.getInstance();
-                            calendar.setTimeInMillis(currentUser.getEndTime());
-                            currentStatusButton.setText(timeFormat.format(calendar.getTime()));
+
+                            Button currentStatusButton = findViewById(R.id.timeButton_nav);
+                            Calendar endCalendar = Calendar.getInstance();
+                            endCalendar.setTimeInMillis(currentUser.getEndTime());
+                            currentStatusButton.setText(timeFormat.format(endCalendar.getTime()));
+
+                            Button dateButtonNav = findViewById(R.id.dateButton_nav);
+                            Calendar today = Calendar.getInstance();
+                            if (today.get(Calendar.DAY_OF_YEAR) == endCalendar.get(Calendar.DAY_OF_YEAR)) {
+                                dateButtonNav.setText(getString(R.string.today_nav));
+                            } else {
+                                dateButtonNav.setText(getString(R.string.tomorrow_nav));
+                            }
                         } else {
                             Log.d("debug", "data snapshot is null");
                             startActivity(new Intent(MainActivity.this, LogIn.class));
                             finish();
-                            return;
                         }
                     }
 
@@ -248,15 +257,6 @@ public class MainActivity extends AppCompatActivity
                 timePickerFragment.show(getSupportFragmentManager(), "timePickerNav");
             }
         });
-        Button dateButtonNav = findViewById(R.id.dateButton_nav);
-        Calendar today = Calendar.getInstance();
-        Calendar endTime = Calendar.getInstance();
-        endTime.setTimeInMillis(currentUser.getEndTime());
-        if (today.get(Calendar.DAY_OF_YEAR) == endTime.get(Calendar.DAY_OF_YEAR)) {
-            dateButtonNav.setText(getString(R.string.today_nav));
-        } else {
-            dateButtonNav.setText(getString(R.string.tomorrow_nav));
-        }
 
         // Set up listener for log out
         ImageView exitImageView = findViewById(R.id.exitImageView_nav);
@@ -382,6 +382,10 @@ public class MainActivity extends AppCompatActivity
 
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(currentUser.getEndTime());
+            calendar.set(calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH),
+                    hourOfDay, minute);
             int endDay = calendar.get(Calendar.DAY_OF_YEAR);
 
             // if user set free time less than current time
@@ -394,10 +398,6 @@ public class MainActivity extends AppCompatActivity
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();
 
-                calendar.set(calendar.get(Calendar.YEAR),
-                        calendar.get(Calendar.MONTH),
-                        calendar.get(Calendar.DAY_OF_MONTH),
-                        hourOfDay, minute);
                 dbRef.child("users").child(userId).child("endTime").setValue(calendar.getTimeInMillis());
 
                 // change text view for time button
@@ -410,10 +410,21 @@ public class MainActivity extends AppCompatActivity
     // Date button in ** NAV DRAWER **
     public void changeDate(View v) {
         Button dateButtonNav = v.findViewById(R.id.dateButton_nav);
+
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.setTimeInMillis(currentUser.getEndTime());
+
+        Calendar newEnd = Calendar.getInstance();
+        newEnd.set(
+                newEnd.get(Calendar.YEAR),
+                newEnd.get(Calendar.MONTH),
+                newEnd.get(Calendar.DAY_OF_MONTH),
+                endCalendar.get(Calendar.HOUR_OF_DAY),
+                endCalendar.get(Calendar.MINUTE)
+                );
+
         // today --> tomorrow
         if (dateButtonNav.getText().toString().equals(getString(R.string.today_nav))) {
-            Calendar newEnd = Calendar.getInstance();
-            newEnd.setTimeInMillis(currentUser.getEndTime());
             // add one day
             newEnd.add(Calendar.DATE, 1);
             // update end time in database
@@ -424,10 +435,7 @@ public class MainActivity extends AppCompatActivity
             dateButtonNav.setText(getString(R.string.tomorrow_nav));
         } else {
             // tomorrow --> today
-            Calendar newEnd = Calendar.getInstance();
-            newEnd.setTimeInMillis(currentUser.getEndTime());
-            // subtract one day
-            newEnd.add(Calendar.DATE, -1);
+            // do not change day
             // update end time in database
             FirebaseDatabase database = FirebaseDatabase.getInstance();
             DatabaseReference dbRef = database.getReference();

@@ -148,7 +148,9 @@ public class WelcomeActivity extends AppCompatActivity {
                 // initialize firebase
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();
+                Calendar now = Calendar.getInstance();
                 dbRef.child("users").child(userId).child("isFree").setValue(false);
+                dbRef.child("users").child(userId).child("endTime").setValue(now.getTimeInMillis());
                 finish();
             }
         });
