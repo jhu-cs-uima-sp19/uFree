@@ -1,7 +1,9 @@
 package com.example.ufree;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,32 +18,34 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
-public class FriendRequestAdaptor extends RecyclerView.Adapter {
+public class FriendsExistingAdaptor extends RecyclerView.Adapter {
 
-    ArrayList<FriendRequestData> list;
+    ArrayList<FriendsExistingData> list;
     Context context;
     DatabaseReference dbref = FirebaseDatabase.getInstance().getReference("users");
+    HashMap<String, Runnable> pendingRunnables = new HashMap<>();
 
-    public FriendRequestAdaptor(ArrayList<FriendRequestData> list, Context context) {
+    public FriendsExistingAdaptor(ArrayList<FriendsExistingData> list, Context context) {
         this.list = list;
         this.context = context;
     }
 
     @Override
-    public FriendRequestViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public FriendsExistingViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         //Inflate the layout, initialize the View Holder
-        View v = LayoutInflater.from(parent.getContext()).inflate(
-                R.layout.rowlayout_friends_request, parent, false);
-        FriendRequestViewHolder holder = new FriendRequestViewHolder(v);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.rowlayout_friends_existing,
+                parent, false);
+        FriendsExistingViewHolder holder = new FriendsExistingViewHolder(v);
         return holder;
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         //Use the provided View Holder on the onCreateViewHolder method to populate the current row on the RecyclerView
-        final FriendRequestViewHolder myHolder = (FriendRequestViewHolder) holder;
+        final FriendsExistingViewHolder myHolder = (FriendsExistingViewHolder) holder;
         myHolder.email.setText(list.get(position).email);
         String id = list.get(position).email.replaceAll("[^a-zA-Z0-9]", "");
         dbref.child(id).addValueEventListener(new ValueEventListener() {
@@ -72,15 +76,38 @@ public class FriendRequestAdaptor extends RecyclerView.Adapter {
     }
 
     // Insert a new item to the RecyclerView on a predefined position
-    public void insert(int position, FriendRequestData data) {
+    public void insert(int position, FriendsExistingData data) {
         list.add(position, data);
         notifyItemInserted(position);
     }
 
     // Remove a RecyclerView item containing a specified Data object
-    public void remove(FriendRequestData data) {
+    public void remove(FriendsExistingData data) {
         int position = list.indexOf(data);
-        list.remove(position);
-        notifyItemRemoved(position);
+        this.remove(position);
+    }
+
+    public void remove(final int pos) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(context);
+        alert.setTitle("Delete Friend");
+        alert.setMessage("Are you sure you want to delete friend?");
+        alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // TODO. Do delete friend
+                list.remove(pos);
+                notifyItemRemoved(pos);
+                return;
+            }
+        });
+        alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        alert.show();
     }
 }

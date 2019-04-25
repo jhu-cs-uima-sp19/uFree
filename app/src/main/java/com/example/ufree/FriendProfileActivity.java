@@ -1,11 +1,14 @@
 package com.example.ufree;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.support.v7.widget.Toolbar;
 
@@ -24,9 +27,12 @@ public class FriendProfileActivity extends AppCompatActivity {
     String phone;
 
     // Set up the view elements
-    TextView nameView;// = (TextView) findViewById(R.id.name);
-    TextView emailView;// = (TextView) findViewById(R.id.email);
-    TextView phoneView;// = (TextView) findViewById(R.id.phone);
+    TextView nameView;
+    TextView emailView;
+    TextView phoneView;
+    Button deleteFriend;
+
+    boolean friend;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +41,7 @@ public class FriendProfileActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -45,15 +51,16 @@ public class FriendProfileActivity extends AppCompatActivity {
             }
         });
 
-
         nameView = (TextView) findViewById(R.id.name);
         emailView = (TextView) findViewById(R.id.email);
         phoneView = (TextView) findViewById(R.id.phone);
+        deleteFriend = (Button) findViewById(R.id.deleteFriend);
 
         // Get the extras from intent
         Intent intent = getIntent();
         String email = intent.getExtras().getString("email");
         String userId = email.replaceAll("[^a-zA-Z0-9]", "");
+        friend = intent.getExtras().getBoolean("friend");
 
         // Firebase stuff
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
@@ -65,6 +72,10 @@ public class FriendProfileActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
+                if (user == null) {
+                    finish();
+                    return;
+                }
                 name = user.getFullName();
                 phone = user.getPhone();
                 nameView.setText(name);
@@ -79,5 +90,31 @@ public class FriendProfileActivity extends AppCompatActivity {
 
         System.out.println("Name: " + name + " Phone: " + phone);
         emailView.setText(email);
+
+        if (friend) {
+            deleteFriend.setVisibility(View.VISIBLE);
+            deleteFriend.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AlertDialog.Builder alert = new AlertDialog.Builder(FriendProfileActivity.this);
+                    alert.setTitle("Delete Friend");
+                    alert.setMessage("Are you sure you want to remove friend?");
+                    alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // TODO remove friend from deleter and deletee
+                                }
+                            });
+                    alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                    alert.show();
+                }
+            });
+        }
     }
 }

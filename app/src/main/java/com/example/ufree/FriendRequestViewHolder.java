@@ -8,7 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class FriendRequestViewHolder extends RecyclerView.ViewHolder
     implements View.OnClickListener {
@@ -42,6 +41,7 @@ public class FriendRequestViewHolder extends RecyclerView.ViewHolder
             String e = email.getText().toString();
             Intent i = new Intent(v.getContext(), FriendProfileActivity.class);
             i.putExtra("email", e);
+            i.putExtra("friend", false);
             v.getContext().startActivity(i);
         }
 
