@@ -33,6 +33,7 @@ public class FriendProfileActivity extends AppCompatActivity {
     Button deleteFriend;
     Button addFriend;
 
+    // Type of user accessing this page
     int type;
 
     @Override

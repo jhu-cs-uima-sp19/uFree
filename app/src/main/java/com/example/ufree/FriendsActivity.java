@@ -85,6 +85,44 @@ public class FriendsActivity extends AppCompatActivity
         // set FriendsActivity to be selected
         navigationView.getMenu().getItem(2).setChecked(true);
 
+        // Set up listener for toggle and time button in nav drawer
+        Switch toggleNav = findViewById(R.id.toggle_nav);
+        Button currentStatusButton = findViewById(R.id.timeButton_nav);
+        toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                databaseReference.child(userId).child("isFree").setValue(isChecked);
+            }
+        });
+        currentStatusButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogFragment timePickerFragment = new MainActivity.TimePickerFragmentNav();
+                timePickerFragment.show(getSupportFragmentManager(), "timePickerNav");
+            }
+        });
+
+        // Set up listener for log out
+        ImageView exitImageView = findViewById(R.id.exitImageView_nav);
+        TextView logoutTextView = findViewById(R.id.logout_nav);
+        exitImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(FriendsActivity.this, LogIn.class));
+                finish();
+                return;
+            }
+        });
+        logoutTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(FriendsActivity.this, LogIn.class));
+                finish();
+                return;
+            }
+        });
+
         // Set up friend request recycler view
         friendRequestsView = (RecyclerView) findViewById(R.id.friendRequests);
         friendRequestsView.setLayoutManager(new LinearLayoutManager(FriendsActivity.this));
@@ -153,50 +191,11 @@ public class FriendsActivity extends AppCompatActivity
             }
         });
 
-        // Set up listener for toggle and time button in nav drawer
-        Switch toggleNav = findViewById(R.id.toggle_nav);
-        Button currentStatusButton = findViewById(R.id.timeButton_nav);
-        toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                databaseReference.child(userId).child("isFree").setValue(isChecked);
-            }
-        });
-        currentStatusButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DialogFragment timePickerFragment = new MainActivity.TimePickerFragmentNav();
-                timePickerFragment.show(getSupportFragmentManager(), "timePickerNav");
-            }
-        });
-
-        // Set up listener for log out
-        ImageView exitImageView = findViewById(R.id.exitImageView_nav);
-        TextView logoutTextView = findViewById(R.id.logout_nav);
-        exitImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(FriendsActivity.this, LogIn.class));
-                finish();
-                return;
-            }
-        });
-        logoutTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(FriendsActivity.this, LogIn.class));
-                finish();
-                return;
-            }
-        });
-
         // Add new friends
         FloatingActionButton fab = findViewById(R.id.fab_friends);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO. Call search for all friends to add people
                 Intent intent = new Intent(FriendsActivity.this, FriendsSearch.class);
                 startActivity(intent);
             }

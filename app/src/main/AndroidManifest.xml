@@ -15,7 +15,9 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".FriendsSearch"></activity>
+        <activity
+            android:name=".FriendsSearch"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".FriendProfileActivity"
             android:theme="@style/AppTheme.NoActionBar" />
