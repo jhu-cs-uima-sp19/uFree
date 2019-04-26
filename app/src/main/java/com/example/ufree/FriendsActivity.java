@@ -3,6 +3,7 @@ package com.example.ufree;
 // TODO. Log out in nav drawer. Time in nav drawer
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -24,6 +25,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,7 +44,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -57,7 +62,12 @@ public class FriendsActivity extends AppCompatActivity
     private FirebaseUser user;
     private FirebaseAuth.AuthStateListener authStateListener;
 
+    static User currentUser;
+
     private String userId;
+    private boolean checkedAvailability;
+
+    static final java.text.DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
 
     public ArrayList<FriendRequestData> friendRequestData;
     public ArrayList<FriendsExistingData> friendsExistingData;
@@ -85,44 +95,6 @@ public class FriendsActivity extends AppCompatActivity
         // set FriendsActivity to be selected
         navigationView.getMenu().getItem(2).setChecked(true);
 
-        // Set up listener for toggle and time button in nav drawer
-        Switch toggleNav = findViewById(R.id.toggle_nav);
-        Button currentStatusButton = findViewById(R.id.timeButton_nav);
-        toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                databaseReference.child(userId).child("isFree").setValue(isChecked);
-            }
-        });
-        currentStatusButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DialogFragment timePickerFragment = new MainActivity.TimePickerFragmentNav();
-                timePickerFragment.show(getSupportFragmentManager(), "timePickerNav");
-            }
-        });
-
-        // Set up listener for log out
-        ImageView exitImageView = findViewById(R.id.exitImageView_nav);
-        TextView logoutTextView = findViewById(R.id.logout_nav);
-        exitImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(FriendsActivity.this, LogIn.class));
-                finish();
-                return;
-            }
-        });
-        logoutTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(FriendsActivity.this, LogIn.class));
-                finish();
-                return;
-            }
-        });
-
         // Set up friend request recycler view
         friendRequestsView = (RecyclerView) findViewById(R.id.friendRequests);
         friendRequestsView.setLayoutManager(new LinearLayoutManager(FriendsActivity.this));
@@ -145,8 +117,8 @@ public class FriendsActivity extends AppCompatActivity
         userId = user.getEmail().replaceAll("[^a-zA-Z0-9]", "");
 
         // Getting info from firebase to populate recycler view with
-        databaseReference = firebaseDatabase.getReference("users");
-        databaseReference.child(userId).addValueEventListener(new ValueEventListener() {
+        databaseReference = firebaseDatabase.getReference();
+        databaseReference.child("users").child(userId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 friendRequestData.clear();
@@ -188,6 +160,113 @@ public class FriendsActivity extends AppCompatActivity
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Toast.makeText(FriendsActivity.this,
                         "Something went wrong.", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        // Record if user has been asked for availability
+        checkedAvailability = false;
+
+        databaseReference.child("users").child(userId).addValueEventListener(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            System.out.println(dataSnapshot.getValue());
+                            currentUser = dataSnapshot.getValue(User.class);
+                            SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
+                            SharedPreferences.Editor spEdit = sp.edit();
+                            spEdit.putString("userID", dataSnapshot.getKey());
+                            System.out.println(dataSnapshot.getKey());
+                            spEdit.apply();
+
+                            Log.d("test", "here" + currentUser.toString());
+
+                            // if user has been asked for availability, do NOT ask again
+                            if (!checkedAvailability) {
+                                Calendar calendar = Calendar.getInstance();
+                                int currentDay = calendar.get(Calendar.DAY_OF_YEAR);
+                                int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+                                int currentMinute = calendar.get(Calendar.MINUTE);
+                                int currentTime = currentHour * 60 + currentMinute;
+                                // if user is free and end time does not exceed current time, do NOT ask for availability
+                                // else show welcome screen
+                                if (!(currentUser.getIsFree()
+                                        && ((currentUser.getEndDay() > currentDay)
+                                        || (currentUser.getEndDay() == currentDay && currentUser.getEndTime() >= currentTime)))) {
+                                    Intent intent = new Intent(getApplicationContext(), WelcomeActivity.class);
+                                    startActivity(intent);
+                                }
+                                checkedAvailability = true;
+                            }
+
+                            /* Display user info in navigation header */
+                            NavigationView navigationView = findViewById(R.id.nav_view);
+                            View navHeader = navigationView.getHeaderView(0);
+                            if (navHeader != null) {
+                                TextView nameTextView = navHeader.findViewById(R.id.name_nav);
+                                TextView emailTextView = navHeader.findViewById(R.id.email_nav);
+                                nameTextView.setText(currentUser.getFullName());
+                                emailTextView.setText(currentUser.getEmail());
+                                Switch toggle = findViewById(R.id.toggle_nav);
+                                Button currentStatusButton = findViewById(R.id.timeButton_nav);
+                                toggle.setChecked(currentUser.getIsFree());
+                                Time t = new Time(currentUser.getEndHour(), currentUser.getEndMinute(), 0);
+                                currentStatusButton.setText(timeFormat.format(t));
+                            } else {
+                                Log.d("debug", "Nav view is null");
+                                Log.d("debug", "Nav view: " + navigationView);
+                                Log.d("debug", "Nav header: " + navHeader);
+                            }
+                        } else {
+                            Log.d("debug", "data snapshot is null");
+                            startActivity(new Intent(FriendsActivity.this, LogIn.class));
+                            finish();
+                            return;
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.w("firebase", "loadUserFreeTime:onCancelled", databaseError.toException());
+                    }
+                }
+        );
+
+        // Set up listener for toggle and time button in nav drawer
+        Switch toggleNav = findViewById(R.id.toggle_nav);
+        Button currentStatusButton = findViewById(R.id.timeButton_nav);
+        toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                databaseReference.child(userId).child("isFree").setValue(isChecked);
+            }
+        });
+        currentStatusButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogFragment timePickerFragment = new MainActivity.TimePickerFragmentNav();
+                timePickerFragment.show(getSupportFragmentManager(), "timePickerNav");
+            }
+        });
+
+        // Set up listener for log out
+        ImageView exitImageView = findViewById(R.id.exitImageView_nav);
+        TextView logoutTextView = findViewById(R.id.logout_nav);
+        exitImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(FriendsActivity.this, LogIn.class));
+                finish();
+                return;
+            }
+        });
+        logoutTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(FriendsActivity.this, LogIn.class));
+                finish();
+                return;
             }
         });
 
