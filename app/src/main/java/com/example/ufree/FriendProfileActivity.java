@@ -31,8 +31,9 @@ public class FriendProfileActivity extends AppCompatActivity {
     TextView emailView;
     TextView phoneView;
     Button deleteFriend;
+    Button addFriend;
 
-    boolean friend;
+    int type;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,12 +56,13 @@ public class FriendProfileActivity extends AppCompatActivity {
         emailView = (TextView) findViewById(R.id.email);
         phoneView = (TextView) findViewById(R.id.phone);
         deleteFriend = (Button) findViewById(R.id.deleteFriend);
+        addFriend = (Button) findViewById(R.id.addFriend);
 
         // Get the extras from intent
         Intent intent = getIntent();
         String email = intent.getExtras().getString("email");
         String userId = email.replaceAll("[^a-zA-Z0-9]", "");
-        friend = intent.getExtras().getBoolean("friend");
+        type = intent.getExtras().getInt("type");
 
         // Firebase stuff
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
@@ -91,7 +93,7 @@ public class FriendProfileActivity extends AppCompatActivity {
         System.out.println("Name: " + name + " Phone: " + phone);
         emailView.setText(email);
 
-        if (friend) {
+        if (type == 1) {
             deleteFriend.setVisibility(View.VISIBLE);
             deleteFriend.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -105,6 +107,30 @@ public class FriendProfileActivity extends AppCompatActivity {
                                     // TODO remove friend from deleter and deletee
                                 }
                             });
+                    alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                    alert.show();
+                }
+            });
+        } else if (type == 2) {
+            addFriend.setVisibility(View.VISIBLE);
+            addFriend.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AlertDialog.Builder alert = new AlertDialog.Builder(FriendProfileActivity.this);
+                    alert.setTitle("Add Friend");
+                    alert.setMessage("Are you sure you want to send a friend request?");
+                    alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // TODO add friend request
+                        }
+                    });
                     alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
 
                         @Override

@@ -197,8 +197,8 @@ public class FriendsActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 // TODO. Call search for all friends to add people
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Intent intent = new Intent(FriendsActivity.this, FriendsSearch.class);
+                startActivity(intent);
             }
         });
     }

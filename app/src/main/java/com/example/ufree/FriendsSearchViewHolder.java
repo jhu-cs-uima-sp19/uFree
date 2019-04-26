@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class FriendsExistingViewHolder extends RecyclerView.ViewHolder
+public class FriendsSearchViewHolder extends RecyclerView.ViewHolder
         implements View.OnClickListener {
 
     ConstraintLayout constraintLayout;
@@ -15,10 +15,10 @@ public class FriendsExistingViewHolder extends RecyclerView.ViewHolder
     TextView name;
     TextView email;
 
-    FriendsExistingViewHolder(View itemView) {
+    FriendsSearchViewHolder(View itemView) {
         super(itemView);
 
-        this.constraintLayout =(ConstraintLayout) itemView.findViewById(R.id.friendsExistingRowLayout);
+        this.constraintLayout =(ConstraintLayout) itemView.findViewById(R.id.friendsSearchRowLayout);
         this.profilePic = (ImageView) itemView.findViewById(R.id.profilePic_main);
         this.name = (TextView) itemView.findViewById(R.id.name);
         this.email = (TextView) itemView.findViewById(R.id.email);
@@ -34,7 +34,7 @@ public class FriendsExistingViewHolder extends RecyclerView.ViewHolder
             String e = this.email.getText().toString();
             Intent i = new Intent(v.getContext(), FriendProfileActivity.class);
             i.putExtra("email", e);
-            i.putExtra("type", 1);
+            i.putExtra("type", 2);
             v.getContext().startActivity(i);
         }
     }

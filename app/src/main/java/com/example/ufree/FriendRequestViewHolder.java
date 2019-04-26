@@ -41,7 +41,7 @@ public class FriendRequestViewHolder extends RecyclerView.ViewHolder
             String e = email.getText().toString();
             Intent i = new Intent(v.getContext(), FriendProfileActivity.class);
             i.putExtra("email", e);
-            i.putExtra("friend", false);
+            i.putExtra("type", 0);
             v.getContext().startActivity(i);
         }
 
