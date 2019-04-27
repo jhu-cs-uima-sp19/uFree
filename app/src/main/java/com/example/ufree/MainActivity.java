@@ -352,6 +352,11 @@ public class MainActivity extends AppCompatActivity
                         selectedCalendar.get(Calendar.HOUR_OF_DAY), 0);
                 Button dateButton = getActivity().findViewById(R.id.dateButton_main);
                 dateButton.setText(dateFormat.format(selectedCalendar.getTime()));
+                // change the dummy user to invoke onDataChange
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference dbRef = database.getReference();
+                dummyUserIsFree = !dummyUserIsFree;
+                dbRef.child("users").child("dummy").child("isFree").setValue(dummyUserIsFree);
             } else {
                 Toast.makeText(getContext(), "You can only select today or tomorrow", Toast.LENGTH_SHORT).show();
                 DialogFragment datePickerFragment = new DatePickerFragment();
