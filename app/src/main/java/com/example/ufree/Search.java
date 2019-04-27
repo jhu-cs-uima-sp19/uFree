@@ -117,7 +117,7 @@ public class Search {
 }
 
 
-    //
- //   final FirebaseDatabase database = FirebaseDatabase.getInstance();
- //   final DatabaseReference dbref = database.getInstance().getReference("users");
- //   dbref.child(userId).child("friends").setValue(0);
+
+    final FirebaseDatabase database = FirebaseDatabase.getInstance();
+    final DatabaseReference dbref = database.getInstance().getReference("users");
+    dbref.child(userId).child("friends").setValue(0);
