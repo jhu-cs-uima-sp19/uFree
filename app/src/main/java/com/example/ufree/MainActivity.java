@@ -445,12 +445,17 @@ public class MainActivity extends AppCompatActivity
         } else {
             // tomorrow --> today
             // do not change day
-            // update end time in database
-            FirebaseDatabase database = FirebaseDatabase.getInstance();
-            DatabaseReference dbRef = database.getReference();
-            dbRef.child("users").child(userId).child("endTime").setValue(newEnd.getTimeInMillis());
-            // change button text
-            dateButtonNav.setText(getString(R.string.today_nav));
+            Calendar now = Calendar.getInstance();
+            if (newEnd.getTimeInMillis() < now.getTimeInMillis()) {
+                Toast.makeText(v.getContext(), "You cannot set free time before current time", Toast.LENGTH_SHORT).show();
+            } else {
+                // update end time in database
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference dbRef = database.getReference();
+                dbRef.child("users").child(userId).child("endTime").setValue(newEnd.getTimeInMillis());
+                // change button text
+                dateButtonNav.setText(getString(R.string.today_nav));
+            }
         }
     }
 
