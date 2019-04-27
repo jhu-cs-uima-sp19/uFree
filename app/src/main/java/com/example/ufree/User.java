@@ -15,6 +15,8 @@ public class User {
     private int endHour;
     private int endMinute;
     private boolean isFree;
+    private ArrayList<String> incomingFriends;
+    private ArrayList<String> frienders;
 
     public User() {
         // Default constructor required for calls to DataSnapshot.getValue(com.example.ufree.User.class)
@@ -33,6 +35,8 @@ public class User {
         this.endHour = 0;
         this.endMinute = 0;
         this.events = eventsList;
+        this.incomingFriends = null;
+        this.frienders = null;
     }
 
     public User(User that) {
@@ -47,6 +51,8 @@ public class User {
         this.endMinute = that.endMinute;
         this.isFree = that.isFree;
         this.events = that.events;
+        this.incomingFriends = that.incomingFriends;
+        this.frienders = that.frienders;
     }
 
     public String getEmail() {
@@ -92,6 +98,10 @@ public class User {
     public int getEndTime() {
         return this.endHour * 60 + this.endMinute;
     }
+
+    public ArrayList<String> getIncomingFriends() { return this.incomingFriends; }
+
+    public ArrayList<String> getFrienders() { return this.frienders; }
 
 
     public String toString() {

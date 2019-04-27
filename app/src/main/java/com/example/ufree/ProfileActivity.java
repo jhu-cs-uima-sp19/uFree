@@ -4,9 +4,7 @@ import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
@@ -24,7 +22,6 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -40,8 +37,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
-import org.w3c.dom.Text;
 
 import java.sql.Time;
 import java.util.Calendar;
@@ -377,7 +372,8 @@ public class ProfileActivity extends AppCompatActivity
             Intent intent = new Intent(this, EventsActivity.class);
             startActivity(intent);
         } else if (id == R.id.friends_nav) {
-
+            Intent intent = new Intent(this, FriendsActivity.class);
+            startActivity(intent);
         } else if (id == R.id.calendar_nav) {
 
         } else if (id == R.id.profile_nav) {

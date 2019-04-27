@@ -23,7 +23,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -31,7 +30,6 @@ import android.widget.TimePicker;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.FirebaseApp;
@@ -45,7 +43,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -489,7 +486,8 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(this, EventsActivity.class);
             startActivity(intent);
         } else if (id == R.id.friends_nav) {
-            // TODO: implement friend activity
+            Intent intent = new Intent(this, FriendsActivity.class);
+            startActivity(intent);
         } else if (id == R.id.calendar_nav) {
             // TODO: implement calendar activity
         } else if (id == R.id.profile_nav) {
