@@ -117,6 +117,7 @@ public class ProfileActivity extends AppCompatActivity
                     phoneEditView.setText(dataSnapshot.getValue(User.class).getPhone());
                     emailTV.setText(dataSnapshot.getValue(User.class).getEmail());
 
+                    /* NAV DRAWER */
                     /* Display user info in navigation header */
                     NavigationView navigationView = findViewById(R.id.nav_view);
                     View navHeader = navigationView.getHeaderView(0);
@@ -152,6 +153,7 @@ public class ProfileActivity extends AppCompatActivity
             }
         });
 
+        /* NAV DRAWER */
         // Set up listener for toggle and time button in nav drawer
         Switch toggleNav = findViewById(R.id.toggle_nav);
         Button currentStatusButton = findViewById(R.id.timeButton_nav);
@@ -232,6 +234,8 @@ public class ProfileActivity extends AppCompatActivity
                 finish();
             }
         });
+
+
 
         userNameButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -358,6 +362,7 @@ public class ProfileActivity extends AppCompatActivity
 
     }
 
+    /* NAV DRAWER */
     // Time picker for time button in the ** NAV DRAWER **
     public static class TimePickerFragmentNav extends DialogFragment
             implements TimePickerDialog.OnTimeSetListener {
