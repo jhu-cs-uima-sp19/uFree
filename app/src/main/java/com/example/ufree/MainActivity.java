@@ -24,6 +24,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
@@ -47,13 +48,14 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.sql.Time;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, View.OnLongClickListener {
 
     static User currentUser;
     static String userId;
@@ -61,6 +63,13 @@ public class MainActivity extends AppCompatActivity
     HashMap<String, User> freeFriends = new HashMap<String, User>();
     static Calendar selectedCalendar;
     static boolean dummyUserIsFree = true;
+    boolean isInActionMode = false;
+    TextView counterTextView;
+    FreeFriendRecyclerViewAdapter adapter;
+    FloatingActionButton fab;
+    ArrayList<String> selectedFreinds = new ArrayList<String>();
+    int counter = 0;
+    ActionBarDrawerToggle toggle;
 
     static final java.text.DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
     static final java.text.DateFormat dateFormat = new SimpleDateFormat("MMM dd, EEE");
@@ -86,24 +95,17 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         // set up title of app bar
         getSupportActionBar().setTitle("Who's Free");
+        counterTextView = findViewById(R.id.counterTextView_main);
+        counterTextView.setVisibility(View.GONE);
 
         // TODO: Set up correct listener for fab
         /* Set up floating add button */
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_main);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(), NewEventActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        // TODO: suppress warning
-        //fab.setVisibility(View.GONE);
+        fab = (FloatingActionButton) findViewById(R.id.fab_main);
+        fab.setVisibility(View.GONE);
 
         /* Set up navigation drawer */
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+        toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
@@ -199,7 +201,7 @@ public class MainActivity extends AppCompatActivity
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        final FreeFriendRecyclerViewAdapter adapter = new FreeFriendRecyclerViewAdapter(freeFriends, this);
+        adapter = new FreeFriendRecyclerViewAdapter(freeFriends, this);
         recyclerView.setAdapter(adapter);
 
         // Set up dummy user
@@ -453,6 +455,12 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }
+        if (isInActionMode) {
+            clearActionMode();
+            adapter.notifyDataSetChanged();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -468,14 +476,19 @@ public class MainActivity extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+        Log.d("debug", "item id: " + id);
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.search_main) {
             // TODO: implement search function
             return true;
+        } else if (id == android.R.id.home && isInActionMode) {
+            clearActionMode();
+            Log.d("debug", "back button is pressed");
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -501,5 +514,81 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        // clear the option menu
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.getMenu().clear();
+        isInActionMode = true;
+        getSupportActionBar().setTitle("");
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        counterTextView.setVisibility(View.VISIBLE);
+        adapter.notifyDataSetChanged();
+        fab.setVisibility(View.VISIBLE);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                StringBuilder sb = new StringBuilder();
+                for (String id: selectedFreinds) {
+                    sb.append(id);
+                    sb.append(" ");
+                }
+                String result = sb.toString();
+                Intent intent = new Intent(v.getContext(), NewEventActivity.class);
+                intent.putExtra("ids", result);
+                startActivity(intent);
+                clearActionMode();
+            }
+        });
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        toggle.onDrawerStateChanged(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        toggle.setDrawerIndicatorEnabled(false);
+        toggle.syncState();
+        return true;
+    }
+
+    public void prepareSelection(View view, String selectedId) {
+        if (((CheckBox)view).isChecked()) {
+            selectedFreinds.add(selectedId);
+            counter++;
+            updateCounter(counter);
+        } else {
+            selectedFreinds.remove(selectedId);
+            counter--;
+            updateCounter(counter);
+        }
+    }
+
+    public void updateCounter(int counter) {
+        if (counter == 0) {
+            counterTextView.setText("0 friend selected");
+        } else {
+            counterTextView.setText(getString(R.string.multiSelectedTextView_toolbar, counter));
+        }
+    }
+
+
+    public void clearActionMode() {
+        isInActionMode = false;
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.getMenu().clear();
+        toolbar.inflateMenu(R.menu.main);
+        counterTextView.setText("0 friend selected");
+        counterTextView.setVisibility(View.GONE);
+        getSupportActionBar().setTitle("Who's Free");
+        counter = 0;
+        selectedFreinds.clear();
+        fab.setVisibility(View.GONE);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        /* Set up navigation drawer */
+        toggle.onDrawerStateChanged(DrawerLayout.LOCK_MODE_UNLOCKED);
+        toggle.setDrawerIndicatorEnabled(true);
+        toggle.syncState();
+        adapter.notifyDataSetChanged();
     }
 }

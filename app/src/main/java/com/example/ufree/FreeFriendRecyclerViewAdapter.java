@@ -3,10 +3,12 @@ package com.example.ufree;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -25,8 +27,9 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
     private final HashMap<String, User> freeFriends;
     private String[] userIds;
     private Context context;
+    MainActivity mainActivity;
 
-    public static class FreeFriendHolder extends RecyclerView.ViewHolder {
+    public static class FreeFriendHolder extends RecyclerView.ViewHolder{
         public ImageView profilePic;
         public TextView freeFriendname;
         public ImageView timeIcon;
@@ -34,8 +37,11 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
         public TextView freeTimeTextView;
         public TextView freeDateTextView;
         public TextView userIDTextView;
+        public CheckBox checkBox;
+        MainActivity mainActivity;
+        ConstraintLayout constraintLayout;
 
-        public FreeFriendHolder(View v) {
+        public FreeFriendHolder(View v, MainActivity mainActivity) {
             super(v);
             profilePic = v.findViewById(R.id.profilePic_main);
             freeFriendname = v.findViewById(R.id.freeFriendName_main);
@@ -44,6 +50,10 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
             freeTimeTextView = v.findViewById(R.id.freeTimeTextView_main);
             freeDateTextView = v.findViewById(R.id.freeDateTextView_main);
             userIDTextView = v.findViewById(R.id.freeFriendIDTextView);
+            checkBox = v.findViewById(R.id.checkBox_main);
+            this.mainActivity = mainActivity;
+            constraintLayout = v.findViewById(R.id.freeFriendItemLayout_main);
+            constraintLayout.setOnLongClickListener(mainActivity);
         }
     }
 
@@ -52,6 +62,7 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
         this.freeFriends = myFreeFriends;
         this.userIds = myFreeFriends.keySet().toArray(new String[myFreeFriends.size()]);
         this.context = context;
+        this.mainActivity = (MainActivity) context;
     }
 
 
@@ -70,11 +81,11 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
                 context.startActivity(intent);
             }
         });
-        return new FreeFriendHolder(view);
+        return new FreeFriendHolder(view, mainActivity);
     }
 
     @Override
-    public void onBindViewHolder(FreeFriendHolder holder, int position) {
+    public void onBindViewHolder(FreeFriendHolder holder, final int position) {
         // TODO: reduce memory usage here
         userIds = freeFriends.keySet().toArray(new String[freeFriends.size()]);
         User freeFriend = freeFriends.get(userIds[position]);
@@ -89,6 +100,19 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
             holder.freeDateTextView.setText("today");
         } else {
             holder.freeDateTextView.setText("tomorrow");
+        }
+        // set visibility of check box
+        if (mainActivity.isInActionMode) {
+            holder.checkBox.setVisibility(View.VISIBLE);
+            holder.checkBox.setChecked(false);
+            holder.checkBox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mainActivity.prepareSelection(v, userIds[position]);
+                }
+            });
+        } else {
+            holder.checkBox.setVisibility(View.GONE);
         }
     }
 

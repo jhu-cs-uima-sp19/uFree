@@ -39,6 +39,7 @@
     <string name="changeStatus_nav">Free now till</string>
     <string name="today_nav">Today</string>
     <string name="tomorrow_nav">Tomorrow</string>
+    <string name="multiSelectedTextView_toolbar">%1$d friends selected</string>
 
     <string-array name="monthSpinnerValues">
         <item name="January">January</item>
