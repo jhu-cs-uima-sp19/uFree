@@ -424,5 +424,12 @@ public class EventsActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        // set Who's Free to be selected
+        navigationView.getMenu().getItem(1).setChecked(true);
+    }
 
 }
