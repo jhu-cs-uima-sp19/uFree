@@ -596,4 +596,12 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
         adapter.notifyDataSetChanged();
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        // set Who's Free to be selected
+        navigationView.getMenu().getItem(0).setChecked(true);
+    }
 }
