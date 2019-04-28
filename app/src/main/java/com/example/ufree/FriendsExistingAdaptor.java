@@ -3,13 +3,18 @@ package com.example.ufree;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,6 +32,12 @@ public class FriendsExistingAdaptor extends RecyclerView.Adapter {
     Context context;
     DatabaseReference dbref = FirebaseDatabase.getInstance().getReference("users");
     HashMap<String, Runnable> pendingRunnables = new HashMap<>();
+    final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    final String idOfCurrentUser = user.getEmail().replaceAll("[^a-zA-Z0-9]", "");
+    final FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+    final DatabaseReference databaseReference = firebaseDatabase.getReference("users");
+    final DatabaseReference mDatabase1 = firebaseDatabase.getReference("users");
+    final DatabaseReference mDatabase2 = firebaseDatabase.getReference("users");
 
     public FriendsExistingAdaptor(ArrayList<FriendsExistingData> list, Context context) {
         this.list = list;
@@ -98,7 +109,39 @@ public class FriendsExistingAdaptor extends RecyclerView.Adapter {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // TODO. Do delete friend
+                databaseReference.child(idOfCurrentUser).child("frienders").orderByValue().startAt(list.get(pos).email).endAt(list.get(pos).email)
+                        .addChildEventListener(new ChildEventListener() {
+                            @Override
+                            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
+                                String temp = dataSnapshot.getKey();
+                                mDatabase1.child(idOfCurrentUser).child("frienders").child(temp).removeValue();
+                            }
+
+                            @Override
+                            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                            }
+
+                            @Override
+                            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                            }
+
+                            @Override
+                            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+
+
+
+
+
                 list.remove(pos);
                 notifyItemRemoved(pos);
                 return;

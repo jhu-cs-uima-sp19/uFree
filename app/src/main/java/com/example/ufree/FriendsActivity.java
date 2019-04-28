@@ -12,6 +12,7 @@ import android.graphics.drawable.Drawable;
 import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -38,6 +39,7 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -132,23 +134,104 @@ public class FriendsActivity extends AppCompatActivity
                 }
 
                 // If user is valid
-                ArrayList<String> incomingFriends = user.getIncomingFriends();
-                ArrayList<String> existingFriends = user.getFrienders();
+         //       ArrayList<String> incomingFriends = user.getIncomingFriends();
+         //       ArrayList<String> existingFriends = user.getFrienders();
+
+
+          /*      final ArrayList<FriendRequestData> incomingFriends = new ArrayList<FriendRequestData>();
+                final ArrayList<FriendsExistingData> existingFriends = new ArrayList<FriendsExistingData>();
+                databaseReference.child("users").child(userId).child("incomingFriends").orderByValue()
+                        .addChildEventListener(new ChildEventListener() {
+                            @Override
+                            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
+                                incomingFriends.add(new FriendRequestData(dataSnapshot.getKey()));
+                                //   Log.d("test",dataSnapshot.getKey().toString());
+                            }
+
+                            @Override
+                            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                            }
+
+                            @Override
+                            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                            }
+
+                            @Override
+                            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+
+
+                databaseReference.child("users").child(userId).child("frienders").orderByValue()
+                        .addChildEventListener(new ChildEventListener() {
+                            @Override
+                            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
+                                existingFriends.add(new FriendsExistingData(dataSnapshot.getKey()));
+                                //   Log.d("test",dataSnapshot.getKey().toString());
+                            }
+
+                            @Override
+                            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                            }
+
+                            @Override
+                            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                            }
+
+                            @Override
+                            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+
+*/
+
+
+
+                HashMap<String, String> incomingFriends = user.getIncomingFriends();
+                HashMap<String, String> existingFriends = user.getFrienders();
+
 
                 if (incomingFriends != null) {
                     // If user and incoming friends list are valid
-                    for (int i = 0; i < incomingFriends.size(); i++) {
-                        friendRequestData.add(new FriendRequestData(incomingFriends.get(i)));
+
+                    for (HashMap.Entry<String,String> entry : incomingFriends.entrySet()){
+                        friendRequestData.add(new FriendRequestData(entry.getValue()));
                     }
+
+
+
+                    //    for (int i = 0; i < incomingFriends.size(); i++) {
+                    //    friendRequestData.add(new FriendRequestData(incomingFriends.get(i)));
+
 
                     FriendRequestAdaptor myAdaptor = new FriendRequestAdaptor(friendRequestData,
                             FriendsActivity.this);
                     friendRequestsView.setAdapter(myAdaptor);
                 }
                 if (existingFriends != null) {
-                    for (int i = 0; i < existingFriends.size(); i++) {
-                        friendsExistingData.add(new FriendsExistingData(existingFriends.get(i)));
+                  //  for (int i = 0; i < existingFriends.size(); i++) {
+                  //      friendsExistingData.add(new FriendsExistingData(existingFriends.get(i)));
+                  //  }
+                    for (HashMap.Entry<String,String> entry : existingFriends.entrySet()){
+                        friendsExistingData.add(new FriendsExistingData(entry.getValue()));
                     }
+
 
                     FriendsExistingAdaptor myAdaptor = new FriendsExistingAdaptor(friendsExistingData,
                             FriendsActivity.this);
@@ -166,7 +249,7 @@ public class FriendsActivity extends AppCompatActivity
         // Record if user has been asked for availability
         checkedAvailability = false;
 
-        databaseReference.child("users").child(userId).addValueEventListener(
+        databaseReference.child("users").child("JJgmailcom").addValueEventListener(
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {

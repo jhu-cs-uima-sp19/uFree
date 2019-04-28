@@ -7,4 +7,8 @@ public class FriendsSearchData {
     FriendsSearchData(String e) {
         this.email = e;
     }
+
+
+
+
 }

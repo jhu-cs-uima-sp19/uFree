@@ -15,8 +15,8 @@ public class User {
     private int endHour;
     private int endMinute;
     private boolean isFree;
-    private ArrayList<String> incomingFriends;
-    private ArrayList<String> frienders;
+    private HashMap<String,String> incomingFriends;
+    private HashMap<String,String> frienders;
 
     public User() {
         // Default constructor required for calls to DataSnapshot.getValue(com.example.ufree.User.class)
@@ -99,9 +99,14 @@ public class User {
         return this.endHour * 60 + this.endMinute;
     }
 
-    public ArrayList<String> getIncomingFriends() { return this.incomingFriends; }
+    public HashMap<String,String> getIncomingFriends() { return this.incomingFriends; }
 
-    public ArrayList<String> getFrienders() { return this.frienders; }
+    public HashMap<String,String> getFrienders() { return this.frienders; }
+
+
+
+
+
 
 
     public String toString() {
