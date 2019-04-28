@@ -30,6 +30,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewParent;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -387,7 +388,9 @@ public class EventsActivity extends AppCompatActivity
             Long id = Long.valueOf(String.valueOf(selectedItemId.getText()));
             Intent intent;
 
-            if (view.getId() == R.id.EventsRecyclerView) {
+
+            ViewParent parent = view.getParent();
+            if (((View) parent).getId() == R.id.EventsRecyclerView) {
                 intent = new Intent(this, NewEventActivity.class);
             } else {
                 intent = new Intent(this, ViewEventActivity.class);
