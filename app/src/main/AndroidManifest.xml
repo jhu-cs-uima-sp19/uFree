@@ -27,9 +27,6 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".ViewEventActivity" />
         <activity
-            android:name=".CalenderPickerActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
             android:name=".WelcomeActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".NewEventActivity" />
