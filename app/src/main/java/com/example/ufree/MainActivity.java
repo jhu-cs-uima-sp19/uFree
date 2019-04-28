@@ -81,6 +81,7 @@ public class MainActivity extends AppCompatActivity
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user == null) {
+                    System.out.println("shiiiiiiiiiiiiiiiiiiiiiiiiiiiiiit");
                     startActivity(new Intent(MainActivity.this, LogIn.class));
                     finish();
                     return;
@@ -89,6 +90,7 @@ public class MainActivity extends AppCompatActivity
         };
 
         if (user == null) {
+            System.out.println("assssssssssssssssssssssssssssssss");
             startActivity(new Intent(MainActivity.this, LogIn.class));
             finish();
             return;
@@ -184,6 +186,7 @@ public class MainActivity extends AppCompatActivity
                                 Log.d("debug", "Nav header: " + navHeader);
                             }
                         } else {
+                            System.out.println("hoooooooooooooooooooooooole");
                             startActivity(new Intent(MainActivity.this, LogIn.class));
                             finish();
                         }
@@ -273,6 +276,7 @@ public class MainActivity extends AppCompatActivity
                                 }
                             }
                         } else {
+                            System.out.println("cuuuuuuuuuuuuuuuuuunt");
                             startActivity(new Intent(MainActivity.this, LogIn.class));
                             finish();
                         }
@@ -308,6 +312,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 FirebaseAuth.getInstance().signOut();
+                System.out.println("fuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuck");
                 startActivity(new Intent(MainActivity.this, LogIn.class));
                 finish();
             }
@@ -316,6 +321,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 FirebaseAuth.getInstance().signOut();
+                System.out.println("thiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiis");
                 startActivity(new Intent(MainActivity.this, LogIn.class));
                 finish();
             }

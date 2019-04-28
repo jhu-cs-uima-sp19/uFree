@@ -4,6 +4,7 @@ public class User {
     private String email;
     private String fullName;
     private String phone;
+    private String profilePic;
     private int startDay;
     private int startHour;
     private int startMinute;
@@ -21,6 +22,7 @@ public class User {
         this.fullName = n;
         this.phone = p;
         this.email = e;
+        this.profilePic = null;
         this.isFree = false;
         this.startDay = 0;
         this.startHour = 0;
@@ -34,6 +36,7 @@ public class User {
         this.email = that.email;
         this.fullName = that.fullName;
         this.phone = that.phone;
+        this.profilePic = that.profilePic;
         this.startDay = that.startDay;
         this.startHour = that.startHour;
         this.startMinute = that.startMinute;
@@ -54,6 +57,8 @@ public class User {
     public String getPhone() {
         return this.phone;
     }
+
+    public String getProfilePic() { return this.profilePic; }
 
     public int getStartDay() {
         return this.startDay;

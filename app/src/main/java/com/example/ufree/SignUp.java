@@ -3,10 +3,13 @@ package com.example.ufree;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -22,6 +25,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v7.widget.CardView;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,6 +37,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.*;
 
 import java.io.IOException;
@@ -44,6 +49,9 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 /**
  * A login screen that offers login via email/password.
@@ -64,18 +72,29 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
     private View mProgressView;
     private View mLoginFormView;
 
-    private int RESULT_LOAD_IMAGE = 0;
+    // Profile pic result codes
+    private final int GALLERY = 0;
+    private final int CAMERA = 1;
+    private final int PICK_IMAGE_REQUEST = 71;
 
-    //database elements
+    // Uploading image
+    private Uri filePath;
+
+    // Database elements
     private FirebaseDatabase db = FirebaseDatabase.getInstance();
-    DatabaseReference dbRef = db.getReference("users");
+    DatabaseReference dbRef = db.getReference();
 
     private FirebaseAuth auth;
 
+    private FirebaseStorage storage = FirebaseStorage.getInstance();
+    StorageReference storageReference = storage.getReference();
+
+    // Fields for creating user
     private String fullName;
     private String email;
     private String phoneNumber;
     private String password;
+    private String profileImageURL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,32 +129,108 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
         profilePictureImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(
-                        Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-
-                startActivityForResult(intent, RESULT_LOAD_IMAGE);
+                final AlertDialog.Builder pictureDialog = new AlertDialog.Builder(SignUp.this);
+                pictureDialog.setTitle("Choose Profile Picture");
+                String[] pictureDialogItems = {
+                        "Select photo from gallery",
+                        "Capture photo from camera" };
+                pictureDialog.setItems(pictureDialogItems,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (which) {
+                                    case 0:
+                                        choosePhotoFromGallery();
+                                        break;
+                                    case 1:
+                                        takePhotoFromCamera();
+                                        break;
+                                }
+                            }
+                        });
+                pictureDialog.show();
             }
         });
+
+        ImageView userView = (ImageView) findViewById(R.id.user_pic);
+        userView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final AlertDialog.Builder pictureDialog = new AlertDialog.Builder(SignUp.this);
+                pictureDialog.setTitle("Choose Profile Picture");
+                String[] pictureDialogItems = {
+                        "Select photo from gallery",
+                        "Capture photo from camera" };
+                pictureDialog.setItems(pictureDialogItems,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (which) {
+                                    case 0:
+                                        choosePhotoFromGallery();
+                                        break;
+                                    case 1:
+                                        takePhotoFromCamera();
+                                        break;
+                                }
+                            }
+                        });
+                pictureDialog.show();
+            }
+        });
+    }
+
+    // User chooses photo from gallery
+    private void choosePhotoFromGallery() {
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK,
+                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(galleryIntent, this.GALLERY);
+    }
+
+    // User chooses to take a photo as profile pic
+    private void takePhotoFromCamera() {
+        Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(intent, this.CAMERA);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
+        ImageView defaultView = findViewById(R.id.profile_picture);
+        CardView cardView = findViewById(R.id.user_pic_wrapper);
+        ImageView userView = findViewById(R.id.user_pic);
 
-            Uri uri = data.getData();
-
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-
-                ImageView imageView = (ImageView) findViewById(R.id.profile_picture);
-                imageView.setImageBitmap(bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        // Something went wrong/user cancelled request
+        if (resultCode == RESULT_CANCELED) {
+            return;
         }
-
+        // If user chose gallery
+        if (requestCode == GALLERY) {
+            if (data != null) {
+                filePath = data.getData();
+                try {
+                    defaultView.setVisibility(View.GONE);
+                    cardView.setVisibility(View.VISIBLE);
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), filePath);
+                    userView.setImageBitmap(bitmap);
+                    // TODO. Save image to db
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.out.println("Gallery image failed");
+                }
+            }
+            return;
+        }
+        if (requestCode == CAMERA) {
+            filePath = data.getData();
+            defaultView.setVisibility(View.GONE);
+            cardView.setVisibility(View.VISIBLE);
+            Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+            userView.setImageBitmap(bitmap);
+            // TODO. Save image to firebase
+            return;
+        }
     }
 
     /**
@@ -354,7 +449,9 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
                                 if (!task.isSuccessful()) {
                                     Toast.makeText(SignUp.this, "Sign Up Failed" + task.getException(), Toast.LENGTH_LONG).show();
                                 } else {
-                                    dbRef.child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(fullName, phoneNumber, email));
+                                    dbRef.child("users").child(email.replaceAll("[^a-zA-Z0-9]", ""))
+                                            .setValue(new User(fullName, phoneNumber, email));
+                                    uploadImage();
                                     startActivity(new Intent(SignUp.this, MainActivity.class));
                                     finish();
                                 }
@@ -369,6 +466,22 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
         protected void onCancelled() {
             mAuthTask = null;
             showProgress(false);
+        }
+    }
+
+    private void uploadImage() {
+        storageReference = storage.getReference(
+                "profilePics/" + email.replaceAll("[^a-zA-Z0-9]", "") + ".jpg");
+        if (filePath != null) {
+            storageReference.putFile(filePath)
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    profileImageURL = storageReference.getDownloadUrl().toString();
+                    dbRef.child("users").child(email.replaceAll("[^a-zA-Z0-9]", ""))
+                            .child("profilePic").setValue(profileImageURL);
+                }
+            });
         }
     }
 }

@@ -30,13 +30,32 @@
             android:id="@+id/email_login_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:gravity="center">
 
             <ImageView
                 android:id="@+id/profile_picture"
-                android:layout_width="match_parent"
-                android:layout_height="113dp"
+                android:layout_width="139dp"
+                android:layout_height="139dp"
+                android:scaleType="centerCrop"
+                android:visibility="visible"
                 app:srcCompat="@drawable/user_default_profile" />
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/user_pic_wrapper"
+                android:layout_width="139dp"
+                android:layout_height="139dp"
+                android:visibility="gone"
+                app:cardCornerRadius="69dp">
+
+                <ImageView
+                    android:id="@+id/user_pic"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@drawable/user_default_profile" />
+
+            </android.support.v7.widget.CardView>
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
