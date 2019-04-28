@@ -82,8 +82,12 @@ public class NewEventActivity extends AppCompatActivity {
         if (extras != null) {
             eventIdValue = extras.getLong("id", counter);
             System.out.println("ID IS: " + eventIdValue);
-            dbref.child("events").child(String.valueOf(eventIdValue)).addListenerForSingleValueEvent(new ValueEventListener() {
+            Button changeEventButton = findViewById(R.id.CreateEventButton);
+            Button deleteEventButton = findViewById(R.id.deleteEventButton);
+            changeEventButton.setText("Edit Event");
+            deleteEventButton.setVisibility(View.VISIBLE);
 
+            dbref.child("events").child(String.valueOf(eventIdValue)).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     HashMap<String, Object> event = (HashMap<String, Object>) dataSnapshot.getValue();
@@ -251,6 +255,38 @@ public class NewEventActivity extends AppCompatActivity {
                 inviteesTextView.setText(inviteesStringVal);
             }
         }
+    }
+
+    public void deleteEventAction(View v) {
+        SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
+        final String user = sp.getString("userID", "none");
+
+        if (!user.equals("none")) {
+            dbref.child("events").child(String.valueOf(eventIdValue)).child("participants").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    ArrayList<String> participants = (ArrayList<String>) dataSnapshot.getValue();
+                    long index = 0;
+                    for (int i = 0; i < participants.size(); i++) {
+                        if (participants.get(i).equals(user)) {
+                            index = i;
+                        }
+                    }
+
+                    dbref.child("events").child(String.valueOf(eventIdValue)).child("participants").child(String.valueOf(index)).removeValue();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+            dbref.child("users").child(user).child("events").child(String.valueOf(eventIdValue)).removeValue();
+        }
+
+        Intent intent = new Intent(this, EventsActivity.class);
+        startActivity(intent);
     }
 
     @Override
