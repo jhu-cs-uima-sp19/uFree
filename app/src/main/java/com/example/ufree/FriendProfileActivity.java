@@ -83,6 +83,8 @@ public class FriendProfileActivity extends AppCompatActivity {
                 phone = user.getPhone();
                 nameView.setText(name);
                 phoneView.setText(phone);
+                // set up title of action bar to be name of friend
+                getSupportActionBar().setTitle(user.getFullName());
             }
 
             @Override
