@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:showIn="navigation_view">
 
     <group android:checkableBehavior="single">
@@ -25,5 +26,11 @@
             android:icon="@drawable/ic_account_circle_black_24dp"
             android:title="Profile" />
     </group>
+
+    <item
+        android:id="@+id/changeFree_nav"
+        app:actionLayout="@layout/nav_extra"
+        android:title="Free now until"
+        app:showAsAction="always" />
 
 </menu>
