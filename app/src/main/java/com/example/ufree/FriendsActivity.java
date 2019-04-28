@@ -322,7 +322,7 @@ public class FriendsActivity extends AppCompatActivity
         Button currentStatusButton = findViewById(R.id.timeButton_nav);
         toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                databaseReference.child(userId).child("isFree").setValue(isChecked);
+                databaseReference.child("user").child(userId).child("isFree").setValue(isChecked);
             }
         });
         currentStatusButton.setOnClickListener(new View.OnClickListener() {
