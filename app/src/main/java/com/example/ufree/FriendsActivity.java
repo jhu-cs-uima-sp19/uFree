@@ -249,7 +249,7 @@ public class FriendsActivity extends AppCompatActivity
         // Record if user has been asked for availability
         checkedAvailability = false;
 
-        databaseReference.child("users").child("JJgmailcom").addValueEventListener(
+        databaseReference.child("users").child(userId).addValueEventListener(
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {

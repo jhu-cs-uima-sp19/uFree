@@ -138,6 +138,35 @@ public class FriendsExistingAdaptor extends RecyclerView.Adapter {
                             }
                         });
 
+                databaseReference.child(list.get(pos).email).child("frienders").orderByValue().startAt(idOfCurrentUser).endAt(idOfCurrentUser)
+                        .addChildEventListener(new ChildEventListener() {
+                            @Override
+                            public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
+                                String temp = dataSnapshot.getKey();
+                                mDatabase1.child(list.get(pos).email).child("frienders").child(temp).removeValue();
+                            }
+
+                            @Override
+                            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                            }
+
+                            @Override
+                            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                            }
+
+                            @Override
+                            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+
 
 
 

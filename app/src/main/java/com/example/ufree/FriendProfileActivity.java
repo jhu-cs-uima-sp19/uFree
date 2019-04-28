@@ -135,7 +135,7 @@ public class FriendProfileActivity extends AppCompatActivity {
                 .addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
-                        requestSentV.setText("1");
+                        requestSentV.setText("2");
                     }
 
                     @Override
