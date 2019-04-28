@@ -51,7 +51,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@drawable/icons8_checkmark_64" />
+        app:srcCompat="@drawable/ic_check_circle_orange_24dp" />
 
     <ImageView
         android:id="@+id/reject"
@@ -62,7 +62,7 @@
         app:layout_constraintEnd_toStartOf="@+id/accept"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.666"
-        app:srcCompat="@drawable/icons8_delete_64" />
+        app:srcCompat="@drawable/ic_remove_circle_orange_24dp" />
 
 
 </android.support.constraint.ConstraintLayout>
