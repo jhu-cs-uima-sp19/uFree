@@ -199,6 +199,7 @@ public class NewEventActivity extends AppCompatActivity {
             Event e = new Event(participants, invitees, date, time, location,
                     description, eventIdValue);
 
+
             dbref.child("events").child(String.valueOf(eventIdValue)).setValue(e);
 
             if (eventIdValue == counter) {

@@ -385,7 +385,14 @@ public class EventsActivity extends AppCompatActivity
 
         if (selectedItemDescription != null && selectedItemLocation != null) {
             Long id = Long.valueOf(String.valueOf(selectedItemId.getText()));
-            Intent intent = new Intent(this, ViewEventActivity.class);
+            Intent intent;
+
+            if (view.getId() == R.id.EventsRecyclerView) {
+                intent = new Intent(this, NewEventActivity.class);
+            } else {
+                intent = new Intent(this, ViewEventActivity.class);
+            }
+
             Bundle extras = new Bundle();
             extras.putLong("id", id);
             intent.putExtras(extras);
