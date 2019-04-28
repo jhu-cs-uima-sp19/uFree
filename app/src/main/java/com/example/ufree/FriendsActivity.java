@@ -138,13 +138,16 @@ public class FriendsActivity extends AppCompatActivity
          //       ArrayList<String> existingFriends = user.getFrienders();
 
 
-          /*      final ArrayList<FriendRequestData> incomingFriends = new ArrayList<FriendRequestData>();
-                final ArrayList<FriendsExistingData> existingFriends = new ArrayList<FriendsExistingData>();
+                final HashMap<String, String> incomingFriends = user.getIncomingFriends();
+                final HashMap<String, String> existingFriends = user.getFrienders();
+
+          //      final ArrayList<FriendRequestData> incomingFriends = new ArrayList<FriendRequestData>();
+          //      final ArrayList<FriendsExistingData> existingFriends = new ArrayList<FriendsExistingData>();
                 databaseReference.child("users").child(userId).child("incomingFriends").orderByValue()
                         .addChildEventListener(new ChildEventListener() {
                             @Override
                             public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
-                                incomingFriends.add(new FriendRequestData(dataSnapshot.getKey()));
+                                incomingFriends.put(dataSnapshot.getKey(),(String)dataSnapshot.getValue());
                                 //   Log.d("test",dataSnapshot.getKey().toString());
                             }
 
@@ -174,7 +177,7 @@ public class FriendsActivity extends AppCompatActivity
                         .addChildEventListener(new ChildEventListener() {
                             @Override
                             public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
-                                existingFriends.add(new FriendsExistingData(dataSnapshot.getKey()));
+                                existingFriends.put(dataSnapshot.getKey(),(String)dataSnapshot.getValue());
                                 //   Log.d("test",dataSnapshot.getKey().toString());
                             }
 
@@ -199,12 +202,11 @@ public class FriendsActivity extends AppCompatActivity
                             }
                         });
 
-*/
 
 
 
-                HashMap<String, String> incomingFriends = user.getIncomingFriends();
-                HashMap<String, String> existingFriends = user.getFrienders();
+
+
 
 
                 if (incomingFriends != null) {

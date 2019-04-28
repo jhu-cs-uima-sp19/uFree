@@ -12,6 +12,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import java.util.ArrayList;
 
 public class FriendsSearch extends AppCompatActivity {
@@ -22,6 +25,8 @@ public class FriendsSearch extends AppCompatActivity {
     FriendsExistingAdaptor adaptor;
 
     ArrayList<FriendsSearchData> searchResults = new ArrayList<>();
+    private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();;
+    String cUserID = user.getEmail().replaceAll("[^a-zA-Z0-9]", "");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +68,7 @@ public class FriendsSearch extends AppCompatActivity {
                 searchResults.clear();
              //   SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
              //   String userid = sp.getString("userID", "empty");
-                Search sea = new Search(s,"not_needed");
+                Search sea = new Search(s,cUserID);
                 searchResults = sea.searchAll();
                 FriendsSearchAdaptor myAdaptor = new FriendsSearchAdaptor(searchResults, FriendsSearch.this);
                 recyclerView.setAdapter(myAdaptor);

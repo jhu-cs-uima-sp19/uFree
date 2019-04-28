@@ -41,8 +41,14 @@ public class Search {
                 .addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
-                    ids.add(new FriendsSearchData(dataSnapshot.getKey()));
-                 //   Log.d("test",dataSnapshot.getKey().toString());
+                String temp = dataSnapshot.getKey();
+                if(temp.equals(userId)){
+
+                }
+                else {
+                    ids.add(new FriendsSearchData(temp));
+              //      Log.d("test3",dataSnapshot.getKey());
+                }
             }
 
                     @Override
