@@ -1,5 +1,6 @@
 package com.example.ufree;
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
@@ -35,7 +36,6 @@ import android.widget.TimePicker;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.FirebaseApp;
@@ -50,7 +50,6 @@ import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,6 +73,7 @@ public class MainActivity extends AppCompatActivity
     static final java.text.DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
     static final java.text.DateFormat dateFormat = new SimpleDateFormat("MMM dd, EEE");
 
+    @SuppressLint("RestrictedApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -524,7 +524,8 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(this, EventsActivity.class);
             startActivity(intent);
         } else if (id == R.id.friends_nav) {
-            // TODO: implement friend activity
+            Intent intent = new Intent(this, FriendsActivity.class);
+            startActivity(intent);
         } else if (id == R.id.calendar_nav) {
             // TODO: implement calendar activity
         } else if (id == R.id.profile_nav) {
