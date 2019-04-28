@@ -8,12 +8,8 @@ public class User {
     private String fullName;
     private String phone;
     public HashMap<String, Integer> events;
-    private int startDay;
-    private int startHour;
-    private int startMinute;
-    private int endDay;
-    private int endHour;
-    private int endMinute;
+    private long startTime;
+    private long endTime;
     private boolean isFree;
 
     public User() {
@@ -26,12 +22,8 @@ public class User {
         this.phone = p;
         this.email = e;
         this.isFree = false;
-        this.startDay = 0;
-        this.startHour = 0;
-        this.startMinute = 0;
-        this.endDay = 0;
-        this.endHour = 0;
-        this.endMinute = 0;
+        this.startTime = 0;
+        this.endTime = 0;
         this.events = eventsList;
     }
 
@@ -39,12 +31,8 @@ public class User {
         this.email = that.email;
         this.fullName = that.fullName;
         this.phone = that.phone;
-        this.startDay = that.startDay;
-        this.startHour = that.startHour;
-        this.startMinute = that.startMinute;
-        this.endDay = that.endDay;
-        this.endHour = that.endHour;
-        this.endMinute = that.endMinute;
+        this.startTime = that.startTime;
+        this.endTime = that.endTime;
         this.isFree = that.isFree;
         this.events = that.events;
     }
@@ -61,44 +49,22 @@ public class User {
         return this.phone;
     }
 
-    public int getStartDay() {
-        return this.startDay;
-    }
+    public long getStartTime() { return this.startTime; }
 
-    public int getStartHour() {
-        return this.startHour;
-    }
-
-    public int getStartMinute() {
-        return this.startMinute;
-    }
-
-    public int getEndDay() {
-        return this.endDay;
-    }
-
-    public int getEndHour() {
-        return this.endHour;
-    }
-
-    public int getEndMinute() {
-        return this.endMinute;
+    public long getEndTime() {
+        return this.endTime;
     }
 
     public boolean getIsFree() {
         return this.isFree;
     }
 
-    public int getEndTime() {
-        return this.endHour * 60 + this.endMinute;
-    }
-
 
     public String toString() {
         return "User email: " + this.email + "\nname: " + this.fullName
                 + "\nphone : " + this.phone + "\nisFree: " + this.isFree
-                + "\nstartTime: " + this.startDay + ", " + this.startHour + ", " + this.startMinute
-                + "\nendTime: " + this.endDay + ", " + this.endHour + ", " + this.endMinute + "\n";
+                + "\nstartTime: " + this.startTime + ", "
+                + "\nendTime: " + this.endTime + "\n";
     }
 
 }

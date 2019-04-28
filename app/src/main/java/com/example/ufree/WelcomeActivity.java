@@ -1,19 +1,28 @@
 package com.example.ufree;
 
+import android.app.Dialog;
+import android.app.TimePickerDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -24,21 +33,29 @@ import java.util.Calendar;
 
 public class WelcomeActivity extends AppCompatActivity {
 
-    View popupView;
+    static View popupView;
     private FirebaseUser user;
+    static Calendar endCalendar;
+    static String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
 
-        final FirebaseDatabase database = FirebaseDatabase.getInstance();
-        final DatabaseReference mDatabase = database.getInstance().getReference();
-        final FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        // TODO: DIRECTLY GET USER ID FROM DATABASE
-        user = FirebaseAuth.getInstance().getCurrentUser();
-        String temp = user.getEmail().replaceAll("@", "");
-        final String userId = temp.replaceAll("\\.", "");
+        // get user id from Shared Preferences
+        SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
+        userId = sp.getString("userID", "dummy");
+        // if there is no user id in Shared Preferences, go back to log in
+        if (userId.equals("dummy")) {
+            Log.d("debug", "userId in Shared Preferences is null");
+            startActivity(new Intent(WelcomeActivity.this, LogIn.class));
+            finish();
+            return;
+        }
+
+        endCalendar = Calendar.getInstance();
+        endCalendar.add(Calendar.MINUTE, 30);
 
         ImageView yes = (ImageView) findViewById(R.id.yes_welcome);
         yes.setOnClickListener(new View.OnClickListener() {
@@ -62,32 +79,30 @@ public class WelcomeActivity extends AppCompatActivity {
                 popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
                 popupWindow.setBackgroundDrawable(new ColorDrawable(Color.WHITE));
 
-                // set up seek bar
-                SeekBar seekbar = popupView.findViewById(R.id.seekBar_welcome);
-                seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                    int currentProgress;
-                    TextView currentProgressTextView = popupView.findViewById(R.id.currentProgressTextView_welcome);
-
+                // set up time picker for date button
+                Button timeButton = popupView.findViewById(R.id.timeButton_welcome);
+                timeButton.setText(MainActivity.timeFormat.format(endCalendar.getTime()));
+                timeButton.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        currentProgress = progress;
-                        double currentHours = currentProgress * 23.5 / 100 + 0.5;
-                        String text = getString(R.string.currentProgressText_welcome, currentHours);
-                        currentProgressTextView.setText(text);
+                    public void onClick(View v) {
+                        DialogFragment timePickerFragment = new TimePickerFragmentWelcome();
+                        timePickerFragment.show(getSupportFragmentManager(), "timePickerWelcome");
                     }
+                });
 
+                // set up date button
+                final Button dateButton = popupView.findViewById(R.id.dateButton_welcome);
+                dateButton.setText(getString(R.string.today_nav));
+                dateButton.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {
-                        double currentHours = currentProgress * 23.5 / 100 + 0.5;
-                        String text = getString(R.string.currentProgressText_welcome, currentHours);
-                        currentProgressTextView.setText(text);
-                    }
-
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {
-                        double currentHours = currentProgress * 23.5 / 100 + 0.5;
-                        String text = getString(R.string.currentProgressText_welcome, currentHours);
-                        currentProgressTextView.setText(text);
+                    public void onClick(View v) {
+                        if (dateButton.getText().toString().equals(getString(R.string.today_nav))) {
+                            dateButton.setText(getString(R.string.tomorrow_nav));
+                            endCalendar.add(Calendar.DATE, 1);
+                        } else {
+                            dateButton.setText(getString(R.string.today_nav));
+                            endCalendar.add(Calendar.DATE, -1);
+                        }
                     }
                 });
 
@@ -109,38 +124,17 @@ public class WelcomeActivity extends AppCompatActivity {
                         FirebaseDatabase database = FirebaseDatabase.getInstance();
                         DatabaseReference dbRef = database.getReference();
 
-                        // calculate start and end time
-                        Calendar calendar = Calendar.getInstance();
-                        // TODO: integrate year as part of free time
-                        int startDay = calendar.get(Calendar.DAY_OF_YEAR);
-                        int startHour = calendar.get(Calendar.HOUR_OF_DAY);
-                        int startMinute = calendar.get(Calendar.MINUTE);
+                        Calendar now = Calendar.getInstance();
 
-                        SeekBar seekbar = popupView.findViewById(R.id.seekBar_welcome);
-                        int freeMinute = (int)((seekbar.getProgress() * 23.5 / 100 + 0.5) * 60);
-                        Log.d("free time", "freeMinute: " + freeMinute);
-
-                        int endDay = startDay;
-                        int endTime = startHour * 60 + startMinute + freeMinute;
-                        //Log.d("free time", "endTime: " + endTime);
-                        if (endTime >= 24 * 60) {
-                            endTime -= 24 * 60;
-                            endDay++;
+                        if (now.getTimeInMillis() < endCalendar.getTimeInMillis()) {
+                            dbRef.child("users").child(userId).child("startTime").setValue(now.getTimeInMillis());
+                            dbRef.child("users").child(userId).child("endTime").setValue(endCalendar.getTimeInMillis());
+                            dbRef.child("users").child(userId).child("isFree").setValue(true);
+                            popupWindow.dismiss();
+                            finish();
+                        } else {
+                            Toast.makeText(view.getContext(), "You cannot select time before current time", Toast.LENGTH_SHORT).show();
                         }
-
-                        int endHour = endTime / 60;
-                        int endMinute = endTime - endHour * 60;
-
-                        dbRef.child("users").child(userId).child("startDay").setValue(startDay);
-                        dbRef.child("users").child(userId).child("startHour").setValue(startHour);
-                        dbRef.child("users").child(userId).child("startMinute").setValue(startMinute);
-                        dbRef.child("users").child(userId).child("endDay").setValue(endDay);
-                        dbRef.child("users").child(userId).child("endHour").setValue(endHour);
-                        dbRef.child("users").child(userId).child("endMinute").setValue(endMinute);
-                        dbRef.child("users").child(userId).child("isFree").setValue(true);
-
-                        popupWindow.dismiss();
-                        finish();
                     }
                 });
 
@@ -154,11 +148,41 @@ public class WelcomeActivity extends AppCompatActivity {
                 // initialize firebase
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();
+                Calendar now = Calendar.getInstance();
                 dbRef.child("users").child(userId).child("isFree").setValue(false);
+                dbRef.child("users").child(userId).child("endTime").setValue(now.getTimeInMillis());
                 finish();
             }
         });
 
+    }
+
+    // Time picker for time button in the pop up window
+    public static class TimePickerFragmentWelcome extends DialogFragment
+            implements TimePickerDialog.OnTimeSetListener {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Create a new instance of TimePickerDialog and return it
+            Calendar calendar = Calendar.getInstance();
+            // free for 30 minutes by default
+            calendar.add(Calendar.MINUTE, 30);
+            int endHour = calendar.get(Calendar.HOUR_OF_DAY);
+            int endMinute = calendar.get(Calendar.MINUTE);
+            return new TimePickerDialog(getActivity(), this, endHour, endMinute,
+                    DateFormat.is24HourFormat(getActivity()));
+        }
+
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            endCalendar.set(
+                    endCalendar.get(Calendar.YEAR),
+                    endCalendar.get(Calendar.MONTH),
+                    endCalendar.get(Calendar.DAY_OF_MONTH),
+                    hourOfDay, minute
+            );
+            Button timeButton = popupView.findViewById(R.id.timeButton_welcome);
+            timeButton.setText(MainActivity.timeFormat.format(endCalendar.getTime()));
+        }
     }
 
 }
