@@ -37,5 +37,63 @@
     <string name="search">Search</string>
     <string name="close">Close</string>
     <string name="changeStatus_nav">Free now till</string>
+    <string name="today_nav">Today</string>
+    <string name="tomorrow_nav">Tomorrow</string>
+    <string name="multiSelectedTextView_toolbar">%1$d friends selected</string>
+
+    <string-array name="monthSpinnerValues">
+        <item name="January">January</item>
+        <item name="February">February</item>
+        <item name="March">March</item>
+        <item name="April">April</item>
+        <item name="May">May</item>
+        <item name="June">June</item>
+        <item name="July">July</item>
+        <item name="August">August</item>
+        <item name="September">September</item>
+        <item name="October">October</item>
+        <item name="November">November</item>
+        <item name="December">December</item>
+    </string-array>
+
+    <string-array name="hourSpinnerValues">
+        <item name="midnight">12 AM</item>
+        <item name="oneAM">1 AM</item>
+        <item name="twoAM">2 AM</item>
+        <item name="threeAM">3 AM</item>
+        <item name="fourAM">4 AM</item>
+        <item name="fiveAM">5 AM</item>
+        <item name="sixAM">6 AM</item>
+        <item name="sevenAM">7 AM</item>
+        <item name="eightAM">8 AM</item>
+        <item name="nineAM">9 AM</item>
+        <item name="tenAM">10 AM</item>
+        <item name="elevenAM">11 AM</item>
+        <item name="noon">12 PM</item>
+        <item name="onePM">1 PM</item>
+        <item name="twoPM">2 PM</item>
+        <item name="threePM">3 PM</item>
+        <item name="fourPM">4 PM</item>
+        <item name="fivePM">5 PM</item>
+        <item name="sixPM">6 PM</item>
+        <item name="sevenPM">7 PM</item>
+        <item name="eightPM">8 PM</item>
+        <item name="ninePM">9 PM</item>
+        <item name="tenPM">10 PM</item>
+        <item name="elevenPM">11 PM</item>
+    </string-array>
+
+    <string-array name="minuteSpinnerValues">
+        <item name="00">00</item>
+        <item name="15">15</item>
+        <item name="30">30</item>
+        <item name="45">45</item>
+    </string-array>
+
     <string name="currentProgressText_welcome">%1$.1f hours</string>
+    <string name="title_activity_friends">Friends</string>
+
+    <!-- FriendsActivity -->
+    <string name="friend_requests">Friend Requests</string>
+    <string name="friends">Friends</string>
 </resources>
