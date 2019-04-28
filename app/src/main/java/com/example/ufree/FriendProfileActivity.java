@@ -278,6 +278,7 @@ public class FriendProfileActivity extends AppCompatActivity {
 
                                     mDatabase1.child(idOfCurrentUser).child("frienders").child(deleteeId).removeValue();
                                     mDatabase2.child(userId).child("frienders").child(deleterId).removeValue();
+                                    finish();
                                 }
                             });
                     alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
