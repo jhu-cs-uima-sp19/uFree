@@ -240,7 +240,8 @@ public class ProfileActivity extends AppCompatActivity
             }
         });
 
-        // TODO: Delete account from authentication, not just from database
+        //ToDO
+        //delete Auth???? maybe lost in merging
         deleteAccount.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 

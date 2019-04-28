@@ -64,5 +64,14 @@
         app:layout_constraintVertical_bias="0.666"
         app:srcCompat="@drawable/icons8_delete_64" />
 
+    <TextView
+        android:id="@+id/textViewRequestID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:visibility="invisible"
+        tools:layout_editor_absoluteX="92dp"
+        tools:layout_editor_absoluteY="337dp" />
+
 
 </android.support.constraint.ConstraintLayout>

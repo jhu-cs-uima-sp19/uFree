@@ -179,7 +179,7 @@ public class FriendsActivity extends AppCompatActivity
                             System.out.println(dataSnapshot.getKey());
                             spEdit.apply();
 
-                            Log.d("test", "here" + currentUser.toString());
+              //              Log.d("test", "here" + currentUser.toString());
 
                             // if user has been asked for availability, do NOT ask again
                             if (!checkedAvailability) {

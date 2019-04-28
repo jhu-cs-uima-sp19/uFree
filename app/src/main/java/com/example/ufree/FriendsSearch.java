@@ -2,6 +2,7 @@ package com.example.ufree;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -60,13 +61,10 @@ public class FriendsSearch extends AppCompatActivity {
             public boolean onQueryTextSubmit(String s) {
                 searchView.clearFocus();
                 searchResults.clear();
-
-                // TODO. Replace with the actual search araylist
-                FriendsSearchData temp = new FriendsSearchData("joanne@cs.jhu.edu");
-                searchResults.add(temp);
-                temp = new FriendsSearchData("djhfg@dskjf.com");
-                searchResults.add(temp);
-
+             //   SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
+             //   String userid = sp.getString("userID", "empty");
+                Search sea = new Search(s,"not_needed");
+                searchResults = sea.searchAll();
                 FriendsSearchAdaptor myAdaptor = new FriendsSearchAdaptor(searchResults, FriendsSearch.this);
                 recyclerView.setAdapter(myAdaptor);
                 return false;
