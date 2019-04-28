@@ -301,17 +301,21 @@ public class MainActivity extends AppCompatActivity
                     selectedCalendar.get(Calendar.MONTH),
                     selectedCalendar.get(Calendar.DAY_OF_MONTH),
                     hourOfDay, minute, 0);
-            int selectedHour = selectedCalendar.get(Calendar.HOUR_OF_DAY);
-            int selectedMinute = selectedCalendar.get(Calendar.MINUTE);
-            // change the dummy user to invoke onDataChange
-            FirebaseDatabase database = FirebaseDatabase.getInstance();
-            DatabaseReference dbRef = database.getReference();
-            dummyUserIsFree = !dummyUserIsFree;
-            dbRef.child("users").child("dummy").child("isFree").setValue(dummyUserIsFree);
-            // change text view for time button
-            Button timeButton = getActivity().findViewById(R.id.timeButton_main);
-            Time selectedTime = new Time(selectedHour, selectedMinute, 0);
-            timeButton.setText(timeFormat.format(selectedTime));
+            Calendar now = Calendar.getInstance();
+            if (selectedCalendar.getTimeInMillis() < now.getTimeInMillis()) {
+                Toast.makeText(getContext(), "You cannot select time before current time", Toast.LENGTH_SHORT).show();
+                DialogFragment datePickerFragment = new TimePickerFragmentBottom();
+                datePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerBottom");
+            } else {
+                // change the dummy user to invoke onDataChange
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference dbRef = database.getReference();
+                dummyUserIsFree = !dummyUserIsFree;
+                dbRef.child("users").child("dummy").child("isFree").setValue(dummyUserIsFree);
+                // change text view for time button
+                Button timeButton = getActivity().findViewById(R.id.timeButton_main);
+                timeButton.setText(timeFormat.format(selectedCalendar.getTime()));
+            }
         }
     }
 
@@ -340,23 +344,30 @@ public class MainActivity extends AppCompatActivity
             // Do something with the date chosen by the user
             Calendar today = Calendar.getInstance();
             Calendar chosen = Calendar.getInstance();
-            chosen.set(year, month, day);
+            chosen.set(year, month, day, selectedCalendar.get(Calendar.HOUR_OF_DAY), selectedCalendar.get(Calendar.MINUTE));
             int chosenDay = chosen.get(Calendar.DAY_OF_YEAR);
             int nowDay = today.get(Calendar.DAY_OF_YEAR);
             // the user can only choose today or tomorrow
-            if (chosenDay - nowDay == 1 || chosenDay == nowDay
-            || ((nowDay == 365 || nowDay == 366) && chosenDay == 1 )) {
-                selectedCalendar.set(
-                        year, month, day,
-                        selectedCalendar.get(Calendar.HOUR_OF_DAY),
-                        selectedCalendar.get(Calendar.HOUR_OF_DAY), 0);
-                Button dateButton = getActivity().findViewById(R.id.dateButton_main);
-                dateButton.setText(dateFormat.format(selectedCalendar.getTime()));
-                // change the dummy user to invoke onDataChange
-                FirebaseDatabase database = FirebaseDatabase.getInstance();
-                DatabaseReference dbRef = database.getReference();
-                dummyUserIsFree = !dummyUserIsFree;
-                dbRef.child("users").child("dummy").child("isFree").setValue(dummyUserIsFree);
+            if (chosenDay - nowDay == 1
+                    || (chosenDay == nowDay)
+                    || ((nowDay == 365 || nowDay == 366) && chosenDay == 1 )) {
+                if (today.getTimeInMillis() > chosen.getTimeInMillis()) {
+                    Toast.makeText(getContext(), "You cannot select time before current time", Toast.LENGTH_SHORT).show();
+                    DialogFragment datePickerFragment = new DatePickerFragment();
+                    datePickerFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
+                } else {
+                    selectedCalendar.set(
+                            year, month, day,
+                            selectedCalendar.get(Calendar.HOUR_OF_DAY),
+                            selectedCalendar.get(Calendar.HOUR_OF_DAY), 0);
+                    Button dateButton = getActivity().findViewById(R.id.dateButton_main);
+                    dateButton.setText(dateFormat.format(selectedCalendar.getTime()));
+                    // change the dummy user to invoke onDataChange
+                    FirebaseDatabase database = FirebaseDatabase.getInstance();
+                    DatabaseReference dbRef = database.getReference();
+                    dummyUserIsFree = !dummyUserIsFree;
+                    dbRef.child("users").child("dummy").child("isFree").setValue(dummyUserIsFree);
+                }
             } else {
                 Toast.makeText(getContext(), "You can only select today or tomorrow", Toast.LENGTH_SHORT).show();
                 DialogFragment datePickerFragment = new DatePickerFragment();
