@@ -361,6 +361,11 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
                                     eventIds.put("-1", one);
                                     eventIds.put("-2", two);
                                     dbRef.child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(fullName, phoneNumber, email, eventIds));
+                                    // save user id in Shared Preferences
+                                    SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
+                                    SharedPreferences.Editor preferencesEditor = sp.edit();
+                                    preferencesEditor.putString("userID", email.replaceAll("[^a-zA-Z0-9]", ""));
+                                    preferencesEditor.apply();
                                     startActivity(new Intent(SignUp.this, MainActivity.class));
                                     finish();
                                 }
