@@ -46,7 +46,6 @@ public class FriendsSearchAdaptor extends RecyclerView.Adapter {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         //Use the provided View Holder on the onCreateViewHolder method to populate the current row on the RecyclerView
         final FriendsSearchViewHolder myHolder = (FriendsSearchViewHolder) holder;
-        myHolder.email.setText(list.get(position).email);
         String id = list.get(position).email.replaceAll("[^a-zA-Z0-9]", "");
         dbref.child(id).addValueEventListener(new ValueEventListener() {
             @Override
@@ -54,6 +53,7 @@ public class FriendsSearchAdaptor extends RecyclerView.Adapter {
                 User user = dataSnapshot.getValue(User.class);
                 if (user != null) {
                     myHolder.name.setText(user.getFullName());
+                    myHolder.email.setText(user.getEmail());
                 }
             }
 
