@@ -2,6 +2,7 @@ package com.example.ufree;
 
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
@@ -26,10 +28,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -58,6 +60,8 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Time;
 import java.util.Calendar;
+
+import static com.example.ufree.MainActivity.timeFormat;
 
 public class ProfileActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -142,23 +146,30 @@ public class ProfileActivity extends AppCompatActivity
                                 .into(picView);
                     }
 
+                    /* NAV DRAWER */
                     /* Display user info in navigation header */
                     NavigationView navigationView = findViewById(R.id.nav_view);
                     View navHeader = navigationView.getHeaderView(0);
-                    if (navHeader != null) {
-                        TextView nameTextView = navHeader.findViewById(R.id.name_nav);
-                        TextView emailTextView = navHeader.findViewById(R.id.email_nav);
-                        nameTextView.setText(currentUser.getFullName());
-                        emailTextView.setText(currentUser.getEmail());
-                        Switch toggle = findViewById(R.id.toggle_nav);
-                        Button currentStatusButton = findViewById(R.id.timeButton_nav);
-                        toggle.setChecked(currentUser.getIsFree());
-                        Time t = new Time(currentUser.getEndHour(), currentUser.getEndMinute(), 0);
-                        currentStatusButton.setText(MainActivity.timeFormat.format(t));
+
+                    TextView nameTextView = navHeader.findViewById(R.id.name_nav);
+                    TextView emailTextView = navHeader.findViewById(R.id.email_nav);
+                    nameTextView.setText(currentUser.getFullName());
+                    emailTextView.setText(currentUser.getEmail());
+
+                    Switch toggle = findViewById(R.id.toggle_nav);
+                    toggle.setChecked(currentUser.getIsFree());
+
+                    Button currentStatusButton = findViewById(R.id.timeButton_nav);
+                    Calendar endCalendar = Calendar.getInstance();
+                    endCalendar.setTimeInMillis(currentUser.getEndTime());
+                    currentStatusButton.setText(timeFormat.format(endCalendar.getTime()));
+
+                    Button dateButtonNav = findViewById(R.id.dateButton_nav);
+                    Calendar today = Calendar.getInstance();
+                    if (today.get(Calendar.DAY_OF_YEAR) == endCalendar.get(Calendar.DAY_OF_YEAR)) {
+                        dateButtonNav.setText(getString(R.string.today_nav));
                     } else {
-                        Log.d("debug", "Nav view is null");
-                        Log.d("debug", "Nav view: " + navigationView);
-                        Log.d("debug", "Nav header: " + navHeader);
+                        dateButtonNav.setText(getString(R.string.tomorrow_nav));
                     }
                 } else {
                     startActivity(new Intent(ProfileActivity.this, LogIn.class));
@@ -171,11 +182,11 @@ public class ProfileActivity extends AppCompatActivity
             }
         });
 
-
-
+        /* NAV DRAWER */
         // Set up listener for toggle and time button in nav drawer
         Switch toggleNav = findViewById(R.id.toggle_nav);
         Button currentStatusButton = findViewById(R.id.timeButton_nav);
+        Button dateButtonNav = findViewById(R.id.dateButton_nav);
         toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 dbRef.child("users").child(userId).child("isFree").setValue(isChecked);
@@ -184,12 +195,56 @@ public class ProfileActivity extends AppCompatActivity
         currentStatusButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DialogFragment timePickerFragment = new ProfileActivity.TimePickerFragmentNav();
+                DialogFragment timePickerFragment = new TimePickerFragmentNav();
                 timePickerFragment.show(getSupportFragmentManager(), "timePickerNav");
             }
         });
+        dateButtonNav.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Button dateButtonNav = v.findViewById(R.id.dateButton_nav);
 
-        // Set up listener for log out in nav drawer
+                Calendar endCalendar = Calendar.getInstance();
+                endCalendar.setTimeInMillis(currentUser.getEndTime());
+
+                Calendar newEnd = Calendar.getInstance();
+                newEnd.set(
+                        newEnd.get(Calendar.YEAR),
+                        newEnd.get(Calendar.MONTH),
+                        newEnd.get(Calendar.DAY_OF_MONTH),
+                        endCalendar.get(Calendar.HOUR_OF_DAY),
+                        endCalendar.get(Calendar.MINUTE)
+                );
+
+                // today --> tomorrow
+                if (dateButtonNav.getText().toString().equals(getString(R.string.today_nav))) {
+                    // add one day
+                    newEnd.add(Calendar.DATE, 1);
+                    // update end time in database
+                    FirebaseDatabase database = FirebaseDatabase.getInstance();
+                    DatabaseReference dbRef = database.getReference();
+                    dbRef.child("users").child(userId).child("endTime").setValue(newEnd.getTimeInMillis());
+                    // change button text
+                    dateButtonNav.setText(getString(R.string.tomorrow_nav));
+                } else {
+                    // tomorrow --> today
+                    // do not change day
+                    Calendar now = Calendar.getInstance();
+                    if (newEnd.getTimeInMillis() < now.getTimeInMillis()) {
+                        Toast.makeText(v.getContext(), "You cannot set free time before current time", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // update end time in database
+                        FirebaseDatabase database = FirebaseDatabase.getInstance();
+                        DatabaseReference dbRef = database.getReference();
+                        dbRef.child("users").child(userId).child("endTime").setValue(newEnd.getTimeInMillis());
+                        // change button text
+                        dateButtonNav.setText(getString(R.string.today_nav));
+                    }
+                }
+            }
+        });
+
+        // Set up listener for log out
         ImageView exitImageView = findViewById(R.id.exitImageView_nav);
         TextView logoutTextView = findViewById(R.id.logout_nav);
         exitImageView.setOnClickListener(new View.OnClickListener() {
@@ -241,16 +296,25 @@ public class ProfileActivity extends AppCompatActivity
             public void onClick(View v) {
                 if(!nameEditView.isEnabled()){
                     nameEditView.setEnabled(true);
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
                     userNameButton.setImageResource(R.drawable.ic_check_orange_24dp);
                 }
                 else if(nameEditView.isEnabled()){
                     String value = nameEditView.getText().toString().trim();
-                    String[] splited = value.split("\\s+");
-                    if(splited.length < 2){
-                        Toast.makeText(getBaseContext(), "Please Include Both First And Last Name", Toast.LENGTH_LONG).show();
+                    boolean valid = true;
+                    for (int i = 0; i < value.length(); i++) {
+                        char c = value.charAt(i);
+                        if (!Character.isLetter(c) && c != ' ') {
+                            valid = false;
+                            break;
+                        }
                     }
-                    else if(splited.length > 2){
-                        Toast.makeText(getBaseContext(), "Please Include Only First And Last Name", Toast.LENGTH_LONG).show();
+                    if(value.length() == 0){
+                        Toast.makeText(getBaseContext(), "Please enter a valid name", Toast.LENGTH_SHORT).show();
+                    }
+                    else if(!valid){
+                        Toast.makeText(getBaseContext(), "A valid name cannot contain non-letter character", Toast.LENGTH_LONG).show();
                     }
                     else {
                         dbRef.child("users").child(userId).child("fullName").setValue(value);
@@ -274,6 +338,8 @@ public class ProfileActivity extends AppCompatActivity
             public void onClick(View v) {
                 if(!phoneEditView.isEnabled()){
                     phoneEditView.setEnabled(true);
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
                     phoneButton.setImageResource(R.drawable.ic_check_orange_24dp);
                 }
                 else if(phoneEditView.isEnabled()){
@@ -290,7 +356,8 @@ public class ProfileActivity extends AppCompatActivity
             }
         });
 
-        // TODO: Delete account from authentication, not just from database
+        //ToDO
+        //delete Auth???? maybe lost in merging
         deleteAccount.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
@@ -320,7 +387,6 @@ public class ProfileActivity extends AppCompatActivity
                         startActivity(intent);
                         dialog.dismiss();
                         finish();
-                        return;
                     }
                 });
 
@@ -402,54 +468,52 @@ public class ProfileActivity extends AppCompatActivity
     }
 
     // Time picker for time button in the ** nav drawer **
+    /* NAV DRAWER */
+    // Time picker for time button in the ** NAV DRAWER **
     public static class TimePickerFragmentNav extends DialogFragment
             implements TimePickerDialog.OnTimeSetListener {
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             // Create a new instance of TimePickerDialog and return it
-            // TODO: DIRECTLY GET USER ID FROM DATABASE
-            int endHour = 0;
-            int endMinute = 0;
-            if (currentUser != null) {
-                endHour = currentUser.getEndHour();
-                endMinute = currentUser.getEndMinute();
-            } else {
-                Log.d("debug", "current user is null from time picker in nav drawer");
-            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(currentUser.getEndTime());
+            int endHour = calendar.get(Calendar.HOUR_OF_DAY);
+            int endMinute = calendar.get(Calendar.MINUTE);
             return new TimePickerDialog(getActivity(), this, endHour, endMinute,
                     DateFormat.is24HourFormat(getActivity()));
         }
 
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            Calendar now = Calendar.getInstance();
+            int currentDay = now.get(Calendar.DAY_OF_YEAR);
+
             Calendar calendar = Calendar.getInstance();
-            int currentDay = calendar.get(Calendar.DAY_OF_YEAR);
-            int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
-            int currentMinute = calendar.get(Calendar.MINUTE);
-            int currentTime = currentHour * 60 + currentMinute;
-            int endDay = currentUser.getEndDay();
+            calendar.setTimeInMillis(currentUser.getEndTime());
+            calendar.set(calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH),
+                    hourOfDay, minute);
+            int endDay = calendar.get(Calendar.DAY_OF_YEAR);
+
             // if user set free time less than current time
-            if (currentDay == endDay && currentTime >= hourOfDay * 60 + minute) {
+            if (currentDay == endDay && now.getTimeInMillis() >= calendar.getTimeInMillis()) {
                 Toast.makeText(getContext(), "You cannot set free time before current time", Toast.LENGTH_LONG).show();
-                DialogFragment timePickerFragment = new ProfileActivity.TimePickerFragmentNav();
+                DialogFragment timePickerFragment = new TimePickerFragmentNav();
                 timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
             } else {
                 // update selected calendar object
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();
-                dbRef.child("users").child(userId).child("endHour").setValue(hourOfDay);
-                dbRef.child("users").child(userId).child("endMinute").setValue(minute);
-                Log.d("debug", "user id is null");
 
-                // TODO: enable change date
+                dbRef.child("users").child(userId).child("endTime").setValue(calendar.getTimeInMillis());
+
                 // change text view for time button
                 Button timeButton = getActivity().findViewById(R.id.timeButton_nav);
-                Time selectedTime = new Time(hourOfDay, minute, 0);
-                timeButton.setText(MainActivity.timeFormat.format(selectedTime));
+                timeButton.setText(timeFormat.format(calendar.getTime()));
             }
         }
     }
-
 
     @Override
     public void onBackPressed() {
@@ -481,7 +545,8 @@ public class ProfileActivity extends AppCompatActivity
             Intent intent = new Intent(this, EventsActivity.class);
             startActivity(intent);
         } else if (id == R.id.friends_nav) {
-
+            Intent intent = new Intent(this, FriendsActivity.class);
+            startActivity(intent);
         } else if (id == R.id.calendar_nav) {
 
         } else if (id == R.id.profile_nav) {
@@ -491,5 +556,13 @@ public class ProfileActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        // set Who's Free to be selected
+        navigationView.getMenu().getItem(4).setChecked(true);
     }
 }

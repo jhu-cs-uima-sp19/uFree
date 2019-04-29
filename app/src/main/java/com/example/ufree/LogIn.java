@@ -59,6 +59,7 @@ public class LogIn extends AppCompatActivity implements LoaderCallbacks<Cursor> 
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private String email;
 
     private FirebaseAuth auth;
 
@@ -110,7 +111,7 @@ public class LogIn extends AppCompatActivity implements LoaderCallbacks<Cursor> 
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
+        email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
@@ -270,6 +271,11 @@ public class LogIn extends AppCompatActivity implements LoaderCallbacks<Cursor> 
             showProgress(false);
 
             if (success) {
+                // save user id in Shared Preferences
+                SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
+                SharedPreferences.Editor preferencesEditor = sp.edit();
+                preferencesEditor.putString("userID", mEmail.replaceAll("[^a-zA-Z0-9]", ""));
+                preferencesEditor.apply();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
