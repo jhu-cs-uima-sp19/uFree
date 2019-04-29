@@ -152,16 +152,18 @@ public class FriendsActivity extends AppCompatActivity
                 //      final ArrayList<FriendsExistingData> existingFriends = new ArrayList<FriendsExistingData>();
                 databaseReference.child("users").child(userId).child("incomingFriends").orderByValue()
                         .addChildEventListener(new ChildEventListener() {
+
                             @Override
                             public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
                                 //incomingFriends.put(dataSnapshot.getKey(),(String)dataSnapshot.getValue());
-
+                                incomingFriendsPre.clear();
 
                                 String id = ((String) dataSnapshot.getValue()).replaceAll("[^a-zA-Z0-9]", "");
                                 Query query = databaseReference.child("users").child(id).orderByChild("fullName");
                                 query.addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
+
                                         //    Log.d("test5", dataSnapshot.getKey() + "  " + dataSnapshot.child("fullName").getValue());
                                         incomingFriendsPre.put((String)dataSnapshot.child("email").getValue(), (String) dataSnapshot.child("fullName").getValue());
                                     }
@@ -227,9 +229,12 @@ public class FriendsActivity extends AppCompatActivity
 
                 databaseReference.child("users").child(userId).child("frienders").orderByValue()
                         .addChildEventListener(new ChildEventListener() {
+
+
                             @Override
                             public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
                                 //incomingFriends.put(dataSnapshot.getKey(),(String)dataSnapshot.getValue());
+                                incomingFriendsPre.clear();
 
 
                                 String id = ((String) dataSnapshot.getValue()).replaceAll("[^a-zA-Z0-9]", "");
@@ -312,6 +317,7 @@ public class FriendsActivity extends AppCompatActivity
 
 
                                 if (incomingFriends != null) {
+                                    friendRequestData.clear();
                                     // If user and incoming friends list are valid
 
                                     //     for (HashMap.Entry<String,String> entry : incomingFriends.entrySet()){
@@ -329,6 +335,7 @@ public class FriendsActivity extends AppCompatActivity
                                     friendRequestsView.setAdapter(myAdaptor);
                                 }
                                 if (existingFriends != null) {
+                                    friendsExistingData.clear();
                                     for (int i = 0; i < existingFriends.size(); i++) {
                                         friendsExistingData.add(new FriendsExistingData(existingFriends.get(i)));
                                     }
