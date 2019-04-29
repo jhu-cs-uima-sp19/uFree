@@ -50,7 +50,12 @@ import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
@@ -217,20 +222,26 @@ public class MainActivity extends AppCompatActivity
                         adapter.notifyDataSetChanged();
 
                         if (currentUser != null) {
-                            for (Map.Entry<String, User> entry : allUsers.entrySet()) {
-                                String userId = entry.getKey();
-                                User user = entry.getValue();
+                            // Get current user's friends
+                            HashMap<String, String> friends = currentUser.getFrienders();
+                            for (String friendEmail : friends.values()) {
+                                User user = allUsers.get(friendEmail.replaceAll("[^a-zA-Z0-9]", ""));
                                 if (user != null && user.getEmail() != null
                                         // skip the current user and dummy user
                                         && !user.getEmail().equals(currentUser.getEmail())
                                         && !user.getEmail().equals("dummy")
                                         && user.getIsFree()) {
                                     if (selectedCalendar.getTimeInMillis() < user.getEndTime()) {
-                                        freeFriends.put(userId, new User(user));
-                                        adapter.notifyDataSetChanged();
+                                        freeFriends.put(friendEmail.replaceAll("[^a-zA-Z0-9]", ""), new User(user));
                                     }
                                 }
                             }
+                            HashMap<String, User> sortedFreeFriends = sortByTime(freeFriends);
+                            freeFriends.clear();
+                            for (Map.Entry<String, User> entry: sortedFreeFriends.entrySet()) {
+                                freeFriends.put(entry.getKey(), entry.getValue());
+                            }
+                            adapter.notifyDataSetChanged();
                         } else {
                             startActivity(new Intent(MainActivity.this, LogIn.class));
                             finish();
@@ -621,4 +632,30 @@ public class MainActivity extends AppCompatActivity
         // set Who's Free to be selected
         navigationView.getMenu().getItem(0).setChecked(true);
     }
+
+    // function to sort hashmap by values
+    public static HashMap<String, User> sortByTime(HashMap<String, User> hm)
+    {
+        // Create a list from elements of HashMap
+        List<Map.Entry<String, User> > list =
+                new LinkedList<>(hm.entrySet());
+
+        // Sort the list
+        Collections.sort(list, new Comparator<Map.Entry<String, User> >() {
+            public int compare(Map.Entry<String, User> o1,
+                               Map.Entry<String, User> o2)
+            {
+                return 0 - (Long.valueOf(o1.getValue().getEndTime())).compareTo(Long.valueOf(o2.getValue().getEndTime()));
+            }
+        });
+
+        // put data from sorted list to hashmap
+        HashMap<String, User> temp = new LinkedHashMap<String, User>();
+        for (Map.Entry<String, User> aa : list) {
+            temp.put(aa.getKey(), aa.getValue());
+        }
+        return temp;
+    }
+
+
 }
