@@ -125,7 +125,7 @@ public class ProfileActivity extends AppCompatActivity
 
         // TODO: DIRECTLY GET USER ID FROM DATABASE
         user = FirebaseAuth.getInstance().getCurrentUser();
-        String temp = user.getEmail().replaceAll("@", "");
+        String temp = user.getEmail().replaceAll("[^a-zA-Z0-9]", "");
         userId = temp.replaceAll("\\.", "");
 
         dbRef.child("users").child(userId).addValueEventListener(new ValueEventListener() {

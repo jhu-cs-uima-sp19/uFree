@@ -1,4 +1,5 @@
 package com.example.ufree;
+
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -12,6 +13,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+
 
 import static android.support.constraint.Constraints.TAG;
 
@@ -130,6 +132,7 @@ public class Search {
 
 
     //search list of all users based on name
+
     // final FirebaseDatabase database = FirebaseDatabase.getInstance();
     // final DatabaseReference dbref =database.getInstance().getReference("users").orderByChild("fullName")
     //       .startAt(queryText).endAt(queryText+"\uf8ff");
