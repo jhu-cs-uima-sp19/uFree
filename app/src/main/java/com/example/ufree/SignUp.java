@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.widget.CardView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AutoCompleteTextView;
@@ -214,7 +215,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
                     cardView.setVisibility(View.VISIBLE);
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), filePath);
                     userView.setImageBitmap(bitmap);
-                    // TODO. Save image to db
                 } catch (IOException e) {
                     e.printStackTrace();
                     System.out.println("Gallery image failed");
@@ -228,7 +228,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
             cardView.setVisibility(View.VISIBLE);
             Bitmap bitmap = (Bitmap) data.getExtras().get("data");
             userView.setImageBitmap(bitmap);
-            // TODO. Save image to firebase
             return;
         }
     }
@@ -473,15 +472,21 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
         storageReference = storage.getReference(
                 "profilePics/" + email.replaceAll("[^a-zA-Z0-9]", "") + ".jpg");
         if (filePath != null) {
-            storageReference.putFile(filePath)
-                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    profileImageURL = storageReference.getDownloadUrl().toString();
-                    dbRef.child("users").child(email.replaceAll("[^a-zA-Z0-9]", ""))
-                            .child("profilePic").setValue(profileImageURL);
-                }
-            });
+            storageReference.putFile(filePath).addOnSuccessListener(
+                    new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    Log.d("TAG", uri.toString());
+                                    dbRef.child("users").child(email.replaceAll("[^a-zA-Z0-9]", ""))
+                                            .child("profilePic").setValue(uri.toString());
+                                }
+                            });
+                        }
+                    }
+            );
         }
     }
 }

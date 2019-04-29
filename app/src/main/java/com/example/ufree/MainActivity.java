@@ -3,6 +3,7 @@ package com.example.ufree;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -27,6 +28,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import android.widget.ImageView;
@@ -175,6 +177,13 @@ public class MainActivity extends AppCompatActivity
                                 TextView emailTextView = navHeader.findViewById(R.id.email_nav);
                                 nameTextView.setText(currentUser.getFullName());
                                 emailTextView.setText(currentUser.getEmail());
+                                String photoUrl = currentUser.getProfilePic();
+                                ImageView imageView = (ImageView) findViewById(R.id.imageView);
+                                if (photoUrl != null) {
+                                    Glide.with(getApplicationContext())
+                                            .load(photoUrl)
+                                            .into(imageView);
+                                }
                                 Switch toggle = findViewById(R.id.toggle_nav);
                                 Button currentStatusButton = findViewById(R.id.timeButton_nav);
                                 toggle.setChecked(currentUser.getIsFree());

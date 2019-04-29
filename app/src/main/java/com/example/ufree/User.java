@@ -58,7 +58,9 @@ public class User {
         return this.phone;
     }
 
-    public String getProfilePic() { return this.profilePic; }
+    public String getProfilePic() {
+        return this.profilePic;
+    }
 
     public int getStartDay() {
         return this.startDay;

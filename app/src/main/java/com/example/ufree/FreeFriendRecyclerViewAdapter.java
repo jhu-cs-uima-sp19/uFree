@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -69,6 +71,12 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
         userIds = freeFriends.keySet().toArray(new String[freeFriends.size()]);
         User freeFriend = freeFriends.get(userIds[position]);
         holder.freeFriendname.setText(freeFriend.getFullName());
+        String photoUrl = freeFriend.getProfilePic();
+        if (photoUrl != null) {
+            Glide.with(this.context)
+                    .load(photoUrl)
+                    .into(holder.profilePic);
+        }
         Calendar calendar = java.util.Calendar.getInstance();
         Time time = new Time(freeFriend.getEndHour(), freeFriend.getEndMinute(), 0);
         DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
