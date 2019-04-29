@@ -27,10 +27,4 @@
             android:title="Profile" />
     </group>
 
-    <item
-        android:id="@+id/changeFree_nav"
-        app:actionLayout="@layout/nav_extra"
-        android:title="Free now until"
-        app:showAsAction="always" />
-
 </menu>

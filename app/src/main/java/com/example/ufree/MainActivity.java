@@ -243,6 +243,43 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
         );
+
+        // Set up listener for toggle and time button in nav drawer
+        Switch toggleNav = findViewById(R.id.toggle_nav);
+        Button currentStatusButton = findViewById(R.id.timeButton_nav);
+        toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                dbRef.child("users").child(userId).child("isFree").setValue(isChecked);
+            }
+        });
+        currentStatusButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogFragment timePickerFragment = new TimePickerFragmentNav();
+                timePickerFragment.show(getSupportFragmentManager(), "timePickerNav");
+            }
+        });
+
+        // Set up listener for log out
+        ImageView exitImageView = findViewById(R.id.exitImageView_nav);
+        TextView logoutTextView = findViewById(R.id.logout_nav);
+        exitImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(MainActivity.this, LogIn.class));
+                finish();
+            }
+        });
+        logoutTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(MainActivity.this, LogIn.class));
+                finish();
+            }
+        });
+
     }
 
     // Time picker for time button at ** BOTTOM **
@@ -451,45 +488,6 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        final DatabaseReference dbRef = database.getReference();
-        // Set up listener for toggle and time button in nav drawer
-        View navExtra = findViewById(R.id.extraItem_nav);
-        Switch toggleNav = navExtra.findViewById(R.id.toggle_nav);
-        Button currentStatusButton = navExtra.findViewById(R.id.timeButton_nav);
-        toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                dbRef.child("users").child(userId).child("isFree").setValue(isChecked);
-            }
-        });
-        currentStatusButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DialogFragment timePickerFragment = new TimePickerFragmentNav();
-                timePickerFragment.show(getSupportFragmentManager(), "timePickerNav");
-            }
-        });
-
-        // Set up listener for log out
-        ImageView exitImageView = navExtra.findViewById(R.id.exitImageView_nav);
-        TextView logoutTextView = navExtra.findViewById(R.id.logout_nav);
-        exitImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(MainActivity.this, LogIn.class));
-                finish();
-            }
-        });
-        logoutTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(MainActivity.this, LogIn.class));
-                finish();
-            }
-        });
-
         return true;
     }
 
