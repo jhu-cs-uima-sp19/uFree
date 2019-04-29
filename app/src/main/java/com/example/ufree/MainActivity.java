@@ -217,16 +217,17 @@ public class MainActivity extends AppCompatActivity
                         adapter.notifyDataSetChanged();
 
                         if (currentUser != null) {
-                            for (Map.Entry<String, User> entry : allUsers.entrySet()) {
-                                String userId = entry.getKey();
-                                User user = entry.getValue();
+                            // Get current user's friends
+                            HashMap<String, String> friends = currentUser.getFrienders();
+                            for (String friendEmail : friends.values()) {
+                                User user = allUsers.get(friendEmail.replaceAll("[^a-zA-Z0-9]", ""));
                                 if (user != null && user.getEmail() != null
                                         // skip the current user and dummy user
                                         && !user.getEmail().equals(currentUser.getEmail())
                                         && !user.getEmail().equals("dummy")
                                         && user.getIsFree()) {
                                     if (selectedCalendar.getTimeInMillis() < user.getEndTime()) {
-                                        freeFriends.put(userId, new User(user));
+                                        freeFriends.put(friendEmail.replaceAll("[^a-zA-Z0-9]", ""), new User(user));
                                         adapter.notifyDataSetChanged();
                                     }
                                 }
