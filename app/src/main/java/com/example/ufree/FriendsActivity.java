@@ -11,7 +11,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.Image;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -138,18 +137,18 @@ public class FriendsActivity extends AppCompatActivity
                 }
 
                 // If user is valid
-                //       ArrayList<String> incomingFriends = user.getIncomingFriends();
-                //       ArrayList<String> existingFriends = user.getFrienders();
+         //       ArrayList<String> incomingFriends = user.getIncomingFriends();
+         //       ArrayList<String> existingFriends = user.getFrienders();
 
 
-                //     final HashMap<String, String> incomingFriends = user.getIncomingFriends();
-                //     final HashMap<String, String> existingFriends = user.getFrienders();
+           //     final HashMap<String, String> incomingFriends = user.getIncomingFriends();
+           //     final HashMap<String, String> existingFriends = user.getFrienders();
                 final HashMap<String,String> incomingFriendsPre = new HashMap<>();
                 final HashMap<String,String> existingFriendsPre = new HashMap<>();
 
 
                 //      final ArrayList<FriendRequestData> incomingFriends = new ArrayList<FriendRequestData>();
-                //      final ArrayList<FriendsExistingData> existingFriends = new ArrayList<FriendsExistingData>();
+          //      final ArrayList<FriendsExistingData> existingFriends = new ArrayList<FriendsExistingData>();
                 databaseReference.child("users").child(userId).child("incomingFriends").orderByValue()
                         .addChildEventListener(new ChildEventListener() {
                             @Override
@@ -162,8 +161,8 @@ public class FriendsActivity extends AppCompatActivity
                                 query.addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
-                                        //    Log.d("test5", dataSnapshot.getKey() + "  " + dataSnapshot.child("fullName").getValue());
-                                        incomingFriendsPre.put((String)dataSnapshot.child("email").getValue(), (String) dataSnapshot.child("fullName").getValue());
+                                    //    Log.d("test5", dataSnapshot.getKey() + "  " + dataSnapshot.child("fullName").getValue());
+                                        incomingFriendsPre.put(dataSnapshot.getKey(), (String) dataSnapshot.child("fullName").getValue());
                                     }
 
                                     @Override
@@ -174,8 +173,8 @@ public class FriendsActivity extends AppCompatActivity
 
                                 });
                             }
-                            @Override
-                            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                                @Override
+                                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
                             }
 
@@ -237,8 +236,8 @@ public class FriendsActivity extends AppCompatActivity
                                 query.addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
-                                        //Log.d("test5", "   existing friends   " + dataSnapshot.getKey() + "  " + dataSnapshot.child("fullName").getValue());
-                                        existingFriendsPre.put((String)dataSnapshot.child("email").getValue(), (String) dataSnapshot.child("fullName").getValue());
+                                    //Log.d("test5", "   existing friends   " + dataSnapshot.getKey() + "  " + dataSnapshot.child("fullName").getValue());
+                                        existingFriendsPre.put(dataSnapshot.getKey(), (String) dataSnapshot.child("fullName").getValue());
                                     }
 
                                     @Override
@@ -271,90 +270,80 @@ public class FriendsActivity extends AppCompatActivity
 
                         });
 
-                final Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
+                databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void run() {
-
-                        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
+                    public void onDataChange(DataSnapshot dataSnapshot) {
 
 
-                                ArrayList<HashMap.Entry<String, String>> entries = new ArrayList<>(incomingFriendsPre.entrySet());
-                                Collections.sort(entries, new Comparator<HashMap.Entry<String, String>>(){
-                                    public int compare(HashMap.Entry<String, String> a, HashMap.Entry<String, String> b){
-                                        return a.getValue().compareTo(b.getValue());
-                                    }
-                                });
-                                ArrayList<String> incomingFriends = new ArrayList<>();
-                                for (HashMap.Entry<String, String> entry : entries) {
-                                    incomingFriends.add(entry.getKey());
-                                }
+                ArrayList<HashMap.Entry<String, String>> entries = new ArrayList<>(incomingFriendsPre.entrySet());
+                Collections.sort(entries, new Comparator<HashMap.Entry<String, String>>(){
+                    public int compare(HashMap.Entry<String, String> a, HashMap.Entry<String, String> b){
+                        return a.getValue().compareTo(b.getValue());
+                    }
+                });
+                ArrayList<String> incomingFriends = new ArrayList<>();
+                for (HashMap.Entry<String, String> entry : entries) {
+                    incomingFriends.add(entry.getKey());
+                }
 
 
 
 
-                                ArrayList<HashMap.Entry<String, String>> entries1 = new ArrayList<>(existingFriendsPre.entrySet());
-                                Collections.sort(entries1, new Comparator<HashMap.Entry<String, String>>(){
-                                    public int compare(HashMap.Entry<String, String> a, HashMap.Entry<String, String> b){
-                                        return a.getValue().compareTo(b.getValue());
-                                    }
-                                });
-                                ArrayList<String> existingFriends = new ArrayList<>();
-                                for (HashMap.Entry<String, String> entry : entries1) {
-                                    existingFriends.add(entry.getKey());
-                                }
+                ArrayList<HashMap.Entry<String, String>> entries1 = new ArrayList<>(existingFriendsPre.entrySet());
+                Collections.sort(entries1, new Comparator<HashMap.Entry<String, String>>(){
+                    public int compare(HashMap.Entry<String, String> a, HashMap.Entry<String, String> b){
+                        return a.getValue().compareTo(b.getValue());
+                    }
+                });
+                ArrayList<String> existingFriends = new ArrayList<>();
+                for (HashMap.Entry<String, String> entry : entries1) {
+                    existingFriends.add(entry.getKey());
+                }
 
 
 
 
 
 
-                                if (incomingFriends != null) {
-                                    // If user and incoming friends list are valid
+                if (incomingFriends != null) {
+                    // If user and incoming friends list are valid
 
-                                    //     for (HashMap.Entry<String,String> entry : incomingFriends.entrySet()){
-                                    //         friendRequestData.add(new FriendRequestData(entry.getValue()));
-                                    //     }
-
-
-                                    //        Log.d("test5", Integer.toString(incomingFriends.size()));
-                                    for (int i = 0; i < incomingFriends.size(); i++) {
-                                        friendRequestData.add(new FriendRequestData(incomingFriends.get(i)));
-                                    }
-
-                                    FriendRequestAdaptor myAdaptor = new FriendRequestAdaptor(friendRequestData,
-                                            FriendsActivity.this);
-                                    friendRequestsView.setAdapter(myAdaptor);
-                                }
-                                if (existingFriends != null) {
-                                    for (int i = 0; i < existingFriends.size(); i++) {
-                                        friendsExistingData.add(new FriendsExistingData(existingFriends.get(i)));
-                                    }
-                                    // for (HashMap.Entry<String,String> entry : existingFriends.entrySet()){
-                                    //     friendsExistingData.add(new FriendsExistingData(entry.getValue()));
-                                    // }
+               //     for (HashMap.Entry<String,String> entry : incomingFriends.entrySet()){
+               //         friendRequestData.add(new FriendRequestData(entry.getValue()));
+               //     }
 
 
-                                    FriendsExistingAdaptor myAdaptor = new FriendsExistingAdaptor(friendsExistingData,
-                                            FriendsActivity.this);
-                                    friendsExistingView.setAdapter(myAdaptor);
-                                }
-                            }
+                //        Log.d("test5", Integer.toString(incomingFriends.size()));
+                        for (int i = 0; i < incomingFriends.size(); i++) {
+                            friendRequestData.add(new FriendRequestData(incomingFriends.get(i)));
+                        }
+
+                    FriendRequestAdaptor myAdaptor = new FriendRequestAdaptor(friendRequestData,
+                            FriendsActivity.this);
+                    friendRequestsView.setAdapter(myAdaptor);
+                }
+                if (existingFriends != null) {
+                    for (int i = 0; i < existingFriends.size(); i++) {
+                        friendsExistingData.add(new FriendsExistingData(existingFriends.get(i)));
+                    }
+                   // for (HashMap.Entry<String,String> entry : existingFriends.entrySet()){
+                   //     friendsExistingData.add(new FriendsExistingData(entry.getValue()));
+                   // }
 
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                    FriendsExistingAdaptor myAdaptor = new FriendsExistingAdaptor(friendsExistingData,
+                            FriendsActivity.this);
+                    friendsExistingView.setAdapter(myAdaptor);
+                }
+                    }
 
-                            }
 
-                        });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
                     }
-                }, 300);
 
-
+                });
             }
 
             @Override
