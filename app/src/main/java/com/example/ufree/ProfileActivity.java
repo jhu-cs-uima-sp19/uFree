@@ -153,8 +153,15 @@ public class ProfileActivity extends AppCompatActivity
 
                     TextView nameTextView = navHeader.findViewById(R.id.name_nav);
                     TextView emailTextView = navHeader.findViewById(R.id.email_nav);
+                    ImageView imageView = navHeader.findViewById(R.id.imageView);
                     nameTextView.setText(currentUser.getFullName());
                     emailTextView.setText(currentUser.getEmail());
+                    photoUrl = currentUser.getProfilePic();
+                    if (photoUrl != null) {
+                        Glide.with(getApplicationContext())
+                                .load(photoUrl)
+                                .into(imageView);
+                    }
 
                     Switch toggle = findViewById(R.id.toggle_nav);
                     toggle.setChecked(currentUser.getIsFree());

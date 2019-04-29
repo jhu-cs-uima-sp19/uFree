@@ -33,6 +33,7 @@ import android.widget.Switch;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -141,6 +142,13 @@ public class EventsActivity extends AppCompatActivity
                             TextView emailTextView = navHeader.findViewById(R.id.email_nav);
                             nameTextView.setText(currentUser.getFullName());
                             emailTextView.setText(currentUser.getEmail());
+                            String photoUrl = currentUser.getProfilePic();
+                            ImageView imageView = (ImageView) findViewById(R.id.imageView);
+                            if (photoUrl != null) {
+                                Glide.with(getApplicationContext())
+                                        .load(photoUrl)
+                                        .into(imageView);
+                            }
 
                             Switch toggle = findViewById(R.id.toggle_nav);
                             toggle.setChecked(currentUser.getIsFree());

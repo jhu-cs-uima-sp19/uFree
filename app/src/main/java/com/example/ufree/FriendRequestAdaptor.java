@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -50,6 +51,13 @@ public class FriendRequestAdaptor extends RecyclerView.Adapter {
                 User user = dataSnapshot.getValue(User.class);
                 if (user != null) {
                     myHolder.name.setText(user.getFullName());
+                    String url = user.getProfilePic();
+                    if (url != null) {
+                        Glide.with(context)
+                                .load(url)
+                                .into(myHolder.profilePic);
+
+                    }
                 }
             }
 
