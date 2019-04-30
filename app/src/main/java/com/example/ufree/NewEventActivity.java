@@ -91,9 +91,15 @@ public class NewEventActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     HashMap<String, Object> event = (HashMap<String, Object>) dataSnapshot.getValue();
+                    TextView attendeesTextView = findViewById(R.id.InviteesTextView);
                     if (event != null) {
                         locationInput.setText((String) event.get("location"));
                         descriptionInput.setText((String) event.get("description"));
+                        String attendees = "";
+                        for (String p : (ArrayList<String>) event.get("participants")) {
+                            attendees +=  (p + ", ");
+                        }
+                        attendeesTextView.setText(attendees);
                     }
                 }
 
