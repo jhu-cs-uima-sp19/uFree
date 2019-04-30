@@ -517,10 +517,7 @@ public class MainActivity extends AppCompatActivity
         Log.d("debug", "item id: " + id);
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.search_main) {
-            // TODO: implement search function
-            return true;
-        } else if (id == android.R.id.home && isInActionMode) {
+        if (id == android.R.id.home && isInActionMode) {
             clearActionMode();
             Log.d("debug", "back button is pressed");
             return true;
@@ -545,6 +542,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
         } else if (id == R.id.calendar_nav) {
             // TODO: implement calendar activity
+            Toast.makeText(getApplicationContext(), "Coming up...", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.profile_nav) {
             Intent intent = new Intent(this, ProfileActivity.class);
             startActivity(intent);
