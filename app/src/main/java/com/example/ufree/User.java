@@ -18,6 +18,8 @@ public class User {
     private long startTime;
     private long endTime;
     private boolean isFree;
+    private HashMap<String,String> incomingFriends;
+    private HashMap<String,String> frienders;
 
     public User() {
         // Default constructor required for calls to DataSnapshot.getValue(com.example.ufree.User.class)
@@ -32,6 +34,8 @@ public class User {
         this.startTime = 0;
         this.endTime = 0;
         this.events = eventsList;
+        this.incomingFriends = null;
+        this.frienders = null;
     }
 
     public User(User that) {
@@ -42,6 +46,8 @@ public class User {
         this.endTime = that.endTime;
         this.isFree = that.isFree;
         this.events = that.events;
+        this.incomingFriends = that.incomingFriends;
+        this.frienders = that.frienders;
     }
 
     public String getEmail() {
@@ -66,6 +72,9 @@ public class User {
         return this.isFree;
     }
 
+    public HashMap<String,String> getIncomingFriends() { return this.incomingFriends; }
+
+    public HashMap<String,String> getFrienders() { return this.frienders; }
 
     public String toString() {
         return "User email: " + this.email + "\nname: " + this.fullName

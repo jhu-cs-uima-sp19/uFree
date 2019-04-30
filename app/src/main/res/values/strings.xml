@@ -94,4 +94,9 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_friends">Friends</string>
+
+    <!-- FriendsActivity -->
+    <string name="friend_requests">Friend Requests</string>
+    <string name="friends">Friends</string>
 </resources>
