@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity
     static User currentUser;
     static String userId;
     static boolean checkedAvailability;
-    HashMap<String, User> freeFriends = new HashMap<String, User>();
+    HashMap<String, User> freeFriends = new LinkedHashMap<String, User>();
     static Calendar selectedCalendar;
     static boolean dummyUserIsFree = true;
     boolean isInActionMode = false;
@@ -237,9 +237,15 @@ public class MainActivity extends AppCompatActivity
                                 }
                             }
                             HashMap<String, User> sortedFreeFriends = sortByTime(freeFriends);
+                            for (Map.Entry<String, User> entry: sortedFreeFriends.entrySet()) {
+                                Log.d("debug", "here " + entry.getKey());
+                            }
                             freeFriends.clear();
                             for (Map.Entry<String, User> entry: sortedFreeFriends.entrySet()) {
                                 freeFriends.put(entry.getKey(), entry.getValue());
+                            }
+                            for (Map.Entry<String, User> entry: freeFriends.entrySet()) {
+                                Log.d("debug", "where " + entry.getKey());
                             }
                             adapter.notifyDataSetChanged();
                         } else {
@@ -645,7 +651,7 @@ public class MainActivity extends AppCompatActivity
             public int compare(Map.Entry<String, User> o1,
                                Map.Entry<String, User> o2)
             {
-                return 0 - (Long.valueOf(o1.getValue().getEndTime())).compareTo(Long.valueOf(o2.getValue().getEndTime()));
+                return (Long.valueOf(o1.getValue().getEndTime())).compareTo(Long.valueOf(o2.getValue().getEndTime()));
             }
         });
 
