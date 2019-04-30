@@ -51,6 +51,9 @@ public class FriendsSearchAdaptor extends RecyclerView.Adapter {
         dbref.child(id).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot == null) {
+                    return;
+                }
                 User user = dataSnapshot.getValue(User.class);
                 if (user != null) {
                     myHolder.name.setText(user.getFullName());

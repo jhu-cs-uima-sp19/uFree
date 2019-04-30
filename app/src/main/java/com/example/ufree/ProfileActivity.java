@@ -41,6 +41,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.signin.internal.Storage;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -56,6 +57,7 @@ import com.google.firebase.storage.UploadTask;
 
 import org.w3c.dom.Text;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Time;
@@ -447,11 +449,30 @@ public class ProfileActivity extends AppCompatActivity
                 }
             }
         }
-        if (requestCode == CAMERA) {
-            filePath = data.getData();
+        if (requestCode == CAMERA && data != null) {
             Bitmap bitmap = (Bitmap) data.getExtras().get("data");
             ImageView picView = (ImageView) findViewById(R.id.profilePic_profile);
             picView.setImageBitmap(bitmap);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] datas = baos.toByteArray();
+            final StorageReference storageReference = FirebaseStorage.getInstance().getReference(
+                    "profilePics/" + currentUser.getEmail().replaceAll("[^a-zA-Z0-9]", "") + ".jpg");
+            final UploadTask uploadTask = storageReference.putBytes(datas);
+            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    storageReference.getDownloadUrl().addOnSuccessListener(
+                            new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    dbref.child("users").child(currentUser.getEmail().replaceAll("[^a-zA-Z0-9]", ""))
+                                            .child("profilePic").setValue(uri.toString());
+                                }
+                            }
+                    );
+                }
+            });
         }
 
         final StorageReference storageReference = FirebaseStorage.getInstance().getReference(
