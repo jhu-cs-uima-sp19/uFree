@@ -517,10 +517,7 @@ public class MainActivity extends AppCompatActivity
         Log.d("debug", "item id: " + id);
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.search_main) {
-            // TODO: implement search function
-            return true;
-        } else if (id == android.R.id.home && isInActionMode) {
+        if (id == android.R.id.home && isInActionMode) {
             clearActionMode();
             Log.d("debug", "back button is pressed");
             return true;
