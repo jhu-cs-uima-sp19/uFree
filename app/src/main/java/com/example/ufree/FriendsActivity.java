@@ -337,7 +337,7 @@ public class FriendsActivity extends AppCompatActivity
                                     }
 
                                     FriendRequestAdaptor myAdaptor = new FriendRequestAdaptor(friendRequestData,
-                                            FriendsActivity.this);
+                                            getApplicationContext());
                                     friendRequestsView.setAdapter(myAdaptor);
                                 }
                                 if (existingFriends != null) {
@@ -351,7 +351,7 @@ public class FriendsActivity extends AppCompatActivity
 
 
                                     FriendsExistingAdaptor myAdaptor = new FriendsExistingAdaptor(friendsExistingData,
-                                            FriendsActivity.this);
+                                            getApplicationContext());
                                     friendsExistingView.setAdapter(myAdaptor);
                                 }
                             }

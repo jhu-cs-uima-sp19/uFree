@@ -41,6 +41,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.signin.internal.Storage;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -56,6 +57,7 @@ import com.google.firebase.storage.UploadTask;
 
 import org.w3c.dom.Text;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Time;
@@ -279,8 +281,7 @@ public class ProfileActivity extends AppCompatActivity
                         new android.app.AlertDialog.Builder(ProfileActivity.this);
                 pictureDialog.setTitle("Choose Profile Picture");
                 String[] pictureDialogItems = {
-                        "Select photo from gallery",
-                        "Capture photo from camera" };
+                        "Select photo from gallery"};
                 pictureDialog.setItems(pictureDialogItems,
                         new DialogInterface.OnClickListener() {
                             @Override
@@ -288,9 +289,6 @@ public class ProfileActivity extends AppCompatActivity
                                 switch (which) {
                                     case 0:
                                         choosePhotoFromGallery();
-                                        break;
-                                    case 1:
-                                        takePhotoFromCamera();
                                         break;
                                 }
                             }
@@ -421,11 +419,6 @@ public class ProfileActivity extends AppCompatActivity
         startActivityForResult(galleryIntent, this.GALLERY);
     }
 
-    private void takePhotoFromCamera() {
-        Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(intent, this.CAMERA);
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Uri filePath = null;
@@ -446,12 +439,6 @@ public class ProfileActivity extends AppCompatActivity
                     System.out.println("Gallery image failed");
                 }
             }
-        }
-        if (requestCode == CAMERA) {
-            filePath = data.getData();
-            Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-            ImageView picView = (ImageView) findViewById(R.id.profilePic_profile);
-            picView.setImageBitmap(bitmap);
         }
 
         final StorageReference storageReference = FirebaseStorage.getInstance().getReference(

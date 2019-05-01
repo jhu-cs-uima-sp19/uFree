@@ -71,7 +71,7 @@ public class FriendsSearch extends AppCompatActivity {
              //   String userid = sp.getString("userID", "empty");
                 Search sea = new Search(s,cUserID);
                 searchResults = sea.searchAll();
-                FriendsSearchAdaptor myAdaptor = new FriendsSearchAdaptor(searchResults, FriendsSearch.this);
+                FriendsSearchAdaptor myAdaptor = new FriendsSearchAdaptor(searchResults, getApplicationContext());
                 recyclerView.setAdapter(myAdaptor);
                 return false;
             }
