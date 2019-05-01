@@ -449,11 +449,15 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
                                 if (!task.isSuccessful()) {
                                     Toast.makeText(SignUp.this, "Sign Up Failed" + task.getException(), Toast.LENGTH_LONG).show();
                                 } else {
-                                    HashMap<String, Integer> eventIds = new HashMap<>();
-                                    eventIds.put("-1", -1);
-                                    eventIds.put("-2", -2);
-                                    dbRef.child("users").child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(fullName, phoneNumber, email, eventIds));
+                                    HashMap<String, Long> eventIds = new HashMap<>();
+                                    HashMap<String, Long> inviteIds = new HashMap<>();
+                                    eventIds.put("-1", (long) -1);
+                                    eventIds.put("-2", (long) -2);
+                                    inviteIds.put("-2", (long) -2);
+                                    inviteIds.put("-1", (long) -1);
+                                    dbRef.child("users").child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(fullName, phoneNumber, email, eventIds, inviteIds));
                                     uploadImage();
+                                    dbRef.child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(fullName, phoneNumber, email, eventIds, inviteIds));
                                     // save user id in Shared Preferences
                                     SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
                                     SharedPreferences.Editor preferencesEditor = sp.edit();

@@ -15,12 +15,12 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:text="Location"
-        app:layout_constraintBottom_toTopOf="@+id/LocationInput"
+        app:layout_constraintBottom_toTopOf="@+id/monthSpinner"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.023"
+        app:layout_constraintHorizontal_bias="0.038"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.941" />
+        app:layout_constraintVertical_bias="0.495" />
 
     <TextView
         android:id="@+id/MonthLabel"
@@ -36,7 +36,7 @@
         app:layout_constraintHorizontal_bias="0.036"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/LocationInput"
-        app:layout_constraintVertical_bias="0.233" />
+        app:layout_constraintVertical_bias="0.56" />
 
     <TextView
         android:id="@+id/HourLabel"
@@ -52,7 +52,7 @@
         app:layout_constraintHorizontal_bias="0.035"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/LocationInput"
-        app:layout_constraintVertical_bias="0.518" />
+        app:layout_constraintVertical_bias="0.581" />
 
     <TextView
         android:id="@+id/MinuteLabel"
@@ -68,7 +68,7 @@
         app:layout_constraintHorizontal_bias="0.47"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/LocationInput"
-        app:layout_constraintVertical_bias="0.518" />
+        app:layout_constraintVertical_bias="0.58" />
 
     <TextView
         android:id="@+id/DayLabel"
@@ -77,14 +77,14 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="168dp"
+        android:layout_marginBottom="8dp"
         android:text="Day"
         app:layout_constraintBottom_toTopOf="@+id/DescriptionInput"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.436"
+        app:layout_constraintHorizontal_bias="0.444"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.787" />
+        app:layout_constraintVertical_bias="0.477" />
 
     <TextView
         android:id="@+id/textView5"
@@ -120,41 +120,48 @@
         android:layout_width="140dp"
         android:layout_height="54dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginBottom="4dp"
         android:onClick="addEventAction"
         android:text="Create Event"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.25"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintHorizontal_bias="0.968"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
     <Button
-        android:id="@+id/createEventButton"
-        android:layout_width="100dp"
+        android:id="@+id/deleteEventButton"
+        android:layout_width="140dp"
         android:layout_height="54dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:onClick="removeEventAction"
-        android:text="Discard"
+        android:layout_marginBottom="4dp"
+        android:onClick="deleteEventAction"
+        android:visibility="gone"
+        android:text="Leave Event"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.888"
+        app:layout_constraintHorizontal_bias="0.172"
         app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
         android:id="@+id/AddInviteButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="116dp"
+        android:layout_marginBottom="8dp"
         android:onClick="addInviteAction"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.909"
+        app:layout_constraintHorizontal_bias="0.884"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/DescriptionInput"
+        app:layout_constraintVertical_bias="0.255"
         app:srcCompat="@drawable/ic_add_circle_orange_light_24dp" />
 
     <EditText
@@ -162,15 +169,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="272dp"
+        android:layout_marginBottom="8dp"
         android:ems="10"
         android:inputType="textPersonName"
         android:text="Name"
         app:layout_constraintBottom_toTopOf="@+id/DescriptionInput"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.043"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintHorizontal_bias="0.862"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.204" />
 
     <EditText
         android:id="@+id/DescriptionInput"
@@ -205,7 +215,7 @@
         app:layout_constraintHorizontal_bias="0.32"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.789" />
+        app:layout_constraintVertical_bias="0.824" />
 
     <Spinner
         android:id="@+id/hourSpinner"
@@ -214,7 +224,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="200dp"
+        android:layout_marginBottom="8dp"
         android:entries="@array/hourSpinnerValues"
         android:spinnerMode="dialog"
         app:layout_constraintBottom_toTopOf="@+id/CreateEventButton"
@@ -222,7 +232,7 @@
         app:layout_constraintHorizontal_bias="0.32"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.958" />
+        app:layout_constraintVertical_bias="0.597" />
 
     <Spinner
         android:id="@+id/minuteSpinner"
@@ -231,7 +241,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="28dp"
+        android:layout_marginBottom="8dp"
         android:entries="@array/minuteSpinnerValues"
         android:spinnerMode="dialog"
         app:layout_constraintBottom_toTopOf="@+id/DescriptionInput"
@@ -239,7 +249,7 @@
         app:layout_constraintHorizontal_bias="0.609"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.844" />
+        app:layout_constraintVertical_bias="0.813" />
 
     <EditText
         android:id="@+id/dayEditText"
@@ -248,7 +258,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="8dp"
         android:ems="10"
         android:hint="00"
         android:inputType="number"
@@ -258,7 +268,7 @@
         app:layout_constraintHorizontal_bias="0.609"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.875" />
+        app:layout_constraintVertical_bias="0.831" />
 
     <EditText
         android:id="@+id/searchUsersInput"
@@ -273,9 +283,10 @@
         android:text="Email"
         app:layout_constraintBottom_toTopOf="@+id/CreateEventButton"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.582"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/minuteSpinner"
-        app:layout_constraintVertical_bias="0.837" />
+        app:layout_constraintVertical_bias="0.785" />
 
     <TextView
         android:id="@+id/InviteesTextView"
@@ -290,5 +301,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/searchUsersInput" />
-
 </android.support.constraint.ConstraintLayout>

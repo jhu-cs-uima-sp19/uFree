@@ -2,6 +2,8 @@ package com.example.ufree;
 
 // TODO. Log out in nav drawer. Time in nav drawer
 
+import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
@@ -27,6 +29,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,6 +39,7 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -57,6 +61,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.example.ufree.MainActivity.timeFormat;
+
 public class FriendsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -70,7 +76,7 @@ public class FriendsActivity extends AppCompatActivity
 
     static User currentUser;
 
-    private String userId;
+    private static String userId;
     private boolean checkedAvailability;
 
     static final java.text.DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
@@ -152,16 +158,18 @@ public class FriendsActivity extends AppCompatActivity
                 //      final ArrayList<FriendsExistingData> existingFriends = new ArrayList<FriendsExistingData>();
                 databaseReference.child("users").child(userId).child("incomingFriends").orderByValue()
                         .addChildEventListener(new ChildEventListener() {
+
                             @Override
                             public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
                                 //incomingFriends.put(dataSnapshot.getKey(),(String)dataSnapshot.getValue());
-
+                                incomingFriendsPre.clear();
 
                                 String id = ((String) dataSnapshot.getValue()).replaceAll("[^a-zA-Z0-9]", "");
                                 Query query = databaseReference.child("users").child(id).orderByChild("fullName");
                                 query.addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
+
                                         //    Log.d("test5", dataSnapshot.getKey() + "  " + dataSnapshot.child("fullName").getValue());
                                         incomingFriendsPre.put((String)dataSnapshot.child("email").getValue(), (String) dataSnapshot.child("fullName").getValue());
                                     }
@@ -227,9 +235,12 @@ public class FriendsActivity extends AppCompatActivity
 
                 databaseReference.child("users").child(userId).child("frienders").orderByValue()
                         .addChildEventListener(new ChildEventListener() {
+
+
                             @Override
                             public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
                                 //incomingFriends.put(dataSnapshot.getKey(),(String)dataSnapshot.getValue());
+                                incomingFriendsPre.clear();
 
 
                                 String id = ((String) dataSnapshot.getValue()).replaceAll("[^a-zA-Z0-9]", "");
@@ -312,6 +323,7 @@ public class FriendsActivity extends AppCompatActivity
 
 
                                 if (incomingFriends != null) {
+                                    friendRequestData.clear();
                                     // If user and incoming friends list are valid
 
                                     //     for (HashMap.Entry<String,String> entry : incomingFriends.entrySet()){
@@ -329,6 +341,7 @@ public class FriendsActivity extends AppCompatActivity
                                     friendRequestsView.setAdapter(myAdaptor);
                                 }
                                 if (existingFriends != null) {
+                                    friendsExistingData.clear();
                                     for (int i = 0; i < existingFriends.size(); i++) {
                                         friendsExistingData.add(new FriendsExistingData(existingFriends.get(i)));
                                     }
@@ -364,17 +377,137 @@ public class FriendsActivity extends AppCompatActivity
             }
         });
 
+        /* ------------------------------------------------------------------- */
+        /* CODES FOR CONFIGURING NAV DRAWER */
+        /* DO NOT DELETE!!!! */
+        databaseReference.child("users").child(userId).addValueEventListener(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            currentUser = dataSnapshot.getValue(User.class);
 
+                            /* Display user info in navigation header */
+                            NavigationView navigationView = findViewById(R.id.nav_view);
+                            View navHeader = navigationView.getHeaderView(0);
 
+                            TextView nameTextView = navHeader.findViewById(R.id.name_nav);
+                            TextView emailTextView = navHeader.findViewById(R.id.email_nav);
+                            nameTextView.setText(currentUser.getFullName());
+                            emailTextView.setText(currentUser.getEmail());
 
+                            Switch toggle = findViewById(R.id.toggle_nav);
+                            toggle.setChecked(currentUser.getIsFree());
 
+                            Button currentStatusButton = findViewById(R.id.timeButton_nav);
+                            Calendar endCalendar = Calendar.getInstance();
+                            endCalendar.setTimeInMillis(currentUser.getEndTime());
+                            currentStatusButton.setText(timeFormat.format(endCalendar.getTime()));
 
+                            Button dateButtonNav = findViewById(R.id.dateButton_nav);
+                            Calendar today = Calendar.getInstance();
+                            if (today.get(Calendar.DAY_OF_YEAR) == endCalendar.get(Calendar.DAY_OF_YEAR)) {
+                                dateButtonNav.setText(getString(R.string.today_nav));
+                            } else {
+                                dateButtonNav.setText(getString(R.string.tomorrow_nav));
+                            }
+                        } else {
+                            Log.d("debug", "data snapshot is null");
+                            startActivity(new Intent(FriendsActivity.this, LogIn.class));
+                            finish();
+                        }
+                    }
 
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.w("firebase", "loadUserFreeTime:onCancelled", databaseError.toException());
+                    }
+                }
+        );
 
+        // Set up listener for toggle and time button in nav drawer
+        Switch toggleNav = findViewById(R.id.toggle_nav);
+        Button currentStatusButton = findViewById(R.id.timeButton_nav);
+        Button dateButtonNav = findViewById(R.id.dateButton_nav);
+        toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                databaseReference.child("users").child(userId).child("isFree").setValue(isChecked);
+            }
+        });
+        currentStatusButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogFragment timePickerFragment = new TimePickerFragmentNav();
+                timePickerFragment.show(getSupportFragmentManager(), "timePickerNav");
+            }
+        });
+        dateButtonNav.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Button dateButtonNav = v.findViewById(R.id.dateButton_nav);
 
+                Calendar endCalendar = Calendar.getInstance();
+                endCalendar.setTimeInMillis(currentUser.getEndTime());
 
+                Calendar newEnd = Calendar.getInstance();
+                newEnd.set(
+                        newEnd.get(Calendar.YEAR),
+                        newEnd.get(Calendar.MONTH),
+                        newEnd.get(Calendar.DAY_OF_MONTH),
+                        endCalendar.get(Calendar.HOUR_OF_DAY),
+                        endCalendar.get(Calendar.MINUTE)
+                );
 
-        //TODO: set up navigation drawer
+                // today --> tomorrow
+                if (dateButtonNav.getText().toString().equals(getString(R.string.today_nav))) {
+                    // add one day
+                    newEnd.add(Calendar.DATE, 1);
+                    // update end time in database
+                    FirebaseDatabase database = FirebaseDatabase.getInstance();
+                    DatabaseReference dbRef = database.getReference();
+                    dbRef.child("users").child(userId).child("endTime").setValue(newEnd.getTimeInMillis());
+                    // change button text
+                    dateButtonNav.setText(getString(R.string.tomorrow_nav));
+                } else {
+                    // tomorrow --> today
+                    // do not change day
+                    Calendar now = Calendar.getInstance();
+                    if (newEnd.getTimeInMillis() < now.getTimeInMillis()) {
+                        Toast.makeText(v.getContext(), "You cannot set free time before current time", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // update end time in database
+                        FirebaseDatabase database = FirebaseDatabase.getInstance();
+                        DatabaseReference dbRef = database.getReference();
+                        dbRef.child("users").child(userId).child("endTime").setValue(newEnd.getTimeInMillis());
+                        // change button text
+                        dateButtonNav.setText(getString(R.string.today_nav));
+                    }
+                }
+            }
+        });
+
+        // Set up listener for log out
+        ImageView exitImageView = findViewById(R.id.exitImageView_nav);
+        TextView logoutTextView = findViewById(R.id.logout_nav);
+        exitImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(FriendsActivity.this, LogIn.class));
+                finish();
+            }
+        });
+        logoutTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(FriendsActivity.this, LogIn.class));
+                finish();
+            }
+        });
+
+        /* END OF CODES FOR CONFIGURING NAV DRAWER*/
+        /* ------------------------------------------------------------------- */
 
         // Add new friends
         FloatingActionButton fab = findViewById(R.id.fab_friends);
@@ -402,6 +535,7 @@ public class FriendsActivity extends AppCompatActivity
             // Should not do anything
         } else if (id == R.id.calendar_nav) {
             // TODO: implement calendar activity
+            Toast.makeText(getApplicationContext(), "Coming up...", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.profile_nav) {
             Intent intent = new Intent(this, ProfileActivity.class);
             startActivity(intent);
@@ -410,5 +544,61 @@ public class FriendsActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    /* CODES FOR SETTING UP TIME BUTTON IN NAV DRAWER */
+    /* DO NOT DELETE!!! */
+    // Time picker for time button in the ** NAV DRAWER **
+    public static class TimePickerFragmentNav extends DialogFragment
+            implements TimePickerDialog.OnTimeSetListener {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Create a new instance of TimePickerDialog and return it
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(currentUser.getEndTime());
+            int endHour = calendar.get(Calendar.HOUR_OF_DAY);
+            int endMinute = calendar.get(Calendar.MINUTE);
+            return new TimePickerDialog(getActivity(), this, endHour, endMinute,
+                    DateFormat.is24HourFormat(getActivity()));
+        }
+
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            Calendar now = Calendar.getInstance();
+            int currentDay = now.get(Calendar.DAY_OF_YEAR);
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(currentUser.getEndTime());
+            calendar.set(calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH),
+                    hourOfDay, minute);
+            int endDay = calendar.get(Calendar.DAY_OF_YEAR);
+
+            // if user set free time less than current time
+            if (currentDay == endDay && now.getTimeInMillis() >= calendar.getTimeInMillis()) {
+                Toast.makeText(getContext(), "You cannot set free time before current time", Toast.LENGTH_LONG).show();
+                DialogFragment timePickerFragment = new TimePickerFragmentNav();
+                timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
+            } else {
+                // update selected calendar object
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference dbRef = database.getReference();
+
+                dbRef.child("users").child(userId).child("endTime").setValue(calendar.getTimeInMillis());
+
+                // change text view for time button
+                Button timeButton = getActivity().findViewById(R.id.timeButton_nav);
+                timeButton.setText(timeFormat.format(calendar.getTime()));
+            }
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        // set Who's Free to be selected
+        navigationView.getMenu().getItem(2).setChecked(true);
     }
 }

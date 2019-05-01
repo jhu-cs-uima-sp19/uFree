@@ -52,7 +52,12 @@ import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
@@ -61,7 +66,7 @@ public class MainActivity extends AppCompatActivity
     static User currentUser;
     static String userId;
     static boolean checkedAvailability;
-    HashMap<String, User> freeFriends = new HashMap<String, User>();
+    HashMap<String, User> freeFriends = new LinkedHashMap<String, User>();
     static Calendar selectedCalendar;
     static boolean dummyUserIsFree = true;
     boolean isInActionMode = false;
@@ -226,20 +231,34 @@ public class MainActivity extends AppCompatActivity
                         adapter.notifyDataSetChanged();
 
                         if (currentUser != null) {
-                            for (Map.Entry<String, User> entry : allUsers.entrySet()) {
-                                String userId = entry.getKey();
-                                User user = entry.getValue();
+                            // Get current user's friends
+                            HashMap<String, String> friends = currentUser.getFrienders();
+                            if (friends != null) {
+                            for (String friendEmail : friends.values()) {
+                                User user = allUsers.get(friendEmail.replaceAll("[^a-zA-Z0-9]", ""));
                                 if (user != null && user.getEmail() != null
                                         // skip the current user and dummy user
                                         && !user.getEmail().equals(currentUser.getEmail())
                                         && !user.getEmail().equals("dummy")
                                         && user.getIsFree()) {
                                     if (selectedCalendar.getTimeInMillis() < user.getEndTime()) {
-                                        freeFriends.put(userId, new User(user));
-                                        adapter.notifyDataSetChanged();
+                                        freeFriends.put(friendEmail.replaceAll("[^a-zA-Z0-9]", ""), new User(user));
                                     }
                                 }
                             }
+                            }
+                            HashMap<String, User> sortedFreeFriends = sortByTime(freeFriends);
+                            for (Map.Entry<String, User> entry: sortedFreeFriends.entrySet()) {
+                                Log.d("debug", "here " + entry.getKey());
+                            }
+                            freeFriends.clear();
+                            for (Map.Entry<String, User> entry: sortedFreeFriends.entrySet()) {
+                                freeFriends.put(entry.getKey(), entry.getValue());
+                            }
+                            for (Map.Entry<String, User> entry: freeFriends.entrySet()) {
+                                Log.d("debug", "where " + entry.getKey());
+                            }
+                            adapter.notifyDataSetChanged();
                         } else {
                             System.out.println("cuuuuuuuuuuuuuuuuuunt");
                             startActivity(new Intent(MainActivity.this, LogIn.class));
@@ -512,10 +531,7 @@ public class MainActivity extends AppCompatActivity
         Log.d("debug", "item id: " + id);
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.search_main) {
-            // TODO: implement search function
-            return true;
-        } else if (id == android.R.id.home && isInActionMode) {
+        if (id == android.R.id.home && isInActionMode) {
             clearActionMode();
             Log.d("debug", "back button is pressed");
             return true;
@@ -540,6 +556,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
         } else if (id == R.id.calendar_nav) {
             // TODO: implement calendar activity
+            Toast.makeText(getApplicationContext(), "Coming up...", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.profile_nav) {
             Intent intent = new Intent(this, ProfileActivity.class);
             startActivity(intent);
@@ -633,4 +650,30 @@ public class MainActivity extends AppCompatActivity
         // set Who's Free to be selected
         navigationView.getMenu().getItem(0).setChecked(true);
     }
+
+    // function to sort hashmap by values
+    public static HashMap<String, User> sortByTime(HashMap<String, User> hm)
+    {
+        // Create a list from elements of HashMap
+        List<Map.Entry<String, User> > list =
+                new LinkedList<>(hm.entrySet());
+
+        // Sort the list
+        Collections.sort(list, new Comparator<Map.Entry<String, User> >() {
+            public int compare(Map.Entry<String, User> o1,
+                               Map.Entry<String, User> o2)
+            {
+                return (Long.valueOf(o1.getValue().getEndTime())).compareTo(Long.valueOf(o2.getValue().getEndTime()));
+            }
+        });
+
+        // put data from sorted list to hashmap
+        HashMap<String, User> temp = new LinkedHashMap<String, User>();
+        for (Map.Entry<String, User> aa : list) {
+            temp.put(aa.getKey(), aa.getValue());
+        }
+        return temp;
+    }
+
+
 }

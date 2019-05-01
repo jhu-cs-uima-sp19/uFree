@@ -555,7 +555,8 @@ public class ProfileActivity extends AppCompatActivity
             Intent intent = new Intent(this, FriendsActivity.class);
             startActivity(intent);
         } else if (id == R.id.calendar_nav) {
-
+            // TODO: implement calendar activity
+            Toast.makeText(getApplicationContext(), "Coming up...", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.profile_nav) {
             // SHOULD NOT DO ANYTHING
         }
