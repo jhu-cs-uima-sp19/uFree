@@ -281,8 +281,7 @@ public class ProfileActivity extends AppCompatActivity
                         new android.app.AlertDialog.Builder(ProfileActivity.this);
                 pictureDialog.setTitle("Choose Profile Picture");
                 String[] pictureDialogItems = {
-                        "Select photo from gallery",
-                        "Capture photo from camera" };
+                        "Select photo from gallery"};
                 pictureDialog.setItems(pictureDialogItems,
                         new DialogInterface.OnClickListener() {
                             @Override
@@ -290,9 +289,6 @@ public class ProfileActivity extends AppCompatActivity
                                 switch (which) {
                                     case 0:
                                         choosePhotoFromGallery();
-                                        break;
-                                    case 1:
-                                        takePhotoFromCamera();
                                         break;
                                 }
                             }
@@ -423,11 +419,6 @@ public class ProfileActivity extends AppCompatActivity
         startActivityForResult(galleryIntent, this.GALLERY);
     }
 
-    private void takePhotoFromCamera() {
-        Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(intent, this.CAMERA);
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Uri filePath = null;
@@ -448,31 +439,6 @@ public class ProfileActivity extends AppCompatActivity
                     System.out.println("Gallery image failed");
                 }
             }
-        }
-        if (requestCode == CAMERA && data != null) {
-            Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-            ImageView picView = (ImageView) findViewById(R.id.profilePic_profile);
-            picView.setImageBitmap(bitmap);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] datas = baos.toByteArray();
-            final StorageReference storageReference = FirebaseStorage.getInstance().getReference(
-                    "profilePics/" + currentUser.getEmail().replaceAll("[^a-zA-Z0-9]", "") + ".jpg");
-            final UploadTask uploadTask = storageReference.putBytes(datas);
-            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    storageReference.getDownloadUrl().addOnSuccessListener(
-                            new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-                                    dbref.child("users").child(currentUser.getEmail().replaceAll("[^a-zA-Z0-9]", ""))
-                                            .child("profilePic").setValue(uri.toString());
-                                }
-                            }
-                    );
-                }
-            });
         }
 
         final StorageReference storageReference = FirebaseStorage.getInstance().getReference(

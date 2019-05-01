@@ -134,8 +134,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
                 final AlertDialog.Builder pictureDialog = new AlertDialog.Builder(SignUp.this);
                 pictureDialog.setTitle("Choose Profile Picture");
                 String[] pictureDialogItems = {
-                        "Select photo from gallery",
-                        "Capture photo from camera" };
+                        "Select photo from gallery"};
                 pictureDialog.setItems(pictureDialogItems,
                         new DialogInterface.OnClickListener() {
                             @Override
@@ -143,9 +142,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
                                 switch (which) {
                                     case 0:
                                         choosePhotoFromGallery();
-                                        break;
-                                    case 1:
-                                        takePhotoFromCamera();
                                         break;
                                 }
                             }
@@ -161,8 +157,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
                 final AlertDialog.Builder pictureDialog = new AlertDialog.Builder(SignUp.this);
                 pictureDialog.setTitle("Choose Profile Picture");
                 String[] pictureDialogItems = {
-                        "Select photo from gallery",
-                        "Capture photo from camera" };
+                        "Select photo from gallery"};
                 pictureDialog.setItems(pictureDialogItems,
                         new DialogInterface.OnClickListener() {
                             @Override
@@ -170,9 +165,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
                                 switch (which) {
                                     case 0:
                                         choosePhotoFromGallery();
-                                        break;
-                                    case 1:
-                                        takePhotoFromCamera();
                                         break;
                                 }
                             }
@@ -187,12 +179,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
         Intent galleryIntent = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(galleryIntent, this.GALLERY);
-    }
-
-    // User chooses to take a photo as profile pic
-    private void takePhotoFromCamera() {
-        Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(intent, this.CAMERA);
     }
 
     @Override
@@ -221,14 +207,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
                     System.out.println("Gallery image failed");
                 }
             }
-            return;
-        }
-        if (requestCode == CAMERA) {
-            filePath = data.getData();
-            defaultView.setVisibility(View.GONE);
-            cardView.setVisibility(View.VISIBLE);
-            Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-            userView.setImageBitmap(bitmap);
             return;
         }
     }
