@@ -169,9 +169,11 @@ public class FriendsActivity extends AppCompatActivity
                                 query.addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
+                                        if (dataSnapshot.exists()) {
 
-                                        //    Log.d("test5", dataSnapshot.getKey() + "  " + dataSnapshot.child("fullName").getValue());
-                                        incomingFriendsPre.put((String)dataSnapshot.child("email").getValue(), (String) dataSnapshot.child("fullName").getValue());
+                                            //    Log.d("test5", dataSnapshot.getKey() + "  " + dataSnapshot.child("fullName").getValue());
+                                            incomingFriendsPre.put((String) dataSnapshot.child("email").getValue(), (String) dataSnapshot.child("fullName").getValue());
+                                        }
                                     }
 
                                     @Override
