@@ -31,6 +31,7 @@ import org.w3c.dom.Text;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.lang.Long;
 
@@ -240,6 +241,19 @@ public class NewEventActivity extends AppCompatActivity {
         }
     }
 
+    private boolean checkDate(Event e) {
+        Date d = new Date();
+        final long time = d.getTime() - d.getTime() / (2019 - 1970);
+        final double msMonth = 26298E5;
+        final double msDay = 86400000;
+        final double msHour = 3600000;
+        final double msMinute = 60000;
+        double event_time = e.date.get("month") * msMonth + e.date.get("day") * msDay
+                + e.time.get("hour") * msHour * e.time.get("minute") * msMinute;
+
+        return event_time > time;
+    }
+
     public void addEventAction(View v) {
         System.out.println("Trying to execute action");
         HashMap<String, Integer> date = new HashMap<>();
@@ -266,6 +280,7 @@ public class NewEventActivity extends AppCompatActivity {
                         }
                     });
             alertDialog.show();
+            return;
         }
 
         try {
@@ -281,6 +296,7 @@ public class NewEventActivity extends AppCompatActivity {
                         }
                     });
             alertDialog.show();
+            return;
         }
 
         date.put("month",convertTimeToInt(month));

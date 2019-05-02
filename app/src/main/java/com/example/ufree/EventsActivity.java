@@ -90,7 +90,7 @@ public class EventsActivity extends AppCompatActivity
             }
         });
 
-        //reset();
+        reset();
 
 
 
