@@ -9,6 +9,8 @@ uFree is an app to find friends who are available at the same times you are when
 ## Test accounts
 - Email: jackufree@ufree.com
 - Password: 123456
+- Email: maryufree@ufree.com
+- Password: 123456
 
 ## First Sprint Objectives:
 - Log In 
@@ -50,9 +52,34 @@ uFree is an app to find friends who are available at the same times you are when
   - Add 5 main navigation menus 
   - Add time button and toggle, so the user can change his/her free status.
 
+## Second Sprint Objectives:
+- Sign up 
+  - Implemented upload of profile picture in Sign Up from user's gallery
+
+- Who is free
+  - Display free friends instead of all free users in the database
+  - Order friends based on free time
+  - Implement mutiple selection to create an event with mutiple friends
+
+- Friend
+  - Receiving and sending friend request
+  - Accepting and rejecting friend request
+  - Deleting friends
+  - Write search class that provides public functions to search for friends/all users with their names
+
+- Event
+  - blah
+
+- Profile
+  - Users with profile picture will have their profile pictures displayed in all appropriate places, while users without will retain the default picture.
+  - Users can change their profile picture in the Profile page
+
+
  
  ## General State of the App
  In our first sprint product, the user can create an account, log in and delete account. They will see all free users in the database, and can use time machine to filter free users based on their availability. They can create an event with a single person, and view events detail on Events page. The user can also revise their name, phone number, or change password in Profile page.
+
+ In our second sprint product, the user can upload a profile picture, change the profile picture. The user can search for freinds, send friend requests, and add/delete freinds. Only free friends are visible on Who is free page. The user can create event, send event invitation and edit events.
 
  
  ## Meeting Notes:
@@ -63,4 +90,10 @@ uFree is an app to find friends who are available at the same times you are when
   
  4/8 Meet with Ryenne. Start with setting up firebase.
  
- 4/14 Work day. Spring before deadline.
+ 4/14 Work day. Sprint before deadline.
+
+ 4/21 Plan Sprint 2 goals. Work day.
+
+ 4/27 Meet with Ryenne. Prepare for demo.
+
+ 5/2 Wrap up on sprint 2. Ready for submission!
