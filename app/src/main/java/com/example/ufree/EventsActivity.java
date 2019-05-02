@@ -162,11 +162,13 @@ public class EventsActivity extends AppCompatActivity
                             nameTextView.setText(currentUser.getFullName());
                             emailTextView.setText(currentUser.getEmail());
                             String photoUrl = currentUser.getProfilePic();
-                            ImageView imageView = (ImageView) findViewById(R.id.imageView);
+                            ImageView imageView = navHeader.findViewById(R.id.imageView);
                             if (photoUrl != null) {
-                                Glide.with(getApplicationContext())
-                                        .load(photoUrl)
-                                        .into(imageView);
+                                if (imageView != null) {
+                                    Glide.with(getApplicationContext())
+                                            .load(photoUrl)
+                                            .into(imageView);
+                                }
                             }
 
                             Switch toggle = findViewById(R.id.toggle_nav);

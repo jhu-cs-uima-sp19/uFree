@@ -159,11 +159,13 @@ public class MainActivity extends AppCompatActivity
                             TextView nameTextView = navHeader.findViewById(R.id.name_nav);
                             TextView emailTextView = navHeader.findViewById(R.id.email_nav);
                             String photoUrl = currentUser.getProfilePic();
-                            ImageView imageView = (ImageView) findViewById(R.id.imageView);
+                            ImageView imageView = navHeader.findViewById(R.id.imageView);
                             if (photoUrl != null) {
-                                Glide.with(getApplicationContext())
-                                    .load(photoUrl)
-                                    .into(imageView);
+                                if (imageView != null) {
+                                    Glide.with(getApplicationContext())
+                                            .load(photoUrl)
+                                            .into(imageView);
+                                }
                             }
                             nameTextView.setText(currentUser.getFullName());
                             emailTextView.setText(currentUser.getEmail());
