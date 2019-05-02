@@ -38,7 +38,6 @@ public class NewEventActivity extends AppCompatActivity {
     private EditText descriptionInput;
     private Spinner monthInputSpinner;
     private Spinner hourInputSpinner;
-    private Spinner minuteInputSpinner;
     private EditText dayInput;
     private long eventIdValue;
     private long counter;
@@ -60,7 +59,6 @@ public class NewEventActivity extends AppCompatActivity {
         descriptionInput = (EditText) findViewById(R.id.DescriptionInput);
         monthInputSpinner = (Spinner) findViewById(R.id.monthSpinner);
         hourInputSpinner = (Spinner) findViewById(R.id.hourSpinner);
-        minuteInputSpinner = (Spinner) findViewById(R.id.minuteSpinner);
         dayInput = (EditText) findViewById(R.id.dayEditText);
 
         Spinner monthInput = findViewById(R.id.monthSpinner);
@@ -99,6 +97,7 @@ public class NewEventActivity extends AppCompatActivity {
                     Spinner monthSpinner = findViewById(R.id.monthSpinner);
                     EditText dayEditText = findViewById(R.id.dayEditText);
                     Spinner hourSpinner = findViewById(R.id.hourSpinner);
+                    EditText minuteInput = findViewById(R.id.minuteInput);
 
                     if (my_event != null) {
                         locationInput.setText(my_event.location);
@@ -106,14 +105,18 @@ public class NewEventActivity extends AppCompatActivity {
                         String attendeesText = "";
                         attendees = my_event.participants;
 
-                        for (String p : attendees) {
-                            attendeesText +=  (p + ", ");
+                        if (attendees != null) {
+                            for (String p : attendees) {
+                                attendeesText += (p + ", ");
+                            }
+
+
+                            attendeesText = attendeesText.substring(0, attendeesText.length() - 1);
+                            attendeesTextView.setText(attendeesText);
                         }
 
-                        attendeesText = attendeesText.substring(0, attendeesText.length() - 1);
-                        attendeesTextView.setText(attendeesText);
-
                         dayEditText.setText(String.valueOf(my_event.date.get("day")));
+                        minuteInput.setText(String.valueOf(my_event.time.get("minute")));
 
                         ArrayAdapter<CharSequence> monthAdapter = ArrayAdapter.createFromResource(getApplicationContext(),
                                 R.array.monthSpinnerValues, R.layout.support_simple_spinner_dropdown_item);
@@ -125,7 +128,7 @@ public class NewEventActivity extends AppCompatActivity {
                         hourSpinner.setAdapter(hourAdapter);
 
                         hourSpinner.setSelection(my_event.time.get("hour"));
-                        monthSpinner.setSelection(my_event.date.get("month"));
+                        monthSpinner.setSelection(my_event.date.get("month") - 1);
                     }
                 }
 
@@ -208,28 +211,27 @@ public class NewEventActivity extends AppCompatActivity {
         }
     }
 
-    private String convertIntToTime(int db_ref) {
-        return "";
-    }
-
     public void addEventAction(View v) {
+        System.out.println("Trying to execute action");
         HashMap<String, Integer> date = new HashMap<>();
         HashMap<String, Integer> time = new HashMap<>();
+        EditText minuteInput = findViewById(R.id.minuteInput);
 
         String location = String.valueOf(locationInput.getText());
         String description = String.valueOf(descriptionInput.getText());
         String hour = String.valueOf(hourInputSpinner.getSelectedItem());
-        String minute = String.valueOf(minuteInputSpinner.getSelectedItem());
         String month = String.valueOf(monthInputSpinner.getSelectedItem());
         Integer day = Integer.parseInt(String.valueOf(dayInput.getText()));
+        Integer minute = Integer.parseInt(String.valueOf(minuteInput.getText()));
+
 
         date.put("month",convertTimeToInt(month));
         date.put("day", day);
         time.put("hour", convertTimeToInt(hour));
-        time.put("minute", convertTimeToInt(minute));
+        time.put("minute", minute);
 
         //add the event to the database then increment the counter
-        if (invitees.size() > 0) {
+        if (invitees.size() > 0 && minute > 59 && minute < 0) {
             SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
             String user = sp.getString("userID", "none");
 
@@ -261,7 +263,33 @@ public class NewEventActivity extends AppCompatActivity {
             //return to the events page
             Intent intent = new Intent(this, EventsActivity.class);
             startActivity(intent);
-        } else if (eventIdValue == 0){
+        } else if (minute < 0 || minute > 59) {
+            AlertDialog alertDialog = new AlertDialog.Builder(NewEventActivity.this).create();
+            alertDialog.setTitle("Alert");
+            alertDialog.setMessage("Invalid Time");
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+        } else if (eventIdValue != 0) {
+            my_event.date = new HashMap<>();
+            my_event.date.put("month", convertTimeToInt(month));
+            my_event.date.put("day", day);
+            my_event.time = new HashMap<>();
+            my_event.time.put("hour", convertTimeToInt(hour));
+            my_event.time.put("minute", minute);
+            my_event.location = location;
+            my_event.participants = attendees;
+            my_event.description = description;
+            my_event.invitees = invitees;
+            dbref.child("events").child(String.valueOf(eventIdValue)).setValue(my_event);
+
+            Intent intent = new Intent(this, EventsActivity.class);
+            startActivity(intent);
+        } else {
             AlertDialog alertDialog = new AlertDialog.Builder(NewEventActivity.this).create();
             alertDialog.setTitle("Alert");
             alertDialog.setMessage("You must invite others to your event");
