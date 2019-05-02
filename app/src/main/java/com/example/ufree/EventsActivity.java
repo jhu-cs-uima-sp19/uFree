@@ -27,8 +27,10 @@ import android.view.ViewParent;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Date;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -87,6 +89,8 @@ public class EventsActivity extends AppCompatActivity
                 startActivity(intent);
             }
         });
+
+        //reset();
 
 
 
@@ -349,11 +353,6 @@ public class EventsActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.search_events) {
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -404,6 +403,57 @@ public class EventsActivity extends AppCompatActivity
             intent.putExtras(extras);
             startActivity(intent);
         }
+    }
+
+    private void reset() {
+        Date d = new Date();
+        final long time = d.getTime() - d.getTime() / (2019 - 1970);
+        final double msMonth = 26298E5;
+        final double msDay = 86400000;
+        final double msHour = 3600000;
+        final double msMinute = 60000;
+
+        final ArrayList<Event> events = new ArrayList<>();
+
+        dbref.child("events").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    Event e = ds.getValue(Event.class);
+                    if (e != null) {
+                        double event_time = e.date.get("month") * msMonth + e.date.get("day") * msDay
+                                + e.time.get("hour") * msHour * e.time.get("minute") * msMinute;
+
+                        if (event_time < time) {
+                            seekAndDestroy(e);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void seekAndDestroy(Event e) {
+        if (e.invitees != null) {
+            for (String next_user : e.invitees) {
+                next_user = next_user.replace("@", "").replace(".", "");
+                dbref.child("users").child(next_user).child("invites").child(String.valueOf(e.id)).removeValue();
+            }
+        }
+
+        if (e.participants != null) {
+            for (String next_user : e.participants) {
+                next_user = next_user.replace("@", "").replace(".", "");
+                dbref.child("users").child(next_user).child("events").child(String.valueOf(e.id)).removeValue();
+            }
+        }
+
+        dbref.child("events").child(String.valueOf(e.id)).removeValue();
     }
 
     /* CODES FOR SETTING UP TIME BUTTON IN NAV DRAWER */

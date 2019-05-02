@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
@@ -32,6 +34,7 @@ public class ViewEventActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_event);
+        getSupportActionBar().setTitle("Invitations");
 
         SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
         String user = "";
@@ -91,6 +94,13 @@ public class ViewEventActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.view_event, menu);
+        return true;
+    }
+
     private void getParticipants(Event e) {
         if (e != null && e.participants != null) {
             for (String id : e.participants) {
@@ -134,5 +144,21 @@ public class ViewEventActivity extends AppCompatActivity {
         dbref.child("users").child(userName).setValue(my_user);
         Intent intent = new Intent(this, EventsActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.close_viewEvent) {
+            finish();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -260,7 +260,6 @@ public class MainActivity extends AppCompatActivity
                             }
                             adapter.notifyDataSetChanged();
                         } else {
-                            System.out.println("cuuuuuuuuuuuuuuuuuunt");
                             startActivity(new Intent(MainActivity.this, LogIn.class));
                             finish();
                         }
@@ -296,7 +295,6 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 FirebaseAuth.getInstance().signOut();
-                System.out.println("fuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuck");
                 startActivity(new Intent(MainActivity.this, LogIn.class));
                 finish();
             }
@@ -578,6 +576,7 @@ public class MainActivity extends AppCompatActivity
         counterTextView.setVisibility(View.VISIBLE);
         adapter.notifyDataSetChanged();
         fab.setVisibility(View.VISIBLE);
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -586,6 +585,7 @@ public class MainActivity extends AppCompatActivity
                     sb.append(id);
                     sb.append(" ");
                 }
+
                 String result = sb.toString();
                 Intent intent = new Intent(v.getContext(), NewEventActivity.class);
                 intent.putExtra("ids", result);
@@ -593,6 +593,7 @@ public class MainActivity extends AppCompatActivity
                 clearActionMode();
             }
         });
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         toggle.onDrawerStateChanged(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
