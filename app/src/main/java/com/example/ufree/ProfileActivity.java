@@ -163,9 +163,11 @@ public class ProfileActivity extends AppCompatActivity
                     emailTextView.setText(currentUser.getEmail());
                     photoUrl = currentUser.getProfilePic();
                     if (photoUrl != null) {
-                        Glide.with(getApplicationContext())
-                                .load(photoUrl)
-                                .into(imageView);
+                        if (imageView != null) {
+                            Glide.with(getApplicationContext())
+                                    .load(photoUrl)
+                                    .into(imageView);
+                        }
                     }
 
                     Switch toggle = findViewById(R.id.toggle_nav);
