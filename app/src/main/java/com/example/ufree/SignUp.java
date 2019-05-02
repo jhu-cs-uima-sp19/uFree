@@ -435,7 +435,7 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
                                     inviteIds.put("-1", (long) -1);
                                     dbRef.child("users").child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(fullName, phoneNumber, email, eventIds, inviteIds));
                                     uploadImage();
-                                    dbRef.child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(fullName, phoneNumber, email, eventIds, inviteIds));
+                                    dbRef.child("users").child(email.replaceAll("[^a-zA-Z0-9]", "")).setValue(new User(fullName, phoneNumber, email, eventIds, inviteIds));
                                     // save user id in Shared Preferences
                                     SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
                                     SharedPreferences.Editor preferencesEditor = sp.edit();
