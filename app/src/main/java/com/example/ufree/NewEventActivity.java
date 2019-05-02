@@ -49,6 +49,7 @@ public class NewEventActivity extends AppCompatActivity {
     private ArrayList<String> attendees = new ArrayList<>();
     private Event my_event = new Event();
     Bundle extras = null;
+    String members = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +90,7 @@ public class NewEventActivity extends AppCompatActivity {
         //check if we're editing an existing event
         if (extras != null) {
 
-            String members = extras.getString("ids", "none");
+            members = extras.getString("ids", "none");
 
             if (members.equals("none")) {
                 System.out.println(extras.getLong("id", -2));
@@ -288,7 +289,7 @@ public class NewEventActivity extends AppCompatActivity {
         time.put("minute", minute);
 
         //add the event to the database then increment the counter
-        if (invitees.size() > 0 && minute < 59 && minute > 0 && extras == null) {
+        if (invitees.size() > 0 && minute < 59 && minute > 0 && extras == null || !members.equals("")) {
             System.out.println("making new event");
             SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
             String user = sp.getString("userID", "none");
