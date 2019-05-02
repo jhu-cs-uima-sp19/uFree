@@ -366,66 +366,67 @@ public class ProfileActivity extends AppCompatActivity
             }
         });
 
-        final AlertDialog.Builder builderx = new AlertDialog.Builder(this);
-        builderx.setTitle("Re-enter Your Password");
-
-        // Set up the input
-        final EditText input = new EditText(this);
-        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        builderx.setView(input);
-
-        // Set up the buttons
-        builderx.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String passw = input.getText().toString();
-                AuthCredential credential = EmailAuthProvider
-                        .getCredential(userId, passw);
-
-                // Prompt the user to re-provide their sign-in credentials
-                user.reauthenticate(credential)
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                mDatabase2.child(userId).removeValue();
-                                user.delete()
-                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    Toast.makeText(ProfileActivity.this, "Delete success", Toast.LENGTH_LONG).show();
-                                                    Intent intent = new Intent(getApplicationContext(), LogIn.class);
-                                                    startActivity(intent);
-                                                    finish();
-                                                }
-                                            }
-                                        });
-                            }
-                        });
-            }
-        });
-        builderx.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-
-            }
-        });
+/*
         deleteAccount.setOnClickListener(new View.OnClickListener() {
                                              public void onClick(View v) {
+                                                 final AlertDialog.Builder builderx = new AlertDialog.Builder(ProfileActivity.this);
+                                                 builderx.setTitle("Re-enter Your Password");
+
+                                                 // Set up the input
+                                                 final EditText input = new EditText(ProfileActivity.this);
+                                                 // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+                                                 input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                                                 builderx.setView(input);
+
+                                                 // Set up the buttons
+                                                 builderx.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                                     @Override
+                                                     public void onClick(DialogInterface dialog, int which) {
+                                                         String passw = input.getText().toString();
+                                                         AuthCredential credential = EmailAuthProvider
+                                                                 .getCredential(userId, passw);
+
+                                                         // Prompt the user to re-provide their sign-in credentials
+                                                         user.reauthenticate(credential)
+                                                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                     @Override
+                                                                     public void onComplete(@NonNull Task<Void> task) {
+                                                                         mDatabase2.child(userId).removeValue();
+                                                                         user.delete()
+                                                                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                     @Override
+                                                                                     public void onComplete(@NonNull Task<Void> task) {
+                                                                                         if (task.isSuccessful()) {
+                                                                                             Toast.makeText(ProfileActivity.this, "Delete success", Toast.LENGTH_LONG).show();
+                                                                                             Intent intent = new Intent(getApplicationContext(), LogIn.class);
+                                                                                             startActivity(intent);
+                                                                                             finish();
+                                                                                         }
+                                                                                     }
+                                                                                 });
+                                                                     }
+                                                                 });
+                                                     }
+                                                 });
+                                                 builderx.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                                     @Override
+                                                     public void onClick(DialogInterface dialog, int which) {
+                                                         dialog.cancel();
+
+                                                     }
+                                                 });
                                                  builderx.show();
                                              }
                                          });
 
 
-
+*/
 
 
 
         //ToDO
         //delete Auth???? maybe lost in merging
-/*        deleteAccount.setOnClickListener(new View.OnClickListener() {
+        deleteAccount.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
                 AlertDialog.Builder alert = new AlertDialog.Builder(ProfileActivity.this);
@@ -436,26 +437,29 @@ public class ProfileActivity extends AppCompatActivity
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        mDatabase2.child(userId).removeValue();
+                        AuthCredential credential = EmailAuthProvider
+                                .getCredential(userId, "2312");
 
-                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-                        user.delete()
+                        // Prompt the user to re-provide their sign-in credentials
+                        user.reauthenticate(credential)
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            Toast.makeText(ProfileActivity.this, "Delete success", Toast.LENGTH_LONG).show();
-                                        }
+                                        mDatabase2.child(userId).removeValue();
+                                        user.delete()
+                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if (task.isSuccessful()) {
+                                                            Toast.makeText(ProfileActivity.this, "Delete success", Toast.LENGTH_LONG).show();
+                                                            Intent intent = new Intent(getApplicationContext(), LogIn.class);
+                                                            startActivity(intent);
+                                                            finish();
+                                                        }
+                                                    }
+                                                });
                                     }
                                 });
-
-                        dbRef.child("users").child(userId).removeValue();
-
-                        Intent intent = new Intent(getApplicationContext(), LogIn.class);
-                        startActivity(intent);
-                        dialog.dismiss();
-                        finish();
                     }
                 });
 
@@ -472,7 +476,7 @@ public class ProfileActivity extends AppCompatActivity
 
             }
         });
-        */
+
 
 
 
