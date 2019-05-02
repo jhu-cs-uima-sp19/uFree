@@ -3,6 +3,7 @@ package com.example.ufree;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
+import android.os.health.SystemHealthManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
@@ -11,6 +12,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.content.DialogInterface;
@@ -24,7 +26,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.w3c.dom.Text;
+
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.lang.Long;
 
@@ -36,11 +43,14 @@ public class NewEventActivity extends AppCompatActivity {
     private EditText descriptionInput;
     private Spinner monthInputSpinner;
     private Spinner hourInputSpinner;
-    private Spinner minuteInputSpinner;
     private EditText dayInput;
-    private long eventIdValue;
+    private long eventIdValue = 0;
     private long counter;
-    ArrayList<String> invitees = new ArrayList<>();
+    private ArrayList<String> invitees = new ArrayList<>();
+    private ArrayList<String> attendees = new ArrayList<>();
+    private Event my_event = new Event();
+    Bundle extras = null;
+    String members = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,12 +66,11 @@ public class NewEventActivity extends AppCompatActivity {
         descriptionInput = (EditText) findViewById(R.id.DescriptionInput);
         monthInputSpinner = (Spinner) findViewById(R.id.monthSpinner);
         hourInputSpinner = (Spinner) findViewById(R.id.hourSpinner);
-        minuteInputSpinner = (Spinner) findViewById(R.id.minuteSpinner);
         dayInput = (EditText) findViewById(R.id.dayEditText);
 
         Spinner monthInput = findViewById(R.id.monthSpinner);
 
-        Bundle extras = getIntent().getExtras();
+        extras = getIntent().getExtras();
 
         //initialize the counter
         dbref.child("counters").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -70,7 +79,7 @@ public class NewEventActivity extends AppCompatActivity {
                 HashMap<String, Long> counters = (HashMap) dataSnapshot.getValue();
                 counter = counters.get("events");
                 if (eventIdValue == 0) {
-                    setValues();
+                    eventIdValue = counter;
                 }
             }
 
@@ -79,34 +88,94 @@ public class NewEventActivity extends AppCompatActivity {
             }
         });
 
+        //check if we're editing an existing event
         if (extras != null) {
-            eventIdValue = extras.getLong("id", counter);
-            System.out.println("ID IS: " + eventIdValue);
-            dbref.child("events").child(String.valueOf(eventIdValue)).addListenerForSingleValueEvent(new ValueEventListener() {
 
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    HashMap<String, Object> event = (HashMap<String, Object>) dataSnapshot.getValue();
-                    if (event != null) {
-                        locationInput.setText((String) event.get("location"));
-                        descriptionInput.setText((String) event.get("description"));
+            members = extras.getString("ids", "none");
+
+            if (members.equals("none")) {
+                System.out.println(extras.getLong("id", -2));
+
+                // set up title of app bar
+                getSupportActionBar().setTitle("Edit Event");
+
+                eventIdValue = extras.getLong("id", counter);
+                Button changeEventButton = findViewById(R.id.CreateEventButton);
+                Button deleteEventButton = findViewById(R.id.deleteEventButton);
+                changeEventButton.setText("Save Changes");
+                deleteEventButton.setVisibility(View.VISIBLE);
+
+                dbref.child("events").child(String.valueOf(eventIdValue)).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        my_event = dataSnapshot.getValue(Event.class);
+                        TextView attendeesTextView = findViewById(R.id.InviteesTextView);
+                        Spinner monthSpinner = findViewById(R.id.monthSpinner);
+                        EditText dayEditText = findViewById(R.id.dayEditText);
+                        Spinner hourSpinner = findViewById(R.id.hourSpinner);
+                        EditText minuteInput = findViewById(R.id.minuteInput);
+
+                        if (my_event != null) {
+                            locationInput.setText(my_event.location);
+                            descriptionInput.setText(my_event.description);
+                            String attendeesText = "";
+                            attendees = my_event.participants;
+
+                            if (attendees != null) {
+                                for (String p : attendees) {
+                                    attendeesText += (p + ", ");
+                                }
+
+                                attendeesText = attendeesText.substring(0, attendeesText.length() - 1);
+                                attendeesTextView.setText(attendeesText);
+                            }
+
+                            dayEditText.setText(String.valueOf(my_event.date.get("day")));
+                            minuteInput.setText(String.valueOf(my_event.time.get("minute")));
+
+                            ArrayAdapter<CharSequence> monthAdapter = ArrayAdapter.createFromResource(getApplicationContext(),
+                                    R.array.monthSpinnerValues, R.layout.support_simple_spinner_dropdown_item);
+
+                            ArrayAdapter<CharSequence> hourAdapter = ArrayAdapter.createFromResource(getApplicationContext(),
+                                    R.array.hourSpinnerValues, R.layout.support_simple_spinner_dropdown_item);
+
+                            monthSpinner.setAdapter(monthAdapter);
+                            hourSpinner.setAdapter(hourAdapter);
+
+                            hourSpinner.setSelection(my_event.time.get("hour"));
+                            monthSpinner.setSelection(my_event.date.get("month") - 1);
+                        }
                     }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                    }
+                });
+            } else {
+                String[] friends = members.split(" ");
+
+                for (int i = 0; i < friends.length; i++) {
+                    invitees.add(friends[i]);
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {}
-            });
+                TextView inviteesTextView = findViewById(R.id.InviteesTextView);
+
+                String content = "";
+                for (int i = 0; i < friends.length; i++) {
+                    content = content + friends[i] + ", ";
+                }
+
+                content = content.substring(0, content.length() - 2);
+                inviteesTextView.setText(content);
+            }
         } else {
+            System.out.println("no extras!");
             descriptionInput.setText("event title");
             locationInput.setText("event location");
+
+            // set up title of app bar
+            getSupportActionBar().setTitle("New Event");
         }
-
-        // set up title of app bar
-        getSupportActionBar().setTitle("New Event");
-    }
-
-    private void setValues() {
-        eventIdValue = counter;
     }
 
     @Override
@@ -172,39 +241,97 @@ public class NewEventActivity extends AppCompatActivity {
         }
     }
 
+    private boolean checkDate(Event e) {
+        Date d = new Date();
+        final long time = d.getTime() - d.getTime() / (2019 - 1970);
+        final double msMonth = 26298E5;
+        final double msDay = 86400000;
+        final double msHour = 3600000;
+        final double msMinute = 60000;
+        double event_time = e.date.get("month") * msMonth + e.date.get("day") * msDay
+                + e.time.get("hour") * msHour * e.time.get("minute") * msMinute;
+
+        return event_time > time;
+    }
+
     public void addEventAction(View v) {
+        System.out.println("Trying to execute action");
         HashMap<String, Integer> date = new HashMap<>();
         HashMap<String, Integer> time = new HashMap<>();
+        EditText minuteInput = findViewById(R.id.minuteInput);
 
         String location = String.valueOf(locationInput.getText());
         String description = String.valueOf(descriptionInput.getText());
         String hour = String.valueOf(hourInputSpinner.getSelectedItem());
-        String minute = String.valueOf(minuteInputSpinner.getSelectedItem());
         String month = String.valueOf(monthInputSpinner.getSelectedItem());
-        Integer day = Integer.parseInt(String.valueOf(dayInput.getText()));
+        Integer day = 0;
+        Integer minute = 0;
+
+        try {
+            day = Integer.parseInt(String.valueOf(dayInput.getText()));
+        } catch (NumberFormatException e) {
+            AlertDialog alertDialog = new AlertDialog.Builder(NewEventActivity.this).create();
+            alertDialog.setTitle("Alert");
+            alertDialog.setMessage("Invalid Time");
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+            return;
+        }
+
+        try {
+            minute = Integer.parseInt(String.valueOf(minuteInput.getText()));
+        } catch (NumberFormatException e) {
+            AlertDialog alertDialog = new AlertDialog.Builder(NewEventActivity.this).create();
+            alertDialog.setTitle("Alert");
+            alertDialog.setMessage("Invalid Time");
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+            return;
+        }
 
         date.put("month",convertTimeToInt(month));
         date.put("day", day);
         time.put("hour", convertTimeToInt(hour));
-        time.put("minute", convertTimeToInt(minute));
+        time.put("minute", minute);
 
         //add the event to the database then increment the counter
-        if (invitees.size() > 0) {
-            Event e = new Event(invitees, date, time, location, description, eventIdValue);
+        if (invitees.size() > 0 && minute < 59 && minute > 0 && extras == null || !members.equals("")) {
+            System.out.println("making new event");
+            SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
+            String user = sp.getString("userID", "none");
+
+            if (attendees.size() == 0) {
+                attendees.add(user);
+            }
+
+            Event e = new Event(attendees, invitees, date, time, location,
+                    description, eventIdValue);
+
 
             dbref.child("events").child(String.valueOf(eventIdValue)).setValue(e);
 
             if (eventIdValue == counter) {
+                System.out.println("increment counter");
                 dbref.child("events").child(String.valueOf(counter)).setValue(e);
                 counter++;
                 dbref.child("counters").child("events").setValue(counter);
+            } else {
+                System.out.println(counter);
             }
 
-            SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
-            String user = sp.getString("userID", "none");
-
             for (String u : invitees) {
-                dbref.child("users").child(u).child("events").child(String.valueOf(eventIdValue)).setValue(eventIdValue);
+                u = u.replace("@", "").replace(".", "");
+                dbref.child("users").child(u).child("invites").child(String.valueOf(eventIdValue)).setValue(eventIdValue);
             }
 
             if (!user.equals("none")) {
@@ -212,6 +339,33 @@ public class NewEventActivity extends AppCompatActivity {
             }
 
             //return to the events page
+            Intent intent = new Intent(this, EventsActivity.class);
+            startActivity(intent);
+        } else if (minute < 0 || minute > 59) {
+            AlertDialog alertDialog = new AlertDialog.Builder(NewEventActivity.this).create();
+            alertDialog.setTitle("Alert");
+            alertDialog.setMessage("Invalid Time");
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+        } else if (eventIdValue != 0) {
+            System.out.println(eventIdValue);
+            my_event.date = new HashMap<>();
+            my_event.date.put("month", convertTimeToInt(month));
+            my_event.date.put("day", day);
+            my_event.time = new HashMap<>();
+            my_event.time.put("hour", convertTimeToInt(hour));
+            my_event.time.put("minute", minute);
+            my_event.location = location;
+            my_event.participants = attendees;
+            my_event.description = description;
+            my_event.invitees = invitees;
+            dbref.child("events").child(String.valueOf(eventIdValue)).setValue(my_event);
+
             Intent intent = new Intent(this, EventsActivity.class);
             startActivity(intent);
         } else {
@@ -228,24 +382,91 @@ public class NewEventActivity extends AppCompatActivity {
         }
     }
 
+    /** adds invitation. */
     public void addInviteAction(View v) {
         EditText searchUsersEditText = findViewById(R.id.searchUsersInput);
-        TextView inviteesTextView = findViewById(R.id.InviteesTextView);
-        String userName = String.valueOf(searchUsersEditText.getText());
-        String email = userName;
-        userName = userName.replace("@", "");
-        userName = userName.replace(".", "");
+        final TextView inviteesTextView = findViewById(R.id.InviteesTextView);
+        final String userName = String.valueOf(searchUsersEditText.getText());
+        SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
+        final String me = sp.getString("userID", "none");
 
-        if (dbref.child("users").child(userName) != null) {
-            invitees.add(userName);
-            String invitees = String.valueOf(inviteesTextView.getText());
-            if (invitees.equals("attendees appear here")) {
-                inviteesTextView.setText(userName);
-            } else {
-                invitees = invitees + ", " + email;
-                inviteesTextView.setText(invitees);
+        //search through logged-in users friends to add invites
+        dbref.child("users").child(me).child("frienders").addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                boolean found = false;
+                if (dataSnapshot.getValue() != null) {
+                    System.out.println(dataSnapshot.getValue());
+                    HashMap<String, String> myFriends = (HashMap<String, String>) dataSnapshot.getValue();
+                    for (String f : myFriends.values()) {
+                        if (f.equals(userName)) {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    String inviteesStringVal = String.valueOf(inviteesTextView.getText());
+                    if (invitees.size() == 0 && found) {
+                        invitees.add(userName);
+                        inviteesTextView.setText(userName);
+                    } else if (found) {
+                        invitees.add(userName);
+                        inviteesStringVal = inviteesStringVal + ", " + userName;
+                        inviteesStringVal = inviteesStringVal.substring(0, inviteesStringVal.length() - 2);
+                        inviteesTextView.setText(inviteesStringVal);
+                    } else {
+                        AlertDialog alertDialog = new AlertDialog.Builder(NewEventActivity.this).create();
+                        alertDialog.setTitle("Alert");
+                        alertDialog.setMessage("Sorry! We can't find that friend");
+                        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.show();
+                    }
+                }
             }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void deleteEventAction(View v) {
+        SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
+        final String user = sp.getString("userID", "none");
+
+        if (!user.equals("none")) {
+            dbref.child("events").child(String.valueOf(eventIdValue)).child("participants").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    ArrayList<String> participants = (ArrayList<String>) dataSnapshot.getValue();
+                    long index = 0;
+                    for (int i = 0; i < participants.size(); i++) {
+                        if (participants.get(i).equals(user)) {
+                            index = i;
+                        }
+                    }
+
+                    dbref.child("events").child(String.valueOf(eventIdValue)).child("participants").child(String.valueOf(index)).removeValue();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+
+            dbref.child("users").child(user).child("events").child(String.valueOf(eventIdValue)).removeValue();
         }
+
+        Intent intent = new Intent(this, EventsActivity.class);
+        startActivity(intent);
     }
 
     @Override
@@ -264,10 +485,4 @@ public class NewEventActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void removeEventAction(View v) {
-        dbref.child("events").child(String.valueOf(eventIdValue)).removeValue();
-        //return to the events page
-        Intent intent = new Intent(this, EventsActivity.class);
-        startActivity(intent);
-    }
 }

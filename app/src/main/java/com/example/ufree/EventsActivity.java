@@ -12,6 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v4.app.DialogFragment;
 import android.text.format.DateFormat;
+import android.util.EventLog;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -22,10 +23,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewParent;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Date;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -33,6 +38,7 @@ import android.widget.Switch;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -51,10 +57,14 @@ public class EventsActivity extends AppCompatActivity
     private FirebaseDatabase db;
     private DatabaseReference dbref;
     private RecyclerView eventsRecyclerView;
+    private RecyclerView invitesRecyclerView;
     private ArrayList<Event> events = new ArrayList<>();
+    private ArrayList<Event> invites = new ArrayList<>();
     private HashMap<String, Long> eventRefs = new HashMap<>();
-    static private String user;
+    private HashMap<String, Long> inviteRefs = new HashMap<>();
+    private static String user;
     CustomAdapter recyclerAdapter = new CustomAdapter(events);
+    CustomAdapter invitesRecyclerAdapter = new CustomAdapter(invites);
     private static User currentUser;
 
 
@@ -80,6 +90,8 @@ public class EventsActivity extends AppCompatActivity
             }
         });
 
+        reset();
+
 
 
         /* Set up navigation drawer */
@@ -102,17 +114,25 @@ public class EventsActivity extends AppCompatActivity
         eventsRecyclerView.setItemAnimator(new DefaultItemAnimator());
         eventsRecyclerView.setAdapter(recyclerAdapter);
 
+        invitesRecyclerView = findViewById(R.id.InvitesRecyclerView);
+        RecyclerView.LayoutManager iLayoutManager = new LinearLayoutManager(getApplicationContext());
+        invitesRecyclerView.setLayoutManager(iLayoutManager);
+        invitesRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        invitesRecyclerView.setAdapter(invitesRecyclerAdapter);
+
         SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
         user = sp.getString("userID", "empty");
 
-        if (user != "empty") {
+        if (!user.equals("empty")) {
             if (dbref.child("users").child(user).child("events").getRoot() != null) {
-                dbref.child("users").child(user).child("events").addListenerForSingleValueEvent(new ValueEventListener() {
+                dbref.child("users").child(user).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        System.out.println("found events!");
-                        eventRefs = (HashMap<String, Long>) dataSnapshot.getValue();
+                        User u = dataSnapshot.getValue(User.class);
+                        eventRefs = u.events;
+                        inviteRefs = u.invites;
                         callBack();
+                        invitesCallback();
                     }
 
                     @Override
@@ -141,6 +161,15 @@ public class EventsActivity extends AppCompatActivity
                             TextView emailTextView = navHeader.findViewById(R.id.email_nav);
                             nameTextView.setText(currentUser.getFullName());
                             emailTextView.setText(currentUser.getEmail());
+                            String photoUrl = currentUser.getProfilePic();
+                            ImageView imageView = navHeader.findViewById(R.id.imageView);
+                            if (photoUrl != null) {
+                                if (imageView != null) {
+                                    Glide.with(getApplicationContext())
+                                            .load(photoUrl)
+                                            .into(imageView);
+                                }
+                            }
 
                             Switch toggle = findViewById(R.id.toggle_nav);
                             toggle.setChecked(currentUser.getIsFree());
@@ -261,18 +290,36 @@ public class EventsActivity extends AppCompatActivity
     //let's stack asynchronous functions on top of asynchronous functions by placing
     //database queries in the callback for our database query
     private void callBack() {
-        //System.out.println("events array of size: " + eventRefs.size());
-        if (eventRefs.size() > 0) {
-            for (long id : eventRefs.values()) {
-                //System.out.println(id);
-                //initialize the counter
+        for (long id : eventRefs.values()) {
+            //System.out.println(id);
+            //initialize the counter
+            if (id != -1 && id != -2) {
+                dbref.child("events").child(String.valueOf(id)).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        Event e = dataSnapshot.getValue(Event.class);
+                        events.add(e);
+                        recyclerAdapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                    }
+                });
+            }
+        }
+    }
+
+    private void invitesCallback() {
+        if (inviteRefs != null) {
+            for (long id : inviteRefs.values()) {
                 if (id != -1 && id != -2) {
                     dbref.child("events").child(String.valueOf(id)).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             Event e = dataSnapshot.getValue(Event.class);
-                            events.add(e);
-                            recyclerAdapter.notifyDataSetChanged();
+                            invites.add(e);
+                            invitesRecyclerAdapter.notifyDataSetChanged();
                         }
 
                         @Override
@@ -282,10 +329,7 @@ public class EventsActivity extends AppCompatActivity
                 }
             }
         }
-
     }
-
-
 
     @Override
     public void onBackPressed() {
@@ -310,11 +354,6 @@ public class EventsActivity extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.search_events) {
-            return true;
-        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -351,12 +390,72 @@ public class EventsActivity extends AppCompatActivity
 
         if (selectedItemDescription != null && selectedItemLocation != null) {
             Long id = Long.valueOf(String.valueOf(selectedItemId.getText()));
-            Intent intent = new Intent(this, ViewEventActivity.class);
+            Intent intent;
+
+
+            ViewParent parent = view.getParent();
+            if (((View) parent).getId() == R.id.EventsRecyclerView) {
+                intent = new Intent(this, NewEventActivity.class);
+            } else {
+                intent = new Intent(this, ViewEventActivity.class);
+            }
+
             Bundle extras = new Bundle();
             extras.putLong("id", id);
             intent.putExtras(extras);
             startActivity(intent);
         }
+    }
+
+    private void reset() {
+        Date d = new Date();
+        final long time = d.getTime() - d.getTime() / (2019 - 1970);
+        final double msMonth = 26298E5;
+        final double msDay = 86400000;
+        final double msHour = 3600000;
+        final double msMinute = 60000;
+
+        final ArrayList<Event> events = new ArrayList<>();
+
+        dbref.child("events").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    Event e = ds.getValue(Event.class);
+                    if (e != null) {
+                        double event_time = e.date.get("month") * msMonth + e.date.get("day") * msDay
+                                + e.time.get("hour") * msHour * e.time.get("minute") * msMinute;
+
+                        if (event_time < time) {
+                            seekAndDestroy(e);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void seekAndDestroy(Event e) {
+        if (e.invitees != null) {
+            for (String next_user : e.invitees) {
+                next_user = next_user.replace("@", "").replace(".", "");
+                dbref.child("users").child(next_user).child("invites").child(String.valueOf(e.id)).removeValue();
+            }
+        }
+
+        if (e.participants != null) {
+            for (String next_user : e.participants) {
+                next_user = next_user.replace("@", "").replace(".", "");
+                dbref.child("users").child(next_user).child("events").child(String.valueOf(e.id)).removeValue();
+            }
+        }
+
+        dbref.child("events").child(String.valueOf(e.id)).removeValue();
     }
 
     /* CODES FOR SETTING UP TIME BUTTON IN NAV DRAWER */

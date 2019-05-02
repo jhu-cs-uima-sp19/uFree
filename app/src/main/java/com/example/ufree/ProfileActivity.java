@@ -5,6 +5,14 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.media.Image;
+import android.net.Uri;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -30,7 +38,11 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.google.android.gms.auth.api.signin.internal.Storage;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -39,6 +51,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import org.w3c.dom.Text;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.sql.Time;
 import java.util.Calendar;
 
 import static com.example.ufree.MainActivity.timeFormat;
@@ -49,6 +71,11 @@ public class ProfileActivity extends AppCompatActivity
     private FirebaseUser user;
     static private User currentUser;
     static String userId;
+
+    DatabaseReference dbref = FirebaseDatabase.getInstance().getReference();
+
+    private final int GALLERY = 0;
+    private final int CAMERA = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,11 +134,19 @@ public class ProfileActivity extends AppCompatActivity
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
+                    ImageView picView = (ImageView) findViewById(R.id.profilePic_profile);
                     currentUser = dataSnapshot.getValue(User.class);
                     String displayName = currentUser.getFullName();
                     nameEditView.setText(displayName);
                     phoneEditView.setText(dataSnapshot.getValue(User.class).getPhone());
                     emailTV.setText(dataSnapshot.getValue(User.class).getEmail());
+                    String photoUrl = currentUser.getProfilePic();
+                    System.out.println("hELLO" + photoUrl);
+                    if (photoUrl != null) {
+                        Glide.with(getApplicationContext())
+                                .load(photoUrl)
+                                .into(picView);
+                    }
 
                     /* NAV DRAWER */
                     /* Display user info in navigation header */
@@ -120,8 +155,17 @@ public class ProfileActivity extends AppCompatActivity
 
                     TextView nameTextView = navHeader.findViewById(R.id.name_nav);
                     TextView emailTextView = navHeader.findViewById(R.id.email_nav);
+                    ImageView imageView = navHeader.findViewById(R.id.imageView);
                     nameTextView.setText(currentUser.getFullName());
                     emailTextView.setText(currentUser.getEmail());
+                    photoUrl = currentUser.getProfilePic();
+                    if (photoUrl != null) {
+                        if (imageView != null) {
+                            Glide.with(getApplicationContext())
+                                    .load(photoUrl)
+                                    .into(imageView);
+                        }
+                    }
 
                     Switch toggle = findViewById(R.id.toggle_nav);
                     toggle.setChecked(currentUser.getIsFree());
@@ -231,7 +275,29 @@ public class ProfileActivity extends AppCompatActivity
             }
         });
 
-
+        ImageView picView = (ImageView) findViewById(R.id.profilePic_profile);
+        picView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final android.app.AlertDialog.Builder pictureDialog =
+                        new android.app.AlertDialog.Builder(ProfileActivity.this);
+                pictureDialog.setTitle("Choose Profile Picture");
+                String[] pictureDialogItems = {
+                        "Select photo from gallery"};
+                pictureDialog.setItems(pictureDialogItems,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (which) {
+                                    case 0:
+                                        choosePhotoFromGallery();
+                                        break;
+                                }
+                            }
+                        });
+                pictureDialog.show();
+            }
+        });
 
         userNameButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -274,15 +340,6 @@ public class ProfileActivity extends AppCompatActivity
                 Toast.makeText(getBaseContext(), "Reset Email Sent", Toast.LENGTH_LONG).show();
             }
         });
-
-
-       /* passButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                String email = emailTV.getText().toString();
-                mAuth.sendPasswordResetEmail(email);
-                Toast.makeText(getBaseContext(), "Reset Email Sent", Toast.LENGTH_LONG).show();
-            }
-        });*/
 
         phoneButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -358,6 +415,55 @@ public class ProfileActivity extends AppCompatActivity
 
     }
 
+    private void choosePhotoFromGallery() {
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK,
+                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(galleryIntent, this.GALLERY);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Uri filePath = null;
+        // Something went wrong/user cancelled request
+        if (resultCode == RESULT_CANCELED) {
+            return;
+        }
+        // If user chose gallery
+        if (requestCode == GALLERY) {
+            if (data != null) {
+                filePath = data.getData();
+                try {
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), filePath);
+                    ImageView picView = (ImageView) findViewById(R.id.profilePic_profile);
+                    picView.setImageBitmap(bitmap);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.out.println("Gallery image failed");
+                }
+            }
+        }
+
+        final StorageReference storageReference = FirebaseStorage.getInstance().getReference(
+                "profilePics/" + currentUser.getEmail().replaceAll("[^a-zA-Z0-9]", "") + ".jpg");
+        if (filePath != null) {
+            storageReference.putFile(filePath).addOnSuccessListener(
+                    new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    dbref.child("users").child(currentUser.getEmail().replaceAll("[^a-zA-Z0-9]", ""))
+                                            .child("profilePic").setValue(uri.toString());
+                                }
+                            });
+                        }
+                    }
+            );
+        }
+    }
+
+    // Time picker for time button in the ** nav drawer **
     /* NAV DRAWER */
     // Time picker for time button in the ** NAV DRAWER **
     public static class TimePickerFragmentNav extends DialogFragment
