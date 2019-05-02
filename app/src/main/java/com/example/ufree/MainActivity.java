@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity
 
     static User currentUser;
     static String userId;
-    static boolean checkedAvailability;
+    static boolean checkedAvailability = false;
     HashMap<String, User> freeFriends = new LinkedHashMap<String, User>();
     static Calendar selectedCalendar;
     static boolean dummyUserIsFree = true;
@@ -127,9 +127,6 @@ public class MainActivity extends AppCompatActivity
         // initialize firebase
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         final DatabaseReference dbRef = database.getReference();
-
-        // Record if user has been asked for availability
-        checkedAvailability = false;
 
         dbRef.child("users").child(userId).addValueEventListener(
                 new ValueEventListener() {
