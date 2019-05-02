@@ -7,7 +7,15 @@ public class User {
     private String email;
     private String fullName;
     private String phone;
-    public HashMap<String, Integer> events;
+    private String profilePic;
+    public HashMap<String, Long> events;
+    public HashMap<String, Long> invites;
+    private int startDay;
+    private int startHour;
+    private int startMinute;
+    private int endDay;
+    private int endHour;
+    private int endMinute;
     private long startTime;
     private long endTime;
     private boolean isFree;
@@ -19,15 +27,17 @@ public class User {
     }
 
     // Constructor for sign up
-    public User(String n, String p, String e, HashMap<String, Integer> eventsList) {
+    public User(String n, String p, String e, HashMap<String, Long> eventsList, HashMap<String, Long> invitesList) {
         this.fullName = n;
         this.phone = p;
         this.email = e;
+        this.profilePic = null;
         this.isFree = false;
         this.startTime = 0;
         this.endTime = 0;
         this.events = eventsList;
         this.incomingFriends = null;
+        this.invites = invitesList;
         this.frienders = null;
     }
 
@@ -35,6 +45,7 @@ public class User {
         this.email = that.email;
         this.fullName = that.fullName;
         this.phone = that.phone;
+        this.profilePic = that.profilePic;
         this.startTime = that.startTime;
         this.endTime = that.endTime;
         this.isFree = that.isFree;
@@ -53,6 +64,10 @@ public class User {
 
     public String getPhone() {
         return this.phone;
+    }
+
+    public String getProfilePic() {
+        return this.profilePic;
     }
 
     public long getStartTime() { return this.startTime; }

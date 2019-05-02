@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.media.Image;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -33,6 +34,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import android.widget.ImageView;
@@ -156,6 +158,13 @@ public class MainActivity extends AppCompatActivity
 
                             TextView nameTextView = navHeader.findViewById(R.id.name_nav);
                             TextView emailTextView = navHeader.findViewById(R.id.email_nav);
+                            String photoUrl = currentUser.getProfilePic();
+                            ImageView imageView = (ImageView) findViewById(R.id.imageView);
+                            if (photoUrl != null) {
+                                Glide.with(getApplicationContext())
+                                    .load(photoUrl)
+                                    .into(imageView);
+                            }
                             nameTextView.setText(currentUser.getFullName());
                             emailTextView.setText(currentUser.getEmail());
 
@@ -224,6 +233,7 @@ public class MainActivity extends AppCompatActivity
                         if (currentUser != null) {
                             // Get current user's friends
                             HashMap<String, String> friends = currentUser.getFrienders();
+                            if (friends != null) {
                             for (String friendEmail : friends.values()) {
                                 User user = allUsers.get(friendEmail.replaceAll("[^a-zA-Z0-9]", ""));
                                 if (user != null && user.getEmail() != null
@@ -235,6 +245,7 @@ public class MainActivity extends AppCompatActivity
                                         freeFriends.put(friendEmail.replaceAll("[^a-zA-Z0-9]", ""), new User(user));
                                     }
                                 }
+                            }
                             }
                             HashMap<String, User> sortedFreeFriends = sortByTime(freeFriends);
                             for (Map.Entry<String, User> entry: sortedFreeFriends.entrySet()) {
@@ -249,6 +260,7 @@ public class MainActivity extends AppCompatActivity
                             }
                             adapter.notifyDataSetChanged();
                         } else {
+                            System.out.println("cuuuuuuuuuuuuuuuuuunt");
                             startActivity(new Intent(MainActivity.this, LogIn.class));
                             finish();
                         }
@@ -284,6 +296,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 FirebaseAuth.getInstance().signOut();
+                System.out.println("fuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuck");
                 startActivity(new Intent(MainActivity.this, LogIn.class));
                 finish();
             }
@@ -292,6 +305,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 FirebaseAuth.getInstance().signOut();
+                System.out.println("thiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiis");
                 startActivity(new Intent(MainActivity.this, LogIn.class));
                 finish();
             }
@@ -517,10 +531,7 @@ public class MainActivity extends AppCompatActivity
         Log.d("debug", "item id: " + id);
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.search_main) {
-            // TODO: implement search function
-            return true;
-        } else if (id == android.R.id.home && isInActionMode) {
+        if (id == android.R.id.home && isInActionMode) {
             clearActionMode();
             Log.d("debug", "back button is pressed");
             return true;
@@ -545,6 +556,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
         } else if (id == R.id.calendar_nav) {
             // TODO: implement calendar activity
+            Toast.makeText(getApplicationContext(), "Coming up...", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.profile_nav) {
             Intent intent = new Intent(this, ProfileActivity.class);
             startActivity(intent);

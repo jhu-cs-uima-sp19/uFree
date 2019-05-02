@@ -11,10 +11,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.support.v7.widget.Toolbar;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -41,6 +43,7 @@ public class FriendProfileActivity extends AppCompatActivity {
     TextView deleteeV;
     TextView deleterV;
     TextView requestSentV;
+    ImageView picView;
     Button deleteFriend;
     Button addFriend;
     ArrayList<String> key1;
@@ -76,7 +79,7 @@ public class FriendProfileActivity extends AppCompatActivity {
         deleteeV = (TextView) findViewById(R.id.textViewDeletee);
         deleterV = (TextView) findViewById(R.id.textViewDeleter);
         requestSentV = (TextView) findViewById(R.id.textViewIncoming);
-
+        picView = (ImageView) findViewById(R.id.profilePic_main);
 
 
         // Get the extras from intent
@@ -239,6 +242,12 @@ public class FriendProfileActivity extends AppCompatActivity {
                 phone = user.getPhone();
                 nameView.setText(name);
                 phoneView.setText(phone);
+                String url = user.getProfilePic();
+                if (url != null) {
+                    Glide.with(getApplicationContext())
+                            .load(url)
+                            .into(picView);
+                }
                 // set up title of action bar to be name of friend
                 getSupportActionBar().setTitle(user.getFullName());
             }

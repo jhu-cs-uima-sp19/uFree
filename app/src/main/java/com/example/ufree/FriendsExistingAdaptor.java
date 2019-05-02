@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -65,6 +66,12 @@ public class FriendsExistingAdaptor extends RecyclerView.Adapter {
                 User user = dataSnapshot.getValue(User.class);
                 if (user != null) {
                     myHolder.name.setText(user.getFullName());
+                    String url = user.getProfilePic();
+                    if (url != null) {
+                        Glide.with(context)
+                                .load(url)
+                                .into(myHolder.profilePic);
+                    }
                 }
             }
 

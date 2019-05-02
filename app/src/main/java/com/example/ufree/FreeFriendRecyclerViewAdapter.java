@@ -12,6 +12,7 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import org.w3c.dom.Text;
 
 import java.sql.Time;
@@ -90,6 +91,12 @@ public class FreeFriendRecyclerViewAdapter extends RecyclerView.Adapter<FreeFrie
         userIds = freeFriends.keySet().toArray(new String[freeFriends.size()]);
         User freeFriend = freeFriends.get(userIds[position]);
         holder.freeFriendname.setText(freeFriend.getFullName());
+        String photoUrl = freeFriend.getProfilePic();
+        if (photoUrl != null) {
+            Glide.with(this.context)
+                    .load(photoUrl)
+                    .into(holder.profilePic);
+        }
         holder.userIDTextView.setText(freeFriend.getEmail());
         Calendar now = Calendar.getInstance();
         Calendar endCalendar = java.util.Calendar.getInstance();
