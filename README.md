@@ -7,9 +7,9 @@ Made by: Christian, Tianyue, Alice, Minqi (Team D)
 uFree is an app to find friends who are available at the same times you are when you want to go out! The app provides options for users looking to spontaneously meet up with friends as well as for users interested in making plans in advance.
 
 ## Test accounts
-- Email: jackufree@ufree.com
-- Password: 123456
 - Email: maryufree@ufree.com
+- Password: 123456
+- Email: jackufree@ufree.com
 - Password: 123456
 
 ## First Sprint Objectives:
