@@ -5,6 +5,7 @@ import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -91,7 +92,7 @@ public class EventsActivity extends AppCompatActivity
             }
         });
 
-        //reset();
+        reset();
 
 
 
@@ -106,6 +107,13 @@ public class EventsActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         // set Events to be selected
         navigationView.getMenu().getItem(1).setChecked(true);
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                Log.d("test","now running view\n\n\n");
 
         //create recycler and set adapter
         eventsRecyclerView = findViewById(R.id.EventsRecyclerView);
@@ -123,6 +131,8 @@ public class EventsActivity extends AppCompatActivity
 
         SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
         user = sp.getString("userID", "empty");
+
+
 
         if (!user.equals("empty")) {
             if (dbref.child("users").child(user).child("events").getRoot() != null) {
@@ -285,6 +295,10 @@ public class EventsActivity extends AppCompatActivity
         /* END OF CODES FOR CONFIGURING NAV DRAWER*/
         /* ------------------------------------------------------------------- */
 
+            }
+        }, 500);
+
+
     }
 
     //This is horrendous style but it's what we're doing.
@@ -408,44 +422,44 @@ public class EventsActivity extends AppCompatActivity
             startActivity(intent);
         }
     }
-////
-//    private void reset() {
-//        Date d = new Date();
-////        final long time = d.getTime() - d.getTime() / (2019 - 1970);
-//        final long time = d.getTime();
-////        final double msMonth = 26298E5;
-////        final double msDay = 86400000;
-////        final double msHour = 3600000;
-////        final double msMinute = 60000;
-////
-//        final ArrayList<Event> events = new ArrayList<>();
-////
-//        dbref.child("events").addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-//                    Event e = ds.getValue(Event.class);
-//                    if (e != null) {
-//                        long event_time = e.time;
-//                        if (event_time < time) {
-//                            seekAndDestroy(e);
-//                        }
-////                        double event_time = e.date.get("month") * msMonth + e.date.get("day") * msDay
-////                                + e.time.get("hour") * msHour * e.time.get("minute") * msMinute;
-////
-////                        if (event_time < time) {
-////                            seekAndDestroy(e);
-////                        }
-//                    }
-//                }
-//            }
-////
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-////
-//            }
-//        });
-//    }
+
+    private void reset() {
+        Date d = new Date();
+//        final long time = d.getTime() - d.getTime() / (2019 - 1970);
+        final long time = d.getTime();
+//        final double msMonth = 26298E5;
+//        final double msDay = 86400000;
+//        final double msHour = 3600000;
+//        final double msMinute = 60000;
+//
+        final ArrayList<Event> events = new ArrayList<>();
+//
+        dbref.child("events").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    Event e = ds.getValue(Event.class);
+                    if (e != null) {
+                        long cid = e.id;
+                        long event_time = e.time;
+                        Log.d("test", "event time: " + event_time + "  current time: " + time);
+                        if (event_time < time) {
+//                            String temp = e.description;
+//                            temp = "(Expired)" + temp;
+//                            Log.d("test", Long.toString(cid));
+//                            dbref.child("events").child(Long.toString(cid)).child("description").setValue(temp);
+                            seekAndDestroy(e);
+                        }
+                    }
+                }
+            }
+//
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+            }
+        });
+    }
 
     private void seekAndDestroy(Event e) {
         if (e.invitees != null) {
