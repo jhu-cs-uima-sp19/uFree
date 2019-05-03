@@ -102,19 +102,21 @@ public class ViewEventActivity extends AppCompatActivity {
     private void getParticipants(Event e) {
         if (e != null && e.participants != null) {
             for (String id : e.participants) {
-                dbref.child("users").child(id).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        User u = dataSnapshot.getValue(User.class);
-                        String participantsText = String.valueOf(partsView.getText());
-                        participantsText += u.getFullName() + "\n";
-                        partsView.setText(participantsText);
-                    }
+                if (id != null) {
+                    dbref.child("users").child(id).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            User u = dataSnapshot.getValue(User.class);
+                            String participantsText = String.valueOf(partsView.getText());
+                            participantsText += u.getFullName() + "\n";
+                            partsView.setText(participantsText);
+                        }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                    }
-                });
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                        }
+                    });
+                }
             }
         }
     }
