@@ -132,6 +132,8 @@ public class EventsActivity extends AppCompatActivity
         user = sp.getString("userID", "empty");
 
         if (dbref.child("users").child(user).child("events").getRoot() != null) {
+            eventRefs.clear();
+            inviteRefs.clear();
             dbref.child("users").child(user).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
