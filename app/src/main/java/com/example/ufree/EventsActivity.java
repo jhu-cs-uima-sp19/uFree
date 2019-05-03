@@ -406,44 +406,44 @@ public class EventsActivity extends AppCompatActivity
             startActivity(intent);
         }
     }
-//
-    private void reset() {
-        Date d = new Date();
-//        final long time = d.getTime() - d.getTime() / (2019 - 1970);
-        final long time = d.getTime();
-//        final double msMonth = 26298E5;
-//        final double msDay = 86400000;
-//        final double msHour = 3600000;
-//        final double msMinute = 60000;
-//
-        final ArrayList<Event> events = new ArrayList<>();
-//
-        dbref.child("events").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    Event e = ds.getValue(Event.class);
-                    if (e != null) {
-                        long event_time = e.time;
-                        if (event_time < time) {
-                            seekAndDestroy(e);
-                        }
-//                        double event_time = e.date.get("month") * msMonth + e.date.get("day") * msDay
-//                                + e.time.get("hour") * msHour * e.time.get("minute") * msMinute;
-//
+////
+//    private void reset() {
+//        Date d = new Date();
+////        final long time = d.getTime() - d.getTime() / (2019 - 1970);
+//        final long time = d.getTime();
+////        final double msMonth = 26298E5;
+////        final double msDay = 86400000;
+////        final double msHour = 3600000;
+////        final double msMinute = 60000;
+////
+//        final ArrayList<Event> events = new ArrayList<>();
+////
+//        dbref.child("events").addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+//                    Event e = ds.getValue(Event.class);
+//                    if (e != null) {
+//                        long event_time = e.time;
 //                        if (event_time < time) {
 //                            seekAndDestroy(e);
 //                        }
-                    }
-                }
-            }
-//
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-            }
-        });
-    }
+////                        double event_time = e.date.get("month") * msMonth + e.date.get("day") * msDay
+////                                + e.time.get("hour") * msHour * e.time.get("minute") * msMinute;
+////
+////                        if (event_time < time) {
+////                            seekAndDestroy(e);
+////                        }
+//                    }
+//                }
+//            }
+////
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+////
+//            }
+//        });
+//    }
 
     private void seekAndDestroy(Event e) {
         if (e.invitees != null) {
