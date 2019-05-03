@@ -64,6 +64,7 @@ public class EventsActivity extends AppCompatActivity
     private ArrayList<Event> invites = new ArrayList<>();
     private HashMap<String, Long> eventRefs = new HashMap<>();
     private HashMap<String, Long> inviteRefs = new HashMap<>();
+    private User myUser = new User();
     private String user;
     CustomAdapter recyclerAdapter = new CustomAdapter(events);
     CustomAdapter invitesRecyclerAdapter = new CustomAdapter(invites);
@@ -130,10 +131,27 @@ public class EventsActivity extends AppCompatActivity
         SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
         user = sp.getString("userID", "empty");
 
+        if (dbref.child("users").child(user).child("events").getRoot() != null) {
+            dbref.child("users").child(user).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    myUser = dataSnapshot.getValue(User.class);
+                    eventRefs = myUser.events;
+                    inviteRefs = myUser.invites;
+                    callBack();
+                    invitesCallback();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {}
+            });
+        }
+
 
 
         if (!user.equals("empty")) {
             if (dbref.child("users").child(user).child("events").getRoot() != null) {
+<<<<<<< HEAD
                 eventRefs.clear();
                 inviteRefs.clear();
                 dbref.child("users").child(user).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -148,9 +166,9 @@ public class EventsActivity extends AppCompatActivity
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
+=======
+>>>>>>> 8b3ad38fe9e2bc9dfc02d9aa8e242d3e70149311
 
-                    }
-                });
             }
         }
 
@@ -301,19 +319,27 @@ public class EventsActivity extends AppCompatActivity
 
     }
 
-    //This is horrendous style but it's what we're doing.
-    //let's stack asynchronous functions on top of asynchronous functions by placing
-    //database queries in the callback for our database query
     private void callBack() {
         for (long id : eventRefs.values()) {
             //System.out.println(id);
             //initialize the counter
             if (id != -1 && id != -2) {
-                dbref.child("events").child(String.valueOf(id)).addListenerForSingleValueEvent(new ValueEventListener() {
+                dbref.child("events").child(String.valueOf(id)).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         Event e = dataSnapshot.getValue(Event.class);
-                        events.add(e);
+
+                        boolean add = true;
+
+                        for (Event event : events) {
+                            if (event.id == e.id) {
+                                add = false;
+                            }
+                        }
+
+                        if (add) {
+                            events.add(e);
+                        }
                         recyclerAdapter.notifyDataSetChanged();
                     }
 
@@ -329,12 +355,22 @@ public class EventsActivity extends AppCompatActivity
         if (inviteRefs != null) {
             for (long id : inviteRefs.values()) {
                 if (id != -1 && id != -2) {
-                    dbref.child("events").child(String.valueOf(id)).addListenerForSingleValueEvent(new ValueEventListener() {
+                    dbref.child("events").child(String.valueOf(id)).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             Event e;
                             e = dataSnapshot.getValue(Event.class);
-                            invites.add(e);
+                            boolean add = true;
+                            for (Event event : invites) {
+                                if (event.id == e.id) {
+                                    add = false;
+                                }
+                            }
+
+                            if (add) {
+                                invites.add(e);
+                            }
+
                             invitesRecyclerAdapter.notifyDataSetChanged();
                         }
 
