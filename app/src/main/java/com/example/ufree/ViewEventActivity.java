@@ -18,15 +18,15 @@ import com.google.firebase.database.ValueEventListener;
 
 import org.w3c.dom.Text;
 
+import java.util.Calendar;
+
 public class ViewEventActivity extends AppCompatActivity {
 
     private FirebaseDatabase db;
     private DatabaseReference dbref;
     private long eventIdValue;
-    private String participants;
     private TextView timeView;
     private TextView partsView;
-    private TextView dateView;
     private User my_user = new User();
     private Event my_event = new Event();
 
@@ -44,7 +44,6 @@ public class ViewEventActivity extends AppCompatActivity {
         final TextView desciptionView = findViewById(R.id.descriptionTextView);
         partsView = findViewById(R.id.partTextView);
         timeView = findViewById(R.id.timeTextView);
-        dateView = findViewById(R.id.dateTextView);
 
         //initialize our database objects
         db = FirebaseDatabase.getInstance();
@@ -70,17 +69,20 @@ public class ViewEventActivity extends AppCompatActivity {
         if (extras != null) {
             eventIdValue = extras.getLong("id", -1);
             if (eventIdValue != -1 && eventIdValue != -2) {
+                Calendar timeCalendar = Calendar.getInstance();
                 dbref.child("events").child(String.valueOf(eventIdValue)).addValueEventListener(new ValueEventListener() {
 
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         my_event = dataSnapshot.getValue(Event.class);
                         if (my_event != null) {
+                            Calendar cal = Calendar.getInstance();
+                            cal.setTimeInMillis(my_event.time);
                             locationView.setText(my_event.location);
                             desciptionView.setText(my_event.description);
-                            timeView.setText("test");
+                            String time = String.valueOf(cal.getTime());
+                            timeView.setText(time);
                             getParticipants(my_event);
-                            dateView.setText("test");
                         }
                     }
 
@@ -101,15 +103,17 @@ public class ViewEventActivity extends AppCompatActivity {
 
     private void getParticipants(Event e) {
         if (e != null && e.participants != null) {
-            for (String id : e.participants) {
-                if (id != null) {
+            for (String id : e.participants.values()) {
+                if (id != null && id != "null1" && id != "null2") {
                     dbref.child("users").child(id).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             User u = dataSnapshot.getValue(User.class);
                             String participantsText = String.valueOf(partsView.getText());
-                            participantsText += u.getFullName() + "\n";
-                            partsView.setText(participantsText);
+                            if (u != null) {
+                                participantsText += u.getFullName() + "\n";
+                                partsView.setText(participantsText);
+                            }
                         }
 
                         @Override
@@ -125,7 +129,7 @@ public class ViewEventActivity extends AppCompatActivity {
     public void acceptInviteAction(View v) {
         final String userName = my_user.getEmail().replace("@", "").replace(".", "");
         my_event.invitees.remove(userName);
-        my_event.participants.add(userName);
+        my_event.participants.put(userName, userName);
         dbref.child("events").child(String.valueOf(eventIdValue)).setValue(my_event);
         my_user.invites.remove(String.valueOf(eventIdValue));
         my_user.events.put(String.valueOf(eventIdValue), eventIdValue);

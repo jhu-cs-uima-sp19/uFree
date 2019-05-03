@@ -57,8 +57,8 @@ public class NewEventActivity extends AppCompatActivity {
     private static Calendar selectedCalendar = Calendar.getInstance();
     static final java.text.DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
     static final java.text.DateFormat dateFormat = new SimpleDateFormat("MMM dd, EEE");
-    private ArrayList<String> invitees = new ArrayList<>();
-    private ArrayList<String> attendees = new ArrayList<>();
+    private HashMap<String, String> invitees = new HashMap<>();
+    private HashMap<String, String> attendees = new HashMap<>();
     private Event my_event = new Event();
     private static long selectedTime;
     Bundle extras = null;
@@ -126,12 +126,16 @@ public class NewEventActivity extends AppCompatActivity {
                             attendees = my_event.participants;
 
                             if (attendees != null) {
-                                for (String p : attendees) {
-                                    attendeesText += (p + ", ");
+                                for (String p : attendees.values()) {
+                                    if (!p.equals("null1") && !p.equals("null2")) {
+                                        attendeesText += (p + ", ");
+                                    }
                                 }
 
-                                attendeesText = attendeesText.substring(0, attendeesText.length() - 1);
-                                attendeesTextView.setText(attendeesText);
+                                if (attendeesText.length() > 0) {
+                                    attendeesText = attendeesText.substring(0, attendeesText.length() - 1);
+                                    attendeesTextView.setText(attendeesText);
+                                }
                             }
 
                             Calendar calendar = Calendar.getInstance();
@@ -151,7 +155,7 @@ public class NewEventActivity extends AppCompatActivity {
                 String[] friends = members.split(" ");
 
                 for (int i = 0; i < friends.length; i++) {
-                    invitees.add(friends[i]);
+                    invitees.put(friends[i], friends[i]);
                 }
 
                 TextView inviteesTextView = findViewById(R.id.InviteesTextView);
@@ -285,8 +289,13 @@ public class NewEventActivity extends AppCompatActivity {
             String user = sp.getString("userID", "none");
 
             if (attendees.size() == 0) {
-                attendees.add(user);
+                attendees.put("null1", "null1");
+                attendees.put("null2", "null2");
+                attendees.put(user, user);
             }
+
+            invitees.put("null1", "null1");
+            invitees.put("null2", "null2");
 
             Event e = new Event(attendees, invitees, selectedTime, location, description, eventIdValue);
             dbref.child("events").child(String.valueOf(eventIdValue)).setValue(e);
@@ -294,9 +303,11 @@ public class NewEventActivity extends AppCompatActivity {
             counter++;
             dbref.child("counters").child("events").setValue(counter);
 
-            for (String u : invitees) {
-                u = u.replace("@", "").replace(".", "");
-                dbref.child("users").child(u).child("invites").child(String.valueOf(eventIdValue)).setValue(eventIdValue);
+            for (String u : invitees.values()) {
+                if (!u.equals("null1") && !u.equals("null2")) {
+                    u = u.replace("@", "").replace(".", "");
+                    dbref.child("users").child(u).child("invites").child(String.valueOf(eventIdValue)).setValue(eventIdValue);
+                }
             }
 
             if (!user.equals("none")) {
@@ -307,7 +318,6 @@ public class NewEventActivity extends AppCompatActivity {
             Intent intent = new Intent(this, EventsActivity.class);
             startActivity(intent);
         } else if (eventIdValue != 0) {
-            System.out.println(eventIdValue);
             my_event.location = location;
             my_event.participants = attendees;
             my_event.description = description;
@@ -355,11 +365,12 @@ public class NewEventActivity extends AppCompatActivity {
                     }
 
                     String inviteesStringVal = String.valueOf(inviteesTextView.getText());
+                    String newUserName = userName.replace("@", "").replace(".", "");
                     if (invitees.size() == 0 && found) {
-                        invitees.add(userName);
+                        invitees.put(newUserName, newUserName);
                         inviteesTextView.setText(userName);
                     } else if (found) {
-                        invitees.add(userName);
+                        invitees.put(newUserName, newUserName);
                         inviteesStringVal = inviteesStringVal + ", " + userName;
                         inviteesStringVal = inviteesStringVal.substring(0, inviteesStringVal.length() - 2);
                         inviteesTextView.setText(inviteesStringVal);
@@ -390,26 +401,7 @@ public class NewEventActivity extends AppCompatActivity {
         final String user = sp.getString("userID", "none");
 
         if (!user.equals("none")) {
-            dbref.child("events").child(String.valueOf(eventIdValue)).child("participants").addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    ArrayList<String> participants = (ArrayList<String>) dataSnapshot.getValue();
-                    long index = 0;
-                    for (int i = 0; i < participants.size(); i++) {
-                        if (participants.get(i).equals(user)) {
-                            index = i;
-                        }
-                    }
-
-                    dbref.child("events").child(String.valueOf(eventIdValue)).child("participants").child(String.valueOf(index)).removeValue();
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-
+            dbref.child("events").child(String.valueOf(eventIdValue)).child("participants").child(user).removeValue();
             dbref.child("users").child(user).child("events").child(String.valueOf(eventIdValue)).removeValue();
         }
 

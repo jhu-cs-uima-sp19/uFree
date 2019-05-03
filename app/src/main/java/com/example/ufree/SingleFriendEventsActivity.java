@@ -109,7 +109,7 @@ public class SingleFriendEventsActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         Event e = dataSnapshot.getValue(Event.class);
-                        if (e.participants != null && e.participants.contains(friendID)) {
+                        if (e.participants != null && e.participants.containsKey(friendID)) {
                             events.add(e);
                             recyclerAdapter.notifyDataSetChanged();
                         }

@@ -44,6 +44,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.sql.Time;
@@ -317,7 +318,8 @@ public class EventsActivity extends AppCompatActivity
                     dbref.child("events").child(String.valueOf(id)).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            Event e = dataSnapshot.getValue(Event.class);
+                            Event e;
+                            e = dataSnapshot.getValue(Event.class);
                             invites.add(e);
                             invitesRecyclerAdapter.notifyDataSetChanged();
                         }
@@ -447,14 +449,14 @@ public class EventsActivity extends AppCompatActivity
 
     private void seekAndDestroy(Event e) {
         if (e.invitees != null) {
-            for (String next_user : e.invitees) {
+            for (String next_user : e.invitees.values()) {
                 next_user = next_user.replace("@", "").replace(".", "");
                 dbref.child("users").child(next_user).child("invites").child(String.valueOf(e.id)).removeValue();
             }
         }
 
         if (e.participants != null) {
-            for (String next_user : e.participants) {
+            for (String next_user : e.participants.values()) {
                 next_user = next_user.replace("@", "").replace(".", "");
                 dbref.child("users").child(next_user).child("events").child(String.valueOf(e.id)).removeValue();
             }
