@@ -94,8 +94,6 @@ public class EventsActivity extends AppCompatActivity
 
         reset();
 
-
-
         /* Set up navigation drawer */
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -460,6 +458,7 @@ public class EventsActivity extends AppCompatActivity
             }
         });
     }
+
 
     private void seekAndDestroy(Event e) {
         if (e.invitees != null) {

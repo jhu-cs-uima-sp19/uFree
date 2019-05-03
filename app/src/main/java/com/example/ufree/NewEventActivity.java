@@ -177,7 +177,6 @@ public class NewEventActivity extends AppCompatActivity {
                 inviteesTextView.setText(content);
             }
         } else {
-            System.out.println("no extras!");
             descriptionInput.setText("event title");
             locationInput.setText("event location");
 
@@ -285,10 +284,41 @@ public class NewEventActivity extends AppCompatActivity {
     }
 
     public void addEventAction(View v) {
+        EditText inviteEditText = (EditText) findViewById(R.id.searchUsersInput);
+
         String location = String.valueOf(locationInput.getText());
         String description = String.valueOf(descriptionInput.getText());
+        String search = String.valueOf(inviteEditText.getText());
 
         long selectedTime = selectedCalendar.getTimeInMillis();
+
+        if (location.equals("") || description.equals("") || search.equals("")) {
+            AlertDialog alertDialog = new AlertDialog.Builder(NewEventActivity.this).create();
+            alertDialog.setTitle("Alert");
+            alertDialog.setMessage("Invalid input");
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+
+            return;
+        } else if (invitees.size() == 0 && extras == null) {
+            AlertDialog alertDialog = new AlertDialog.Builder(NewEventActivity.this).create();
+            alertDialog.setTitle("Alert");
+            alertDialog.setMessage("You must invite members");
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+
+            return;
+        }
 
         //add the event to the database then increment the counter
         if (invitees.size() > 0 && extras == null || !members.equals("")) {
@@ -374,7 +404,18 @@ public class NewEventActivity extends AppCompatActivity {
 
                     String inviteesStringVal = String.valueOf(inviteesTextView.getText());
                     String newUserName = userName.replace("@", "").replace(".", "");
-                    if (invitees.size() == 0 && found) {
+                    if (invitees.containsKey(newUserName) || attendees.containsKey(newUserName)) {
+                        AlertDialog alertDialog = new AlertDialog.Builder(NewEventActivity.this).create();
+                        alertDialog.setTitle("Alert");
+                        alertDialog.setMessage("Cannot add friend more than once");
+                        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.show();
+                    } else if (invitees.size() == 0 && found) {
                         invitees.put(newUserName, newUserName);
                         inviteesTextView.setText(userName);
                     } else if (found) {

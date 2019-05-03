@@ -27,13 +27,16 @@
         android:layout_width="wrap_content"
         android:layout_height="28dp"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="36dp"
+        android:layout_marginBottom="8dp"
         android:text="Description"
         app:layout_constraintBottom_toTopOf="@+id/DescriptionInput"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.015"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dateButton_event"
+        app:layout_constraintVertical_bias="1.0" />
 
     <TextView
         android:id="@+id/AttendingTextView"
@@ -44,6 +47,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="48dp"
         android:text="Invited"
+        app:layout_constraintBaseline_toBaselineOf="@+id/searchUsersInput"
         app:layout_constraintBottom_toTopOf="@+id/CreateEventButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.024"
@@ -150,13 +154,13 @@
         app:layout_constraintHorizontal_bias="0.971"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.421" />
+        app:layout_constraintVertical_bias="0.377" />
 
     <Button
         android:id="@+id/dateButton_event"
         android:layout_width="220dp"
         android:layout_height="42dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="12dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
@@ -164,12 +168,13 @@
         android:onClick="showDatePickerDialog"
         android:text="April 11, Thursday"
         android:textSize="18sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/timeButton_event"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/timeButton_main"
         app:layout_constraintHorizontal_bias="0.315"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/LocationInput"
-        app:layout_constraintVertical_bias="0.207" />
+        app:layout_constraintVertical_bias="0.106" />
 
     <EditText
         android:id="@+id/searchUsersInput"
@@ -185,8 +190,8 @@
         app:layout_constraintBottom_toTopOf="@+id/CreateEventButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/minuteSpinner"
-        app:layout_constraintVertical_bias="0.785" />
+        app:layout_constraintTop_toBottomOf="@+id/DescriptionInput"
+        app:layout_constraintVertical_bias="1.0" />
 
     <TextView
         android:id="@+id/InviteesTextView"
