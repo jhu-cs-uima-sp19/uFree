@@ -331,9 +331,10 @@ public class EventsActivity extends AppCompatActivity
                         Event e = dataSnapshot.getValue(Event.class);
 
                         boolean add = true;
-
+                        System.out.println("RUNNING!");
                         for (Event event : events) {
-                            if (event == null || e == null || event.id == e.id) {
+                            System.out.println("here are the events " + event.toString());
+                            if (event == null || e == null || event.id.equals(e.id)) {
                                 add = false;
                             }
                         }
@@ -341,6 +342,7 @@ public class EventsActivity extends AppCompatActivity
                         if (add) {
                             events.add(e);
                         }
+
                         recyclerAdapter.notifyDataSetChanged();
                     }
 
@@ -363,8 +365,10 @@ public class EventsActivity extends AppCompatActivity
                             e = dataSnapshot.getValue(Event.class);
                             boolean add = true;
                             for (Event event : invites) {
-                                if (event == null || e == null || event.id == e.id) {
+                                if (event == null || e == null || event.id.equals(e.id)) {
                                     add = false;
+                                } else if (event.id == e.id) {
+                                    add =false;
                                 }
                             }
 
