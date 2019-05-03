@@ -136,6 +136,7 @@ public class NewEventActivity extends AppCompatActivity {
 
                             Calendar calendar = Calendar.getInstance();
                             calendar.setTimeInMillis(my_event.time);
+                            selectedCalendar.setTimeInMillis(my_event.time);
                             timeButton.setText(timeFormat.format(calendar.getTime()));
                             Button dateButton = findViewById(R.id.dateButton_event);
                             dateButton.setText(dateFormat.format(selectedCalendar.getTime()));
