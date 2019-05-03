@@ -215,21 +215,7 @@ public class EventsActivity extends AppCompatActivity
         Button dateButtonNav = findViewById(R.id.dateButton_nav);
         toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                FirebaseDatabase database = FirebaseDatabase.getInstance();
-                DatabaseReference dbRef = database.getReference();
-                if (isChecked) {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTimeInMillis(currentUser.getEndTime());
-                    Calendar now = Calendar.getInstance();
-                    if (now.getTimeInMillis() < calendar.getTimeInMillis()) {
-                        dbRef.child("users").child(user).child("isFree").setValue(true);
-                    } else {
-                        //Toast.makeText(getApplicationContext(), "You cannot select time before current time", Toast.LENGTH_SHORT).show();
-                        toggleNav.setChecked(false);
-                    }
-                } else {
-                    dbRef.child("users").child(user).child("isFree").setValue(false);
-                }
+                dbref.child("users").child(user).child("isFree").setValue(isChecked);
             }
         });
         currentStatusButton.setOnClickListener(new View.OnClickListener() {

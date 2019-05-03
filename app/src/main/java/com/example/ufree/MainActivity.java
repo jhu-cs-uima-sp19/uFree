@@ -275,20 +275,7 @@ public class MainActivity extends AppCompatActivity
         Button currentStatusButton = findViewById(R.id.timeButton_nav);
         toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTimeInMillis(currentUser.getEndTime());
-                    Calendar now = Calendar.getInstance();
-                    Log.d("debug", "debug now " + now.getTimeInMillis());
-                    if (now.getTimeInMillis() < calendar.getTimeInMillis()) {
-                        dbRef.child("users").child(userId).child("isFree").setValue(true);
-                    } else {
-                        //Toast.makeText(getApplicationContext(), "You cannot select time before current time", Toast.LENGTH_SHORT).show();
-                        toggleNav.setChecked(false);
-                    }
-                } else {
-                    dbRef.child("users").child(userId).child("isFree").setValue(false);
-                }
+                dbRef.child("users").child(userId).child("isFree").setValue(isChecked);
             }
         });
         currentStatusButton.setOnClickListener(new View.OnClickListener() {
