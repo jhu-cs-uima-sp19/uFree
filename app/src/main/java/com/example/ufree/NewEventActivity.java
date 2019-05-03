@@ -99,7 +99,6 @@ public class NewEventActivity extends AppCompatActivity {
 
         //check if we're editing an existing event
         if (extras != null) {
-
             members = extras.getString("ids", "none");
 
             if (members.equals("none")) {
@@ -195,7 +194,7 @@ public class NewEventActivity extends AppCompatActivity {
             Calendar now = Calendar.getInstance();
             if (selectedCalendar.getTimeInMillis() < now.getTimeInMillis()) {
                 Toast.makeText(getContext(), "You cannot select time before current time", Toast.LENGTH_SHORT).show();
-                DialogFragment datePickerFragment = new MainActivity.TimePickerFragmentBottom();
+                DialogFragment datePickerFragment = new NewEventActivity.TimePickerFragmentBottom();
                 datePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerBottom");
             } else {
                 // change text view for time button
@@ -206,7 +205,7 @@ public class NewEventActivity extends AppCompatActivity {
     }
 
     public void showTimePickerDialogBottom(View v) {
-        DialogFragment timePickerFragment = new MainActivity.TimePickerFragmentBottom();
+        DialogFragment timePickerFragment = new NewEventActivity.TimePickerFragmentBottom();
         timePickerFragment.show(getSupportFragmentManager(), "timePickerBottom");
     }
 
@@ -239,7 +238,7 @@ public class NewEventActivity extends AppCompatActivity {
                     || ((nowDay == 365 || nowDay == 366) && chosenDay == 1 )) {
                 if (today.getTimeInMillis() > chosen.getTimeInMillis()) {
                     Toast.makeText(getContext(), "You cannot select time before current time", Toast.LENGTH_SHORT).show();
-                    DialogFragment datePickerFragment = new MainActivity.DatePickerFragment();
+                    DialogFragment datePickerFragment = new NewEventActivity.DatePickerFragment();
                     datePickerFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
                 } else {
                     selectedCalendar.set(
@@ -251,7 +250,7 @@ public class NewEventActivity extends AppCompatActivity {
                 }
             } else {
                 Toast.makeText(getContext(), "You can only select today or tomorrow", Toast.LENGTH_SHORT).show();
-                DialogFragment datePickerFragment = new MainActivity.DatePickerFragment();
+                DialogFragment datePickerFragment = new NewEventActivity.DatePickerFragment();
                 datePickerFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
             }
         }
@@ -269,67 +268,9 @@ public class NewEventActivity extends AppCompatActivity {
         return true;
     }
 
-    private Integer convertTimeToInt(String time) {
-        if (time.equals("January") || time.equals("1 AM")) {
-            return 1;
-        } else if (time.equals("February") || time.equals("2 AM")) {
-            return 2;
-        } else if (time.equals("March") || time.equals("3 AM")) {
-            return 3;
-        } else if (time.equals("April") || time.equals("4 AM")) {
-            return 4;
-        } else if (time.equals("May") || time.equals("5 AM")) {
-            return 5;
-        } else if (time.equals("June") || time.equals("6 AM")) {
-            return 6;
-        } else if (time.equals("July") || time.equals("7 AM")) {
-            return 7;
-        } else if (time.equals("August") || time.equals("8 AM")) {
-            return 8;
-        } else if (time.equals("September") || time.equals("9 AM")) {
-            return 9;
-        } else if (time.equals("October") || time.equals("10 AM")) {
-            return 10;
-        } else if (time.equals("November") || time.equals("11 AM")) {
-            return 11;
-        } else if (time.equals("December") || time.equals("12 PM")) {
-            return 12;
-        } else if (time.equals("12 AM") || time.equals("00")) {
-            return 0;
-        } else if (time == null) {
-          return -2;
-        } else if (time.equals("1 PM")) {
-            return 13;
-        } else if (time.equals("2 PM")) {
-            return 14;
-        } else if (time.equals("3 PM")) {
-            return 15;
-        } else if (time.equals("4 PM")) {
-            return 16;
-        } else if (time.equals("5 PM")) {
-            return 17;
-        } else if (time.equals("6 PM")) {
-            return 18;
-        } else if (time.equals("7 PM")) {
-            return 19;
-        } else if (time.equals("8 PM")) {
-            return 20;
-        } else if (time.equals("9 PM")) {
-            return 21;
-        } else if (time.equals("10 PM")) {
-            return 22;
-        } else if (time.equals("11 PM")) {
-            return 23;
-        } else {
-            return -2;
-        }
-    }
-
     public void addEventAction(View v) {
         String location = String.valueOf(locationInput.getText());
         String description = String.valueOf(descriptionInput.getText());
-        Integer day = 0;
-        Integer minute = 0;
 
         long selectedTime = selectedCalendar.getTimeInMillis();
 
@@ -339,23 +280,15 @@ public class NewEventActivity extends AppCompatActivity {
             SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
             String user = sp.getString("userID", "none");
 
-            long timeInput = selectedCalendar.getTimeInMillis();
-            System.out.println(timeInput);
-
             if (attendees.size() == 0) {
                 attendees.add(user);
             }
 
-            Event e = new Event(attendees, invitees, timeInput, location, description, eventIdValue);
+            Event e = new Event(attendees, invitees, selectedTime, location, description, eventIdValue);
             dbref.child("events").child(String.valueOf(eventIdValue)).setValue(e);
 
-            dbref.child("events").child(String.valueOf(eventIdValue)).setValue(e);
-
-            if (eventIdValue == counter) {
-                dbref.child("events").child(String.valueOf(counter)).setValue(e);
-                counter++;
-                dbref.child("counters").child("events").setValue(counter);
-            }
+            counter++;
+            dbref.child("counters").child("events").setValue(counter);
 
             for (String u : invitees) {
                 u = u.replace("@", "").replace(".", "");
