@@ -1,6 +1,7 @@
 package com.example.ufree;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 
 public class User {
@@ -34,7 +35,9 @@ public class User {
         this.profilePic = null;
         this.isFree = false;
         this.startTime = 0;
-        this.endTime = 0;
+        Calendar now = Calendar.getInstance();
+        now.add(Calendar.MINUTE, 30);
+        this.endTime = now.getTimeInMillis();
         this.events = eventsList;
         this.incomingFriends = null;
         this.invites = invitesList;
