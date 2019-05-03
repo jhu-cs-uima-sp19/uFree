@@ -236,18 +236,18 @@ public class MainActivity extends AppCompatActivity
                             // Get current user's friends
                             HashMap<String, String> friends = currentUser.getFrienders();
                             if (friends != null) {
-                            for (String friendEmail : friends.values()) {
-                                User user = allUsers.get(friendEmail.replaceAll("[^a-zA-Z0-9]", ""));
-                                if (user != null && user.getEmail() != null
-                                        // skip the current user and dummy user
-                                        && !user.getEmail().equals(currentUser.getEmail())
-                                        && !user.getEmail().equals("dummy")
-                                        && user.getIsFree()) {
-                                    if (selectedCalendar.getTimeInMillis() < user.getEndTime()) {
-                                        freeFriends.put(friendEmail.replaceAll("[^a-zA-Z0-9]", ""), new User(user));
+                                for (String friendEmail : friends.values()) {
+                                    User user = allUsers.get(friendEmail.replaceAll("[^a-zA-Z0-9]", ""));
+                                    if (user != null && user.getEmail() != null
+                                            // skip the current user and dummy user
+                                            && !user.getEmail().equals(currentUser.getEmail())
+                                            && !user.getEmail().equals("dummy")
+                                            && user.getIsFree()) {
+                                        if (selectedCalendar.getTimeInMillis() < user.getEndTime()) {
+                                            freeFriends.put(friendEmail.replaceAll("[^a-zA-Z0-9]", ""), new User(user));
+                                        }
                                     }
                                 }
-                            }
                             }
                             HashMap<String, User> sortedFreeFriends = sortByTime(freeFriends);
                             for (Map.Entry<String, User> entry: sortedFreeFriends.entrySet()) {

@@ -78,11 +78,9 @@ public class ViewEventActivity extends AppCompatActivity {
                         if (my_event != null) {
                             locationView.setText(my_event.location);
                             desciptionView.setText(my_event.description);
-                            String time = my_event.time.get("hour") + ":" + my_event.time.get("minute");
-                            timeView.setText(time);
-                            String date = my_event.date.get("month") + "/" + my_event.date.get("day");
+                            timeView.setText("test");
                             getParticipants(my_event);
-                            dateView.setText(date);
+                            dateView.setText("test");
                         }
                     }
 

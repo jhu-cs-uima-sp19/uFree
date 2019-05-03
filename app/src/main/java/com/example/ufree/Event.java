@@ -8,20 +8,17 @@ import java.util.HashMap;
 public class Event {
     public ArrayList<String> participants;
     public ArrayList<String> invitees;
-    public HashMap<String, Integer> date;
-    public HashMap<String, Integer> time;
     public String location;
     public String description;
+    public long time;
     public Long id;
 
     public Event(ArrayList<String> participants, ArrayList<String> invitees,
-                 HashMap<String, Integer> d, HashMap<String, Integer> t,
-                 String l, String desc, Long i) {
+                 long t, String l, String desc, Long i) {
         this.participants = participants;
         this.invitees = invitees;
-        this.date = d;
-        this.time = t;
         this.location = l;
+        this.time = t;
         this.description = desc;
         this.id = i;
     }

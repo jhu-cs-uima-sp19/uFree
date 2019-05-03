@@ -1,23 +1,30 @@
 package com.example.ufree;
 
+import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
 import android.os.health.SystemHealthManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.content.DialogInterface;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -29,8 +36,11 @@ import com.google.firebase.database.ValueEventListener;
 import org.w3c.dom.Text;
 
 import java.lang.reflect.Array;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.lang.Long;
@@ -41,14 +51,16 @@ public class NewEventActivity extends AppCompatActivity {
     private DatabaseReference dbref;
     private EditText locationInput;
     private EditText descriptionInput;
-    private Spinner monthInputSpinner;
-    private Spinner hourInputSpinner;
-    private EditText dayInput;
     private long eventIdValue = 0;
     private long counter;
+    private Button timeButton;
+    private static Calendar selectedCalendar = Calendar.getInstance();
+    static final java.text.DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
+    static final java.text.DateFormat dateFormat = new SimpleDateFormat("MMM dd, EEE");
     private ArrayList<String> invitees = new ArrayList<>();
     private ArrayList<String> attendees = new ArrayList<>();
     private Event my_event = new Event();
+    private static long selectedTime;
     Bundle extras = null;
     String members = "";
 
@@ -64,11 +76,8 @@ public class NewEventActivity extends AppCompatActivity {
         //initialize the input fields
         locationInput = (EditText) findViewById(R.id.LocationInput);
         descriptionInput = (EditText) findViewById(R.id.DescriptionInput);
-        monthInputSpinner = (Spinner) findViewById(R.id.monthSpinner);
-        hourInputSpinner = (Spinner) findViewById(R.id.hourSpinner);
-        dayInput = (EditText) findViewById(R.id.dayEditText);
-
-        Spinner monthInput = findViewById(R.id.monthSpinner);
+        timeButton = findViewById(R.id.timeButton_main);
+        timeButton.setText(timeFormat.format(selectedCalendar.getTime()));
 
         extras = getIntent().getExtras();
 
@@ -94,8 +103,6 @@ public class NewEventActivity extends AppCompatActivity {
             members = extras.getString("ids", "none");
 
             if (members.equals("none")) {
-                System.out.println(extras.getLong("id", -2));
-
                 // set up title of app bar
                 getSupportActionBar().setTitle("Edit Event");
 
@@ -110,10 +117,6 @@ public class NewEventActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         my_event = dataSnapshot.getValue(Event.class);
                         TextView attendeesTextView = findViewById(R.id.InviteesTextView);
-                        Spinner monthSpinner = findViewById(R.id.monthSpinner);
-                        EditText dayEditText = findViewById(R.id.dayEditText);
-                        Spinner hourSpinner = findViewById(R.id.hourSpinner);
-                        EditText minuteInput = findViewById(R.id.minuteInput);
 
                         if (my_event != null) {
                             locationInput.setText(my_event.location);
@@ -130,20 +133,11 @@ public class NewEventActivity extends AppCompatActivity {
                                 attendeesTextView.setText(attendeesText);
                             }
 
-                            dayEditText.setText(String.valueOf(my_event.date.get("day")));
-                            minuteInput.setText(String.valueOf(my_event.time.get("minute")));
-
-                            ArrayAdapter<CharSequence> monthAdapter = ArrayAdapter.createFromResource(getApplicationContext(),
-                                    R.array.monthSpinnerValues, R.layout.support_simple_spinner_dropdown_item);
-
-                            ArrayAdapter<CharSequence> hourAdapter = ArrayAdapter.createFromResource(getApplicationContext(),
-                                    R.array.hourSpinnerValues, R.layout.support_simple_spinner_dropdown_item);
-
-                            monthSpinner.setAdapter(monthAdapter);
-                            hourSpinner.setAdapter(hourAdapter);
-
-                            hourSpinner.setSelection(my_event.time.get("hour"));
-                            monthSpinner.setSelection(my_event.date.get("month") - 1);
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.setTimeInMillis(my_event.time);
+                            timeButton.setText(timeFormat.format(calendar.getTime()));
+                            Button dateButton = findViewById(R.id.dateButton_main);
+                            dateButton.setText(dateFormat.format(selectedCalendar.getTime()));
                         }
                     }
 
@@ -176,6 +170,96 @@ public class NewEventActivity extends AppCompatActivity {
             // set up title of app bar
             getSupportActionBar().setTitle("New Event");
         }
+    }
+
+    // Time picker for time button at ** BOTTOM **
+    public static class TimePickerFragmentBottom extends DialogFragment
+            implements TimePickerDialog.OnTimeSetListener {
+
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Create a new instance of TimePickerDialog and return it
+            int selectedHour = selectedCalendar.get(Calendar.HOUR_OF_DAY);
+            int selectedMinute = selectedCalendar.get(Calendar.MINUTE);
+            return new TimePickerDialog(getActivity(), this, selectedHour, selectedMinute,
+                    DateFormat.is24HourFormat(getActivity()));
+        }
+
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            // update selected calendar object
+            selectedCalendar.set(selectedCalendar.get(Calendar.YEAR),
+                    selectedCalendar.get(Calendar.MONTH),
+                    selectedCalendar.get(Calendar.DAY_OF_MONTH),
+                    hourOfDay, minute, 0);
+            Calendar now = Calendar.getInstance();
+            if (selectedCalendar.getTimeInMillis() < now.getTimeInMillis()) {
+                Toast.makeText(getContext(), "You cannot select time before current time", Toast.LENGTH_SHORT).show();
+                DialogFragment datePickerFragment = new MainActivity.TimePickerFragmentBottom();
+                datePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerBottom");
+            } else {
+                // change text view for time button
+                Button timeButton = getActivity().findViewById(R.id.timeButton_main);
+                timeButton.setText(timeFormat.format(selectedCalendar.getTime()));
+            }
+        }
+    }
+
+    public void showTimePickerDialogBottom(View v) {
+        DialogFragment timePickerFragment = new MainActivity.TimePickerFragmentBottom();
+        timePickerFragment.show(getSupportFragmentManager(), "timePickerBottom");
+    }
+
+
+    /* Date picker for date button at BOTTOM */
+    public static class DatePickerFragment extends DialogFragment
+            implements DatePickerDialog.OnDateSetListener {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the current date as the default date in the picker
+            int year = selectedCalendar.get(Calendar.YEAR);
+            int month = selectedCalendar.get(Calendar.MONTH);
+            int day = selectedCalendar.get(Calendar.DAY_OF_MONTH);
+
+            // Create a new instance of DatePickerDialog and return it
+            return new DatePickerDialog(getActivity(), this, year, month, day);
+        }
+
+        public void onDateSet(DatePicker view, int year, int month, int day) {
+            // Do something with the date chosen by the user
+            Calendar today = Calendar.getInstance();
+            Calendar chosen = Calendar.getInstance();
+            chosen.set(year, month, day, selectedCalendar.get(Calendar.HOUR_OF_DAY), selectedCalendar.get(Calendar.MINUTE));
+            int chosenDay = chosen.get(Calendar.DAY_OF_YEAR);
+            int nowDay = today.get(Calendar.DAY_OF_YEAR);
+            // the user can only choose today or tomorrow
+            if (chosenDay - nowDay == 1
+                    || (chosenDay == nowDay)
+                    || ((nowDay == 365 || nowDay == 366) && chosenDay == 1 )) {
+                if (today.getTimeInMillis() > chosen.getTimeInMillis()) {
+                    Toast.makeText(getContext(), "You cannot select time before current time", Toast.LENGTH_SHORT).show();
+                    DialogFragment datePickerFragment = new MainActivity.DatePickerFragment();
+                    datePickerFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
+                } else {
+                    selectedCalendar.set(
+                            year, month, day,
+                            selectedCalendar.get(Calendar.HOUR_OF_DAY),
+                            selectedCalendar.get(Calendar.HOUR_OF_DAY), 0);
+
+                    Button dateButton = getActivity().findViewById(R.id.dateButton_main);
+                }
+            } else {
+                Toast.makeText(getContext(), "You can only select today or tomorrow", Toast.LENGTH_SHORT).show();
+                DialogFragment datePickerFragment = new MainActivity.DatePickerFragment();
+                datePickerFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
+            }
+        }
+    }
+
+    public void showDatePickerDialog(View v) {
+        DialogFragment newFragment = new MainActivity.DatePickerFragment();
+        newFragment.show(getSupportFragmentManager(), "datePicker");
     }
 
     @Override
@@ -241,92 +325,36 @@ public class NewEventActivity extends AppCompatActivity {
         }
     }
 
-    private boolean checkDate(Event e) {
-        Date d = new Date();
-        final long time = d.getTime() - d.getTime() / (2019 - 1970);
-        final double msMonth = 26298E5;
-        final double msDay = 86400000;
-        final double msHour = 3600000;
-        final double msMinute = 60000;
-        double event_time = e.date.get("month") * msMonth + e.date.get("day") * msDay
-                + e.time.get("hour") * msHour * e.time.get("minute") * msMinute;
-
-        return event_time > time;
-    }
-
     public void addEventAction(View v) {
-        System.out.println("Trying to execute action");
-        HashMap<String, Integer> date = new HashMap<>();
-        HashMap<String, Integer> time = new HashMap<>();
-        EditText minuteInput = findViewById(R.id.minuteInput);
-
         String location = String.valueOf(locationInput.getText());
         String description = String.valueOf(descriptionInput.getText());
-        String hour = String.valueOf(hourInputSpinner.getSelectedItem());
-        String month = String.valueOf(monthInputSpinner.getSelectedItem());
         Integer day = 0;
         Integer minute = 0;
 
-        try {
-            day = Integer.parseInt(String.valueOf(dayInput.getText()));
-        } catch (NumberFormatException e) {
-            AlertDialog alertDialog = new AlertDialog.Builder(NewEventActivity.this).create();
-            alertDialog.setTitle("Alert");
-            alertDialog.setMessage("Invalid Time");
-            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-            alertDialog.show();
-            return;
-        }
-
-        try {
-            minute = Integer.parseInt(String.valueOf(minuteInput.getText()));
-        } catch (NumberFormatException e) {
-            AlertDialog alertDialog = new AlertDialog.Builder(NewEventActivity.this).create();
-            alertDialog.setTitle("Alert");
-            alertDialog.setMessage("Invalid Time");
-            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-            alertDialog.show();
-            return;
-        }
-
-        date.put("month",convertTimeToInt(month));
-        date.put("day", day);
-        time.put("hour", convertTimeToInt(hour));
-        time.put("minute", minute);
+        long selectedTime = selectedCalendar.getTimeInMillis();
 
         //add the event to the database then increment the counter
-        if (invitees.size() > 0 && minute < 59 && minute > 0 && extras == null || !members.equals("")) {
+        if (invitees.size() > 0 && extras == null || !members.equals("")) {
             System.out.println("making new event");
             SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
             String user = sp.getString("userID", "none");
+
+            long timeInput = selectedCalendar.getTimeInMillis();
+            System.out.println(timeInput);
 
             if (attendees.size() == 0) {
                 attendees.add(user);
             }
 
-            Event e = new Event(attendees, invitees, date, time, location,
-                    description, eventIdValue);
-
+            Event e = new Event(attendees, invitees, timeInput, location, description, eventIdValue);
+            dbref.child("events").child(String.valueOf(eventIdValue)).setValue(e);
 
             dbref.child("events").child(String.valueOf(eventIdValue)).setValue(e);
 
             if (eventIdValue == counter) {
-                System.out.println("increment counter");
                 dbref.child("events").child(String.valueOf(counter)).setValue(e);
                 counter++;
                 dbref.child("counters").child("events").setValue(counter);
-            } else {
-                System.out.println(counter);
             }
 
             for (String u : invitees) {
@@ -341,25 +369,8 @@ public class NewEventActivity extends AppCompatActivity {
             //return to the events page
             Intent intent = new Intent(this, EventsActivity.class);
             startActivity(intent);
-        } else if (minute < 0 || minute > 59) {
-            AlertDialog alertDialog = new AlertDialog.Builder(NewEventActivity.this).create();
-            alertDialog.setTitle("Alert");
-            alertDialog.setMessage("Invalid Time");
-            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-            alertDialog.show();
         } else if (eventIdValue != 0) {
             System.out.println(eventIdValue);
-            my_event.date = new HashMap<>();
-            my_event.date.put("month", convertTimeToInt(month));
-            my_event.date.put("day", day);
-            my_event.time = new HashMap<>();
-            my_event.time.put("hour", convertTimeToInt(hour));
-            my_event.time.put("minute", minute);
             my_event.location = location;
             my_event.participants = attendees;
             my_event.description = description;
