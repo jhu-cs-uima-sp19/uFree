@@ -355,7 +355,7 @@ public class NewEventActivity extends AppCompatActivity {
             //return to the events page
             Intent intent = new Intent(this, EventsActivity.class);
             startActivity(intent);
-        } else if (eventIdValue != 0) {
+        } else if (eventIdValue != 0 && my_event != null) {
             my_event.location = location;
             my_event.participants = attendees;
             my_event.description = description;
