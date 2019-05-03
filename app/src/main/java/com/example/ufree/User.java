@@ -50,6 +50,7 @@ public class User {
         this.endTime = that.endTime;
         this.isFree = that.isFree;
         this.events = that.events;
+        this.invites = that.invites;
         this.incomingFriends = that.incomingFriends;
         this.frienders = that.frienders;
     }
@@ -83,6 +84,12 @@ public class User {
     public HashMap<String,String> getIncomingFriends() { return this.incomingFriends; }
 
     public HashMap<String,String> getFrienders() { return this.frienders; }
+
+    public HashMap<String, Long> getEvents() { return this.events; }
+
+    public HashMap<String, Long> getInvites() {
+        return invites;
+    }
 
     public String toString() {
         return "User email: " + this.email + "\nname: " + this.fullName
