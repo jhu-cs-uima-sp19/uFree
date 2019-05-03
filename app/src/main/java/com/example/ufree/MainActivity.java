@@ -64,8 +64,8 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnLongClickListener {
 
     static User currentUser;
-    static String userId;
-    static boolean checkedAvailability = false;
+    String userId;
+    boolean checkedAvailability = false;
     HashMap<String, User> freeFriends = new LinkedHashMap<String, User>();
     static Calendar selectedCalendar;
     static boolean dummyUserIsFree = true;
@@ -143,6 +143,10 @@ public class MainActivity extends AppCompatActivity
                                 // else show welcome screen
                                 if (!(currentUser.getIsFree()
                                         && currentUser.getEndTime() >= now)) {
+                                    Calendar calendar = Calendar.getInstance();
+                                    calendar.add(Calendar.MINUTE, 30);
+                                    dbRef.child("users").child(userId).child("endTime").setValue(calendar.getTimeInMillis());
+                                    dbRef.child("users").child(userId).child("isFree").setValue(false);
                                     Intent intent = new Intent(getApplicationContext(), WelcomeActivity.class);
                                     startActivity(intent);
                                 }
@@ -240,6 +244,7 @@ public class MainActivity extends AppCompatActivity
                                             && !user.getEmail().equals(currentUser.getEmail())
                                             && !user.getEmail().equals("dummy")
                                             && user.getIsFree()) {
+                                        Log.d("debug", "debug freind: " + user.toString());
                                         if (selectedCalendar.getTimeInMillis() < user.getEndTime()) {
                                             freeFriends.put(friendEmail.replaceAll("[^a-zA-Z0-9]", ""), new User(user));
                                         }
@@ -247,15 +252,9 @@ public class MainActivity extends AppCompatActivity
                                 }
                             }
                             HashMap<String, User> sortedFreeFriends = sortByTime(freeFriends);
-                            for (Map.Entry<String, User> entry: sortedFreeFriends.entrySet()) {
-                                Log.d("debug", "here " + entry.getKey());
-                            }
                             freeFriends.clear();
                             for (Map.Entry<String, User> entry: sortedFreeFriends.entrySet()) {
                                 freeFriends.put(entry.getKey(), entry.getValue());
-                            }
-                            for (Map.Entry<String, User> entry: freeFriends.entrySet()) {
-                                Log.d("debug", "where " + entry.getKey());
                             }
                             adapter.notifyDataSetChanged();
                         } else {
@@ -272,11 +271,24 @@ public class MainActivity extends AppCompatActivity
         );
 
         // Set up listener for toggle and time button in nav drawer
-        Switch toggleNav = findViewById(R.id.toggle_nav);
+        final Switch toggleNav = findViewById(R.id.toggle_nav);
         Button currentStatusButton = findViewById(R.id.timeButton_nav);
         toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                dbRef.child("users").child(userId).child("isFree").setValue(isChecked);
+                if (isChecked) {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTimeInMillis(currentUser.getEndTime());
+                    Calendar now = Calendar.getInstance();
+                    Log.d("debug", "debug now " + now.getTimeInMillis());
+                    if (now.getTimeInMillis() < calendar.getTimeInMillis()) {
+                        dbRef.child("users").child(userId).child("isFree").setValue(true);
+                    } else {
+                        //Toast.makeText(getApplicationContext(), "You cannot select time before current time", Toast.LENGTH_SHORT).show();
+                        toggleNav.setChecked(false);
+                    }
+                } else {
+                    dbRef.child("users").child(userId).child("isFree").setValue(false);
+                }
             }
         });
         currentStatusButton.setOnClickListener(new View.OnClickListener() {
@@ -446,6 +458,8 @@ public class MainActivity extends AppCompatActivity
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();
 
+                SharedPreferences sp = getActivity().getSharedPreferences("User", MODE_PRIVATE);
+                String userId = sp.getString("userID", "dummy");
                 dbRef.child("users").child(userId).child("endTime").setValue(calendar.getTimeInMillis());
 
                 // change text view for time button
