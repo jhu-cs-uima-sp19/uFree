@@ -131,47 +131,50 @@ public class EventsActivity extends AppCompatActivity
         SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
         user = sp.getString("userID", "empty");
 
-        if (dbref.child("users").child(user).child("events").getRoot() != null) {
-            eventRefs.clear();
-            inviteRefs.clear();
-            dbref.child("users").child(user).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    myUser = dataSnapshot.getValue(User.class);
-                    eventRefs = myUser.events;
-                    inviteRefs = myUser.invites;
-                    callBack();
-                    invitesCallback();
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {}
-            });
-        }
-
-
-
-        if (!user.equals("empty")) {
+        if (!myUser.equals("empty")) {
             if (dbref.child("users").child(user).child("events").getRoot() != null) {
                 eventRefs.clear();
                 inviteRefs.clear();
-                dbref.child("users").child(user).addListenerForSingleValueEvent(new ValueEventListener() {
+                dbref.child("users").child(user).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        User u = dataSnapshot.getValue(User.class);
-                        eventRefs = u.events;
-                        inviteRefs = u.invites;
+                        myUser = dataSnapshot.getValue(User.class);
+                        eventRefs = myUser.events;
+                        inviteRefs = myUser.invites;
                         callBack();
                         invitesCallback();
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
-
                     }
                 });
             }
         }
+
+
+
+//        if (!user.equals("empty")) {
+//            if (dbref.child("users").child(user).child("events").getRoot() != null) {
+//                eventRefs.clear();
+//                inviteRefs.clear();
+//                dbref.child("users").child(user).addListenerForSingleValueEvent(new ValueEventListener() {
+//                    @Override
+//                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                        User u = dataSnapshot.getValue(User.class);
+//                        eventRefs = u.events;
+//                        inviteRefs = u.invites;
+//                        callBack();
+//                        invitesCallback();
+//                    }
+//
+//                    @Override
+//                    public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                    }
+//                });
+//            }
+//        }
 
         /* ------------------------------------------------------------------- */
         /* CODES FOR CONFIGURING NAV DRAWER */
