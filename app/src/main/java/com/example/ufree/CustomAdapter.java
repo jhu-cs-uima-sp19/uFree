@@ -45,9 +45,11 @@ public class CustomAdapter extends RecyclerView.Adapter {
         Event event = events.get(position);
         //this better be okay...
         MyViewHolder mvHolder = (MyViewHolder) holder;
-        mvHolder.description.setText(event.description);
-        mvHolder.location.setText(event.location);
-        mvHolder.id.setText(String.valueOf(event.id));
+        if (event != null) {
+            mvHolder.description.setText(event.description);
+            mvHolder.location.setText(event.location);
+            mvHolder.id.setText(String.valueOf(event.id));
+        }
     }
 
     @Override

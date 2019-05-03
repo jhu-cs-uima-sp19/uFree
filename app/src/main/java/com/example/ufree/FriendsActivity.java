@@ -42,6 +42,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -76,8 +77,7 @@ public class FriendsActivity extends AppCompatActivity
 
     static User currentUser;
 
-    private static String userId;
-    private boolean checkedAvailability;
+    private String userId;
 
     static final java.text.DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
 
@@ -337,7 +337,7 @@ public class FriendsActivity extends AppCompatActivity
                                     }
 
                                     FriendRequestAdaptor myAdaptor = new FriendRequestAdaptor(friendRequestData,
-                                            FriendsActivity.this);
+                                            getApplicationContext());
                                     friendRequestsView.setAdapter(myAdaptor);
                                 }
                                 if (existingFriends != null) {
@@ -351,7 +351,7 @@ public class FriendsActivity extends AppCompatActivity
 
 
                                     FriendsExistingAdaptor myAdaptor = new FriendsExistingAdaptor(friendsExistingData,
-                                            FriendsActivity.this);
+                                            getApplicationContext());
                                     friendsExistingView.setAdapter(myAdaptor);
                                 }
                             }
@@ -396,6 +396,16 @@ public class FriendsActivity extends AppCompatActivity
                             nameTextView.setText(currentUser.getFullName());
                             emailTextView.setText(currentUser.getEmail());
 
+                            String photoUrl = currentUser.getProfilePic();
+                            ImageView imageView = navHeader.findViewById(R.id.imageView);
+                            if (photoUrl != null) {
+                                if (imageView != null) {
+                                    Glide.with(getApplicationContext())
+                                            .load(photoUrl)
+                                            .into(imageView);
+                                }
+                            }
+
                             Switch toggle = findViewById(R.id.toggle_nav);
                             toggle.setChecked(currentUser.getIsFree());
 
@@ -426,7 +436,7 @@ public class FriendsActivity extends AppCompatActivity
         );
 
         // Set up listener for toggle and time button in nav drawer
-        Switch toggleNav = findViewById(R.id.toggle_nav);
+        final Switch toggleNav = findViewById(R.id.toggle_nav);
         Button currentStatusButton = findViewById(R.id.timeButton_nav);
         Button dateButtonNav = findViewById(R.id.dateButton_nav);
         toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -585,6 +595,8 @@ public class FriendsActivity extends AppCompatActivity
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();
 
+                SharedPreferences sp = getActivity().getSharedPreferences("User", MODE_PRIVATE);
+                String userId = sp.getString("userID", "dummy");
                 dbRef.child("users").child(userId).child("endTime").setValue(calendar.getTimeInMillis());
 
                 // change text view for time button

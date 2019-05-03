@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.media.Image;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -33,6 +34,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import android.widget.ImageView;
@@ -62,8 +64,8 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnLongClickListener {
 
     static User currentUser;
-    static String userId;
-    static boolean checkedAvailability;
+    String userId;
+    boolean checkedAvailability = false;
     HashMap<String, User> freeFriends = new LinkedHashMap<String, User>();
     static Calendar selectedCalendar;
     static boolean dummyUserIsFree = true;
@@ -126,9 +128,6 @@ public class MainActivity extends AppCompatActivity
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
         final DatabaseReference dbRef = database.getReference();
 
-        // Record if user has been asked for availability
-        checkedAvailability = false;
-
         dbRef.child("users").child(userId).addValueEventListener(
                 new ValueEventListener() {
                     @Override
@@ -144,6 +143,10 @@ public class MainActivity extends AppCompatActivity
                                 // else show welcome screen
                                 if (!(currentUser.getIsFree()
                                         && currentUser.getEndTime() >= now)) {
+                                    Calendar calendar = Calendar.getInstance();
+                                    calendar.add(Calendar.MINUTE, 30);
+                                    dbRef.child("users").child(userId).child("endTime").setValue(calendar.getTimeInMillis());
+                                    dbRef.child("users").child(userId).child("isFree").setValue(false);
                                     Intent intent = new Intent(getApplicationContext(), WelcomeActivity.class);
                                     startActivity(intent);
                                 }
@@ -156,6 +159,15 @@ public class MainActivity extends AppCompatActivity
 
                             TextView nameTextView = navHeader.findViewById(R.id.name_nav);
                             TextView emailTextView = navHeader.findViewById(R.id.email_nav);
+                            String photoUrl = currentUser.getProfilePic();
+                            ImageView imageView = navHeader.findViewById(R.id.imageView);
+                            if (photoUrl != null) {
+                                if (imageView != null) {
+                                    Glide.with(getApplicationContext())
+                                            .load(photoUrl)
+                                            .into(imageView);
+                                }
+                            }
                             nameTextView.setText(currentUser.getFullName());
                             emailTextView.setText(currentUser.getEmail());
 
@@ -224,28 +236,25 @@ public class MainActivity extends AppCompatActivity
                         if (currentUser != null) {
                             // Get current user's friends
                             HashMap<String, String> friends = currentUser.getFrienders();
-                            for (String friendEmail : friends.values()) {
-                                User user = allUsers.get(friendEmail.replaceAll("[^a-zA-Z0-9]", ""));
-                                if (user != null && user.getEmail() != null
-                                        // skip the current user and dummy user
-                                        && !user.getEmail().equals(currentUser.getEmail())
-                                        && !user.getEmail().equals("dummy")
-                                        && user.getIsFree()) {
-                                    if (selectedCalendar.getTimeInMillis() < user.getEndTime()) {
-                                        freeFriends.put(friendEmail.replaceAll("[^a-zA-Z0-9]", ""), new User(user));
+                            if (friends != null) {
+                                for (String friendEmail : friends.values()) {
+                                    User user = allUsers.get(friendEmail.replaceAll("[^a-zA-Z0-9]", ""));
+                                    if (user != null && user.getEmail() != null
+                                            // skip the current user and dummy user
+                                            && !user.getEmail().equals(currentUser.getEmail())
+                                            && !user.getEmail().equals("dummy")
+                                            && user.getIsFree()) {
+                                        Log.d("debug", "debug freind: " + user.toString());
+                                        if (selectedCalendar.getTimeInMillis() < user.getEndTime()) {
+                                            freeFriends.put(friendEmail.replaceAll("[^a-zA-Z0-9]", ""), new User(user));
+                                        }
                                     }
                                 }
                             }
                             HashMap<String, User> sortedFreeFriends = sortByTime(freeFriends);
-                            for (Map.Entry<String, User> entry: sortedFreeFriends.entrySet()) {
-                                Log.d("debug", "here " + entry.getKey());
-                            }
                             freeFriends.clear();
                             for (Map.Entry<String, User> entry: sortedFreeFriends.entrySet()) {
                                 freeFriends.put(entry.getKey(), entry.getValue());
-                            }
-                            for (Map.Entry<String, User> entry: freeFriends.entrySet()) {
-                                Log.d("debug", "where " + entry.getKey());
                             }
                             adapter.notifyDataSetChanged();
                         } else {
@@ -262,7 +271,7 @@ public class MainActivity extends AppCompatActivity
         );
 
         // Set up listener for toggle and time button in nav drawer
-        Switch toggleNav = findViewById(R.id.toggle_nav);
+        final Switch toggleNav = findViewById(R.id.toggle_nav);
         Button currentStatusButton = findViewById(R.id.timeButton_nav);
         toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -292,6 +301,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 FirebaseAuth.getInstance().signOut();
+                System.out.println("thiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiis");
                 startActivity(new Intent(MainActivity.this, LogIn.class));
                 finish();
             }
@@ -435,6 +445,8 @@ public class MainActivity extends AppCompatActivity
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();
 
+                SharedPreferences sp = getActivity().getSharedPreferences("User", MODE_PRIVATE);
+                String userId = sp.getString("userID", "dummy");
                 dbRef.child("users").child(userId).child("endTime").setValue(calendar.getTimeInMillis());
 
                 // change text view for time button
@@ -564,6 +576,7 @@ public class MainActivity extends AppCompatActivity
         counterTextView.setVisibility(View.VISIBLE);
         adapter.notifyDataSetChanged();
         fab.setVisibility(View.VISIBLE);
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -572,6 +585,7 @@ public class MainActivity extends AppCompatActivity
                     sb.append(id);
                     sb.append(" ");
                 }
+
                 String result = sb.toString();
                 Intent intent = new Intent(v.getContext(), NewEventActivity.class);
                 intent.putExtra("ids", result);
@@ -579,6 +593,7 @@ public class MainActivity extends AppCompatActivity
                 clearActionMode();
             }
         });
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         toggle.onDrawerStateChanged(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);

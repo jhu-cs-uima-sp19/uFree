@@ -11,7 +11,8 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="10dp"
     android:onClick="viewEventAction"
-    android:longClickable="true">
+    android:longClickable="true"
+    android:elevation="1dp">
     <!--items for a single row of RecyclerView-->
     <TextView
         android:id="@+id/description"

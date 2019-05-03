@@ -109,7 +109,7 @@ public class SingleFriendEventsActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         Event e = dataSnapshot.getValue(Event.class);
-                        if (e.participants.contains(friendID)) {
+                        if (e.participants != null && e.participants.containsKey(friendID)) {
                             events.add(e);
                             recyclerAdapter.notifyDataSetChanged();
                         }
@@ -153,7 +153,7 @@ public class SingleFriendEventsActivity extends AppCompatActivity {
 
         if (selectedItemDescription != null && selectedItemLocation != null) {
             Long id = Long.valueOf(String.valueOf(selectedItemId.getText()));
-            Intent intent = new Intent(this, ViewEventActivity.class);
+            Intent intent = new Intent(this, NewEventActivity.class);
             Bundle extras = new Bundle();
             extras.putLong("id", id);
             intent.putExtras(extras);
