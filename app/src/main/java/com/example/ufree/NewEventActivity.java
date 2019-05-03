@@ -76,8 +76,10 @@ public class NewEventActivity extends AppCompatActivity {
         //initialize the input fields
         locationInput = (EditText) findViewById(R.id.LocationInput);
         descriptionInput = (EditText) findViewById(R.id.DescriptionInput);
-        timeButton = findViewById(R.id.timeButton_main);
+        timeButton = findViewById(R.id.timeButton_event);
         timeButton.setText(timeFormat.format(selectedCalendar.getTime()));
+        Button dateButton = findViewById(R.id.dateButton_event);
+        dateButton.setText(dateFormat.format(selectedCalendar.getTime()));
 
         extras = getIntent().getExtras();
 
@@ -136,7 +138,7 @@ public class NewEventActivity extends AppCompatActivity {
                             Calendar calendar = Calendar.getInstance();
                             calendar.setTimeInMillis(my_event.time);
                             timeButton.setText(timeFormat.format(calendar.getTime()));
-                            Button dateButton = findViewById(R.id.dateButton_main);
+                            Button dateButton = findViewById(R.id.dateButton_event);
                             dateButton.setText(dateFormat.format(selectedCalendar.getTime()));
                         }
                     }
@@ -195,18 +197,18 @@ public class NewEventActivity extends AppCompatActivity {
             Calendar now = Calendar.getInstance();
             if (selectedCalendar.getTimeInMillis() < now.getTimeInMillis()) {
                 Toast.makeText(getContext(), "You cannot select time before current time", Toast.LENGTH_SHORT).show();
-                DialogFragment datePickerFragment = new MainActivity.TimePickerFragmentBottom();
+                DialogFragment datePickerFragment = new NewEventActivity.TimePickerFragmentBottom();
                 datePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerBottom");
             } else {
                 // change text view for time button
-                Button timeButton = getActivity().findViewById(R.id.timeButton_main);
+                Button timeButton = getActivity().findViewById(R.id.timeButton_event);
                 timeButton.setText(timeFormat.format(selectedCalendar.getTime()));
             }
         }
     }
 
     public void showTimePickerDialogBottom(View v) {
-        DialogFragment timePickerFragment = new MainActivity.TimePickerFragmentBottom();
+        DialogFragment timePickerFragment = new NewEventActivity.TimePickerFragmentBottom();
         timePickerFragment.show(getSupportFragmentManager(), "timePickerBottom");
     }
 
@@ -239,7 +241,7 @@ public class NewEventActivity extends AppCompatActivity {
                     || ((nowDay == 365 || nowDay == 366) && chosenDay == 1 )) {
                 if (today.getTimeInMillis() > chosen.getTimeInMillis()) {
                     Toast.makeText(getContext(), "You cannot select time before current time", Toast.LENGTH_SHORT).show();
-                    DialogFragment datePickerFragment = new MainActivity.DatePickerFragment();
+                    DialogFragment datePickerFragment = new NewEventActivity.DatePickerFragment();
                     datePickerFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
                 } else {
                     selectedCalendar.set(
@@ -247,18 +249,19 @@ public class NewEventActivity extends AppCompatActivity {
                             selectedCalendar.get(Calendar.HOUR_OF_DAY),
                             selectedCalendar.get(Calendar.HOUR_OF_DAY), 0);
 
-                    Button dateButton = getActivity().findViewById(R.id.dateButton_main);
+                    Button dateButton = getActivity().findViewById(R.id.dateButton_event);
+                    dateButton.setText(dateFormat.format(selectedCalendar.getTime()));
                 }
             } else {
                 Toast.makeText(getContext(), "You can only select today or tomorrow", Toast.LENGTH_SHORT).show();
-                DialogFragment datePickerFragment = new MainActivity.DatePickerFragment();
+                DialogFragment datePickerFragment = new NewEventActivity.DatePickerFragment();
                 datePickerFragment.show(getActivity().getSupportFragmentManager(), "datePicker");
             }
         }
     }
 
     public void showDatePickerDialog(View v) {
-        DialogFragment newFragment = new MainActivity.DatePickerFragment();
+        DialogFragment newFragment = new NewEventActivity.DatePickerFragment();
         newFragment.show(getSupportFragmentManager(), "datePicker");
     }
 

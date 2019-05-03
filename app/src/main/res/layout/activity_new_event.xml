@@ -134,7 +134,7 @@
 
 
     <Button
-        android:id="@+id/timeButton_main"
+        android:id="@+id/timeButton_event"
         android:layout_width="115dp"
         android:layout_height="41dp"
         android:layout_marginStart="8dp"
@@ -153,7 +153,7 @@
         app:layout_constraintVertical_bias="0.421" />
 
     <Button
-        android:id="@+id/dateButton_main"
+        android:id="@+id/dateButton_event"
         android:layout_width="220dp"
         android:layout_height="42dp"
         android:layout_marginStart="8dp"
