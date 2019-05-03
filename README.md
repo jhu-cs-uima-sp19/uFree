@@ -7,6 +7,8 @@ Made by: Christian, Tianyue, Alice, Minqi (Team D)
 uFree is an app to find friends who are available at the same times you are when you want to go out! The app provides options for users looking to spontaneously meet up with friends as well as for users interested in making plans in advance.
 
 ## Test accounts
+- Email: maryufree@ufree.com
+- Password: 123456
 - Email: jackufree@ufree.com
 - Password: 123456
 
@@ -50,9 +52,37 @@ uFree is an app to find friends who are available at the same times you are when
   - Add 5 main navigation menus 
   - Add time button and toggle, so the user can change his/her free status.
 
+## Second Sprint Objectives:
+- Sign up 
+  - Implemented upload of profile picture in Sign Up from user's gallery
+
+- Who is free
+  - Display free friends instead of all free users in the database
+  - Order friends based on free time
+  - Implement mutiple selection to create an event with mutiple friends
+
+- Friend
+  - Receiving and sending friend request
+  - Accepting and rejecting friend request
+  - Deleting friends
+  - Write search class that provides public functions to search for friends/all users with their names
+
+- Event
+  - added features included invitations, switching spinners to timepickers in the newEvent activity, and editable events.
+  - While formerly users could only view events that they participated in, they can now change the contents of the event, leave the event, and add new members to the event.
+  - When an event is created, the user is required to send invitations to at least one of their friends. This means (among other things) that friends must be fully implements (another pseudo-relational action) and that user objects must be equipped with a new field that tracks references to invitations.
+  - Invitations are read-only and users have the decision to either accept or deny invitations. Error handling on the new event page was also improved.
+
+- Profile
+  - Users with profile picture will have their profile pictures displayed in all appropriate places, while users without will retain the default picture.
+  - Users can change their profile picture in the Profile page
+
+
  
  ## General State of the App
  In our first sprint product, the user can create an account, log in and delete account. They will see all free users in the database, and can use time machine to filter free users based on their availability. They can create an event with a single person, and view events detail on Events page. The user can also revise their name, phone number, or change password in Profile page.
+
+ In our second sprint product, the user can upload a profile picture, change the profile picture. The user can search for freinds, send friend requests, and add/delete freinds. Only free friends are visible on Who is free page. The user can create event, send event invitation and edit events.
 
  
  ## Meeting Notes:
@@ -63,4 +93,12 @@ uFree is an app to find friends who are available at the same times you are when
   
  4/8 Meet with Ryenne. Start with setting up firebase.
  
- 4/14 Work day. Spring before deadline.
+ 4/14 Work day. Sprint before deadline.
+
+ 4/21 Plan Sprint 2 goals. Work day.
+
+ 4/27 Meet with Ryenne. Prepare for demo.
+
+ 5/2 Wrap up on sprint 2
+
+ 5/3 Work day. Ready for submission
