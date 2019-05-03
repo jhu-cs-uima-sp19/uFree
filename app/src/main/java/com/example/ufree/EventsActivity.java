@@ -367,8 +367,6 @@ public class EventsActivity extends AppCompatActivity
                             for (Event event : invites) {
                                 if (event == null || e == null || event.id.equals(e.id)) {
                                     add = false;
-                                } else if (event.id == e.id) {
-                                    add =false;
                                 }
                             }
 
