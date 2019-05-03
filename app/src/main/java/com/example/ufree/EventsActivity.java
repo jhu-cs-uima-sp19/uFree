@@ -65,6 +65,7 @@ public class EventsActivity extends AppCompatActivity
     private HashMap<String, Long> eventRefs = new HashMap<>();
     private HashMap<String, Long> inviteRefs = new HashMap<>();
     private static String user;
+    private User myUser = new User();
     CustomAdapter recyclerAdapter = new CustomAdapter(events);
     CustomAdapter invitesRecyclerAdapter = new CustomAdapter(invites);
     private static User currentUser;
@@ -130,25 +131,27 @@ public class EventsActivity extends AppCompatActivity
         SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
         user = sp.getString("userID", "empty");
 
+        if (dbref.child("users").child(user).child("events").getRoot() != null) {
+            dbref.child("users").child(user).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    myUser = dataSnapshot.getValue(User.class);
+                    eventRefs = myUser.events;
+                    inviteRefs = myUser.invites;
+                    callBack();
+                    invitesCallback();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {}
+            });
+        }
+
 
 
         if (!user.equals("empty")) {
             if (dbref.child("users").child(user).child("events").getRoot() != null) {
-                dbref.child("users").child(user).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        User u = dataSnapshot.getValue(User.class);
-                        eventRefs = u.events;
-                        inviteRefs = u.invites;
-                        callBack();
-                        invitesCallback();
-                    }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
             }
         }
 
@@ -299,19 +302,27 @@ public class EventsActivity extends AppCompatActivity
 
     }
 
-    //This is horrendous style but it's what we're doing.
-    //let's stack asynchronous functions on top of asynchronous functions by placing
-    //database queries in the callback for our database query
     private void callBack() {
         for (long id : eventRefs.values()) {
             //System.out.println(id);
             //initialize the counter
             if (id != -1 && id != -2) {
-                dbref.child("events").child(String.valueOf(id)).addListenerForSingleValueEvent(new ValueEventListener() {
+                dbref.child("events").child(String.valueOf(id)).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         Event e = dataSnapshot.getValue(Event.class);
-                        events.add(e);
+
+                        boolean add = true;
+
+                        for (Event event : events) {
+                            if (event.id == e.id) {
+                                add = false;
+                            }
+                        }
+
+                        if (add) {
+                            events.add(e);
+                        }
                         recyclerAdapter.notifyDataSetChanged();
                     }
 
@@ -327,12 +338,22 @@ public class EventsActivity extends AppCompatActivity
         if (inviteRefs != null) {
             for (long id : inviteRefs.values()) {
                 if (id != -1 && id != -2) {
-                    dbref.child("events").child(String.valueOf(id)).addListenerForSingleValueEvent(new ValueEventListener() {
+                    dbref.child("events").child(String.valueOf(id)).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             Event e;
                             e = dataSnapshot.getValue(Event.class);
-                            invites.add(e);
+                            boolean add = true;
+                            for (Event event : invites) {
+                                if (event.id == e.id) {
+                                    add = false;
+                                }
+                            }
+
+                            if (add) {
+                                invites.add(e);
+                            }
+
                             invitesRecyclerAdapter.notifyDataSetChanged();
                         }
 
