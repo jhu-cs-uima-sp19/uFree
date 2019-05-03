@@ -68,7 +68,10 @@ uFree is an app to find friends who are available at the same times you are when
   - Write search class that provides public functions to search for friends/all users with their names
 
 - Event
-  - blah
+  - added features included invitations, switching spinners to timepickers in the newEvent activity, and editable events.
+  - While formerly users could only view events that they participated in, they can now change the contents of the event, leave the event, and add new members to the event.
+  - When an event is created, the user is required to send invitations to at least one of their friends. This means (among other things) that friends must be fully implements (another pseudo-relational action) and that user objects must be equipped with a new field that tracks references to invitations.
+  - Invitations are read-only and users have the decision to either accept or deny invitations. Error handling on the new event page was also improved.
 
 - Profile
   - Users with profile picture will have their profile pictures displayed in all appropriate places, while users without will retain the default picture.
@@ -96,4 +99,6 @@ uFree is an app to find friends who are available at the same times you are when
 
  4/27 Meet with Ryenne. Prepare for demo.
 
- 5/2 Wrap up on sprint 2. Ready for submission!
+ 5/2 Wrap up on sprint 2
+
+ 5/3 Work day. Ready for submission
