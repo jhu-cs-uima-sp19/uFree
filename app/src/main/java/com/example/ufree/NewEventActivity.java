@@ -54,7 +54,7 @@ public class NewEventActivity extends AppCompatActivity {
     private long eventIdValue = 0;
     private long counter;
     private Button timeButton;
-    private static Calendar selectedCalendar = Calendar.getInstance();
+    private static Calendar selectedCalendar;
     static final java.text.DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
     static final java.text.DateFormat dateFormat = new SimpleDateFormat("MMM dd, EEE");
     private HashMap<String, String> invitees = new HashMap<>();
@@ -77,11 +77,19 @@ public class NewEventActivity extends AppCompatActivity {
         locationInput = (EditText) findViewById(R.id.LocationInput);
         descriptionInput = (EditText) findViewById(R.id.DescriptionInput);
         timeButton = findViewById(R.id.timeButton_event);
+
+        // initialize event time to be 30 minutes after current time
+        selectedCalendar = Calendar.getInstance();
+        selectedCalendar.add(Calendar.MINUTE, 30);
+
         timeButton.setText(timeFormat.format(selectedCalendar.getTime()));
         Button dateButton = findViewById(R.id.dateButton_event);
         dateButton.setText(dateFormat.format(selectedCalendar.getTime()));
 
         extras = getIntent().getExtras();
+
+        // set up title of app bar
+        getSupportActionBar().setTitle("New Event");
 
         //initialize the counter
         dbref.child("counters").addListenerForSingleValueEvent(new ValueEventListener() {
