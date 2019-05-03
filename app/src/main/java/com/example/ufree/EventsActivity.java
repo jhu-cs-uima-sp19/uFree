@@ -333,7 +333,7 @@ public class EventsActivity extends AppCompatActivity
                         boolean add = true;
 
                         for (Event event : events) {
-                            if (event.id == e.id) {
+                            if (event == null || e == null || event.id == e.id) {
                                 add = false;
                             }
                         }
@@ -363,7 +363,7 @@ public class EventsActivity extends AppCompatActivity
                             e = dataSnapshot.getValue(Event.class);
                             boolean add = true;
                             for (Event event : invites) {
-                                if (event.id == e.id) {
+                                if (event == null || e == null || event.id == e.id) {
                                     add = false;
                                 }
                             }
