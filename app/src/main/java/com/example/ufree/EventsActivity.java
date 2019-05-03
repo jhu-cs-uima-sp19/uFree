@@ -91,9 +91,6 @@ public class EventsActivity extends AppCompatActivity
             }
         });
 
-        //reset();
-
-
 
         /* Set up navigation drawer */
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -408,6 +405,8 @@ public class EventsActivity extends AppCompatActivity
             startActivity(intent);
         }
     }
+
+    //TODO: implement removing expired events
 ////
 //    private void reset() {
 //        Date d = new Date();
