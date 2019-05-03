@@ -113,7 +113,7 @@ public class NewEventActivity extends AppCompatActivity {
                 changeEventButton.setText("Save Changes");
                 deleteEventButton.setVisibility(View.VISIBLE);
 
-                dbref.child("events").child(String.valueOf(eventIdValue)).addListenerForSingleValueEvent(new ValueEventListener() {
+                dbref.child("events").child(String.valueOf(eventIdValue)).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         my_event = dataSnapshot.getValue(Event.class);
@@ -339,7 +339,7 @@ public class NewEventActivity extends AppCompatActivity {
         final String me = sp.getString("userID", "none");
 
         //search through logged-in users friends to add invites
-        dbref.child("users").child(me).child("frienders").addListenerForSingleValueEvent(new ValueEventListener() {
+        dbref.child("users").child(me).child("frienders").addValueEventListener(new ValueEventListener() {
 
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -390,7 +390,7 @@ public class NewEventActivity extends AppCompatActivity {
         final String user = sp.getString("userID", "none");
 
         if (!user.equals("none")) {
-            dbref.child("events").child(String.valueOf(eventIdValue)).child("participants").addListenerForSingleValueEvent(new ValueEventListener() {
+            dbref.child("events").child(String.valueOf(eventIdValue)).child("participants").addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     ArrayList<String> participants = (ArrayList<String>) dataSnapshot.getValue();

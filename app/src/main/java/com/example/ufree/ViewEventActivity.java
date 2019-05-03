@@ -54,7 +54,7 @@ public class ViewEventActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
 
         if (user != "empty" && user != null) {
-            dbref.child("users").child(user).addListenerForSingleValueEvent(new ValueEventListener() {
+            dbref.child("users").child(user).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     my_user = dataSnapshot.getValue(User.class);
@@ -70,7 +70,7 @@ public class ViewEventActivity extends AppCompatActivity {
         if (extras != null) {
             eventIdValue = extras.getLong("id", -1);
             if (eventIdValue != -1 && eventIdValue != -2) {
-                dbref.child("events").child(String.valueOf(eventIdValue)).addListenerForSingleValueEvent(new ValueEventListener() {
+                dbref.child("events").child(String.valueOf(eventIdValue)).addValueEventListener(new ValueEventListener() {
 
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
