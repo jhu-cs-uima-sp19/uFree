@@ -70,7 +70,7 @@ public class ProfileActivity extends AppCompatActivity
 
     private FirebaseUser user;
     static private User currentUser;
-    static String userId;
+    String userId;
 
     DatabaseReference dbref = FirebaseDatabase.getInstance().getReference();
 
@@ -195,7 +195,7 @@ public class ProfileActivity extends AppCompatActivity
 
         /* NAV DRAWER */
         // Set up listener for toggle and time button in nav drawer
-        Switch toggleNav = findViewById(R.id.toggle_nav);
+        final Switch toggleNav = findViewById(R.id.toggle_nav);
         Button currentStatusButton = findViewById(R.id.timeButton_nav);
         Button dateButtonNav = findViewById(R.id.dateButton_nav);
         toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -502,6 +502,8 @@ public class ProfileActivity extends AppCompatActivity
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();
 
+                SharedPreferences sp = getActivity().getSharedPreferences("User", MODE_PRIVATE);
+                String userId = sp.getString("userID", "dummy");
                 dbRef.child("users").child(userId).child("endTime").setValue(calendar.getTimeInMillis());
 
                 // change text view for time button

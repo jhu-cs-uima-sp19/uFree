@@ -64,7 +64,7 @@ public class EventsActivity extends AppCompatActivity
     private ArrayList<Event> invites = new ArrayList<>();
     private HashMap<String, Long> eventRefs = new HashMap<>();
     private HashMap<String, Long> inviteRefs = new HashMap<>();
-    private static String user;
+    private String user;
     CustomAdapter recyclerAdapter = new CustomAdapter(events);
     CustomAdapter invitesRecyclerAdapter = new CustomAdapter(invites);
     private static User currentUser;
@@ -212,7 +212,7 @@ public class EventsActivity extends AppCompatActivity
         );
 
         // Set up listener for toggle and time button in nav drawer
-        Switch toggleNav = findViewById(R.id.toggle_nav);
+        final Switch toggleNav = findViewById(R.id.toggle_nav);
         Button currentStatusButton = findViewById(R.id.timeButton_nav);
         Button dateButtonNav = findViewById(R.id.dateButton_nav);
         toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -519,6 +519,8 @@ public class EventsActivity extends AppCompatActivity
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();
 
+                SharedPreferences sp = getActivity().getSharedPreferences("User", MODE_PRIVATE);
+                String user = sp.getString("userID", "dummy");
                 dbRef.child("users").child(user).child("endTime").setValue(calendar.getTimeInMillis());
 
                 // change text view for time button

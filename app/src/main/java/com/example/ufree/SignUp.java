@@ -445,11 +445,6 @@ public class SignUp extends AppCompatActivity implements LoaderCallbacks<Cursor>
                                 }
                             }
                         });
-
-                SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
-                SharedPreferences.Editor spEdit = sp.edit();
-                spEdit.putString("userID", email);
-                spEdit.apply();
             } else {
                 mPasswordView.requestFocus();
             }
