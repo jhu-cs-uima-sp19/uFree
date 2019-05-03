@@ -153,6 +153,23 @@ public class EventsActivity extends AppCompatActivity
 
         if (!user.equals("empty")) {
             if (dbref.child("users").child(user).child("events").getRoot() != null) {
+<<<<<<< HEAD
+                eventRefs.clear();
+                inviteRefs.clear();
+                dbref.child("users").child(user).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        User u = dataSnapshot.getValue(User.class);
+                        eventRefs = u.events;
+                        inviteRefs = u.invites;
+                        callBack();
+                        invitesCallback();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+=======
+>>>>>>> 8b3ad38fe9e2bc9dfc02d9aa8e242d3e70149311
 
             }
         }
