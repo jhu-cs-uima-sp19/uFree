@@ -521,16 +521,19 @@ public class ProfileActivity extends AppCompatActivity
                         handler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                mDatabase2.child(userId).removeValue();
+//                                mDatabase2.child(userId).removeValue();
+//
+//                                dbRef.child("users").child(userId).removeValue();
 
-                                dbRef.child("users").child(userId).removeValue();
+//                                android.os.Process.killProcess(android.os.Process.myPid());
 
                                 Intent intent = new Intent(getApplicationContext(), LogIn.class);
+                                intent.putExtra("delekey" , 1);
                                 startActivity(intent);
-                                finish();
+//                                finish();
 
                             }
-                         }, 1000);
+                         }, 2000);
 
                     }
                 });
