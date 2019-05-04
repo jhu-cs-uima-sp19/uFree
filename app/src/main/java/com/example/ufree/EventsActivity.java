@@ -138,11 +138,13 @@ public class EventsActivity extends AppCompatActivity
                 dbref.child("users").child(user).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        myUser = dataSnapshot.getValue(User.class);
-                        eventRefs = myUser.events;
-                        inviteRefs = myUser.invites;
-                        callBack();
-                        invitesCallback();
+                        if (dataSnapshot.exists()) {
+                            myUser = dataSnapshot.getValue(User.class);
+                            eventRefs = myUser.events;
+                            inviteRefs = myUser.invites;
+                            callBack();
+                            invitesCallback();
+                        }
                     }
 
                     @Override
