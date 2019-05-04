@@ -333,7 +333,12 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(getContext(), "You cannot select time before current time", Toast.LENGTH_SHORT).show();
                 DialogFragment datePickerFragment = new TimePickerFragmentBottom();
                 datePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerBottom");
-            } else {
+            }
+            else if (selectedCalendar.getTimeInMillis() < now.getTimeInMillis() + 1800000) {
+                Toast.makeText(getContext(), "minimum period is 30 minutes", Toast.LENGTH_LONG).show();
+                DialogFragment timePickerFragment = new TimePickerFragmentBottom();
+                timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
+            }else {
                 // change the dummy user to invoke onDataChange
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();
@@ -440,7 +445,12 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(getContext(), "You cannot set free time before current time", Toast.LENGTH_LONG).show();
                 DialogFragment timePickerFragment = new TimePickerFragmentNav();
                 timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
-            } else {
+            }
+            else if (currentDay == endDay && now.getTimeInMillis() >= (calendar.getTimeInMillis() - 1800000)) {
+                Toast.makeText(getContext(), "minimum period is 30 minutes", Toast.LENGTH_LONG).show();
+                DialogFragment timePickerFragment = new TimePickerFragmentNav();
+                timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
+            }else {
                 // update selected calendar object
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();
@@ -488,7 +498,12 @@ public class MainActivity extends AppCompatActivity
             Calendar now = Calendar.getInstance();
             if (newEnd.getTimeInMillis() < now.getTimeInMillis()) {
                 Toast.makeText(v.getContext(), "You cannot set free time before current time", Toast.LENGTH_SHORT).show();
-            } else {
+            }
+            else if (newEnd.getTimeInMillis() < (now.getTimeInMillis() + 1800000)) {
+                Toast.makeText(v.getContext(), "minimum period is 30 minutes", Toast.LENGTH_SHORT).show();
+
+            }
+            else {
                 // update end time in database
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();
