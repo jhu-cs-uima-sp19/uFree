@@ -441,7 +441,23 @@ public class FriendsActivity extends AppCompatActivity
         Button dateButtonNav = findViewById(R.id.dateButton_nav);
         toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                databaseReference.child("users").child(userId).child("isFree").setValue(isChecked);
+                Calendar now = Calendar.getInstance();
+                Calendar endTime = Calendar.getInstance();
+                if (currentUser != null) {
+                    endTime.setTimeInMillis(currentUser.getEndTime());
+                    if ((isChecked && now.getTimeInMillis() < endTime.getTimeInMillis()) || !isChecked) {
+                        databaseReference.child("users").child(userId).child("isFree").setValue(isChecked);
+                    } else {
+                        Log.d("debug", "now is " + now.getTimeInMillis() + ", time "
+                                + now.get(Calendar.HOUR_OF_DAY) + ": " + now.get(Calendar.MINUTE));
+                        Log.d("debug", "selected calendar is " + endTime.getTimeInMillis()  + ", time "
+                                + endTime.get(Calendar.HOUR_OF_DAY) + ": " + endTime.get(Calendar.MINUTE));
+                        Log.d("debug", "debug: fail to change status to " + isChecked);
+                    }
+                } else {
+                    Log.d("debug", "debug: currentUser is null for nav toggle");
+                }
+                Log.d("debug", "debug: toggle nav listener: " + isChecked);
             }
         });
         currentStatusButton.setOnClickListener(new View.OnClickListener() {
@@ -484,7 +500,11 @@ public class FriendsActivity extends AppCompatActivity
                     Calendar now = Calendar.getInstance();
                     if (newEnd.getTimeInMillis() < now.getTimeInMillis()) {
                         Toast.makeText(v.getContext(), "You cannot set free time before current time", Toast.LENGTH_SHORT).show();
-                    } else {
+                    }
+                    else if (newEnd.getTimeInMillis() < now.getTimeInMillis() + 1800000) {
+                        Toast.makeText(v.getContext(), "minimum period is 30 minutes", Toast.LENGTH_SHORT).show();
+                    }
+                    else {
                         // update end time in database
                         FirebaseDatabase database = FirebaseDatabase.getInstance();
                         DatabaseReference dbRef = database.getReference();
@@ -590,7 +610,13 @@ public class FriendsActivity extends AppCompatActivity
                 Toast.makeText(getContext(), "You cannot set free time before current time", Toast.LENGTH_LONG).show();
                 DialogFragment timePickerFragment = new TimePickerFragmentNav();
                 timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
-            } else {
+            }
+            else if (now.getTimeInMillis() >= calendar.getTimeInMillis() - 1800000) {
+                Toast.makeText(getContext(), "minimum period is 30 minutes", Toast.LENGTH_LONG).show();
+                DialogFragment timePickerFragment = new TimePickerFragmentNav();
+                timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
+            }
+            else {
                 // update selected calendar object
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();

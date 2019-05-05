@@ -10,11 +10,13 @@ import android.graphics.Bitmap;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.text.format.DateFormat;
@@ -46,6 +48,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -62,6 +65,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Time;
 import java.util.Calendar;
+import java.util.HashMap;
 
 import static com.example.ufree.MainActivity.timeFormat;
 
@@ -200,7 +204,23 @@ public class ProfileActivity extends AppCompatActivity
         Button dateButtonNav = findViewById(R.id.dateButton_nav);
         toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                dbRef.child("users").child(userId).child("isFree").setValue(isChecked);
+                Calendar now = Calendar.getInstance();
+                Calendar endTime = Calendar.getInstance();
+                if (currentUser != null) {
+                    endTime.setTimeInMillis(currentUser.getEndTime());
+                    if ((isChecked && now.getTimeInMillis() < endTime.getTimeInMillis()) || !isChecked) {
+                        dbRef.child("users").child(userId).child("isFree").setValue(isChecked);
+                    } else {
+                        Log.d("debug", "now is " + now.getTimeInMillis() + ", time "
+                                + now.get(Calendar.HOUR_OF_DAY) + ": " + now.get(Calendar.MINUTE));
+                        Log.d("debug", "selected calendar is " + endTime.getTimeInMillis()  + ", time "
+                                + endTime.get(Calendar.HOUR_OF_DAY) + ": " + endTime.get(Calendar.MINUTE));
+                        Log.d("debug", "debug: fail to change status to " + isChecked);
+                    }
+                } else {
+                    Log.d("debug", "debug: currentUser is null for nav toggle");
+                }
+                Log.d("debug", "debug: toggle nav listener: " + isChecked);
             }
         });
         currentStatusButton.setOnClickListener(new View.OnClickListener() {
@@ -243,7 +263,11 @@ public class ProfileActivity extends AppCompatActivity
                     Calendar now = Calendar.getInstance();
                     if (newEnd.getTimeInMillis() < now.getTimeInMillis()) {
                         Toast.makeText(v.getContext(), "You cannot set free time before current time", Toast.LENGTH_SHORT).show();
-                    } else {
+                    }
+                    else if (newEnd.getTimeInMillis() < now.getTimeInMillis() + 1800000) {
+                        Toast.makeText(v.getContext(), "minimum period is 30 minutes", Toast.LENGTH_SHORT).show();
+
+                    }else {
                         // update end time in database
                         FirebaseDatabase database = FirebaseDatabase.getInstance();
                         DatabaseReference dbRef = database.getReference();
@@ -375,10 +399,9 @@ public class ProfileActivity extends AppCompatActivity
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mDatabase2.child(userId).removeValue();
 
-                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                        user.delete()
+                        FirebaseUser userx = FirebaseAuth.getInstance().getCurrentUser();
+                        userx.delete()
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
@@ -387,13 +410,151 @@ public class ProfileActivity extends AppCompatActivity
                                         }
                                     }
                                 });
+                        dbref.child("events").addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                                    Event e = ds.getValue(Event.class);
+                                    for (HashMap.Entry<String,String> entry : e.invitees.entrySet()){
 
-                        dbRef.child("users").child(userId).removeValue();
+                                        if(entry.getKey().equals(userId)){
+                                            dbref.child("events").child(Long.toString(e.id)).child("invitees").child(userId).removeValue();
+                                        }
+                                    }
+                                    for (HashMap.Entry<String,String> entry : e.participants.entrySet()){
+                                        if(entry.getKey().equals(userId)){
+                                            dbref.child("events").child(Long.toString(e.id)).child("participants").child(userId).removeValue();
+                                        }
 
-                        Intent intent = new Intent(getApplicationContext(), LogIn.class);
-                        startActivity(intent);
+                                    }
+                                }
+                            }
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+                            }
+                        });
+
+
+                        dbref.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                                    User u = ds.getValue(User.class);
+                                    if(u.getFrienders() == null){
+                                        continue;
+                                    }
+                                    for (HashMap.Entry<String,String> entry : u.getFrienders().entrySet()){
+                                        if(entry.getValue().equals(user.getEmail())){
+                                            final String uemail = u.getEmail().replaceAll("[^a-zA-Z0-9]", "");
+                                            dbref.child("users").child(u.getEmail().replaceAll("[^a-zA-Z0-9]", "")).child("frienders").orderByValue().
+                                                    startAt(user.getEmail()).endAt(user.getEmail()).addChildEventListener(new ChildEventListener() {
+                                                        @Override
+                                                        public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
+                                                            String tempx = dataSnapshot.getKey();
+                                                            dbRef.child("users").child(uemail).child("frienders").child(tempx).removeValue();
+                                                        }
+
+                                                        @Override
+                                                        public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                                                        }
+
+                                                        @Override
+                                                        public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                                                        }
+
+                                                        @Override
+                                                        public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                        }
+                                                    });
+                                        }
+                                    }
+                                }
+                            }
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+                            }
+                        });
+
+
+                        dbref.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                                    User u = ds.getValue(User.class);
+                                    if(u.getIncomingFriends() == null){
+                                        continue;
+                                    }
+                                    for (HashMap.Entry<String,String> entry : u.getIncomingFriends().entrySet()){
+                                        if(entry.getValue().equals(user.getEmail())){
+                                            final String uemail = u.getEmail().replaceAll("[^a-zA-Z0-9]", "");
+                                            dbref.child("users").child(u.getEmail().replaceAll("[^a-zA-Z0-9]", "")).child("incomingFriends").orderByValue().
+                                                    startAt(user.getEmail()).endAt(user.getEmail()).addChildEventListener(new ChildEventListener() {
+                                                @Override
+                                                public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
+                                                    String tempx = dataSnapshot.getKey();
+                                                    dbRef.child("users").child(uemail).child("incomingFriends").child(tempx).removeValue();
+                                                }
+
+                                                @Override
+                                                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                                                }
+
+                                                @Override
+                                                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+                                                }
+
+                                                @Override
+                                                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+                                                }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                }
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+                            }
+                        });
+
                         dialog.dismiss();
-                        finish();
+
+                        final Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+//                                mDatabase2.child(userId).removeValue();
+//
+//                                dbRef.child("users").child(userId).removeValue();
+
+//                                android.os.Process.killProcess(android.os.Process.myPid());
+
+                                Intent intent = new Intent(getApplicationContext(), LogIn.class);
+                                intent.putExtra("delekey" , 1);
+                                startActivity(intent);
+//                                finish();
+
+                            }
+                         }, 2000);
+
                     }
                 });
 
@@ -497,7 +658,13 @@ public class ProfileActivity extends AppCompatActivity
                 Toast.makeText(getContext(), "You cannot set free time before current time", Toast.LENGTH_LONG).show();
                 DialogFragment timePickerFragment = new TimePickerFragmentNav();
                 timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
-            } else {
+            }
+            else if (now.getTimeInMillis() >= (calendar.getTimeInMillis() - 1800000)) {
+                Toast.makeText(getContext(), "minimum period is 30 minutes", Toast.LENGTH_LONG).show();
+                DialogFragment timePickerFragment = new TimePickerFragmentNav();
+                timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
+            }
+            else {
                 // update selected calendar object
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();

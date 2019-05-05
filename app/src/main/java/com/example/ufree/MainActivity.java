@@ -146,9 +146,10 @@ public class MainActivity extends AppCompatActivity
                                     Calendar calendar = Calendar.getInstance();
                                     calendar.add(Calendar.MINUTE, 30);
                                     dbRef.child("users").child(userId).child("endTime").setValue(calendar.getTimeInMillis());
-                                    dbRef.child("users").child(userId).child("isFree").setValue(false);
+
                                     Intent intent = new Intent(getApplicationContext(), WelcomeActivity.class);
                                     startActivity(intent);
+                                    Log.d("debug", "debug: user listener is invoked");
                                 }
                                 checkedAvailability = true;
                             }
@@ -244,7 +245,6 @@ public class MainActivity extends AppCompatActivity
                                             && !user.getEmail().equals(currentUser.getEmail())
                                             && !user.getEmail().equals("dummy")
                                             && user.getIsFree()) {
-                                        Log.d("debug", "debug freind: " + user.toString());
                                         if (selectedCalendar.getTimeInMillis() < user.getEndTime()) {
                                             freeFriends.put(friendEmail.replaceAll("[^a-zA-Z0-9]", ""), new User(user));
                                         }
@@ -275,7 +275,23 @@ public class MainActivity extends AppCompatActivity
         Button currentStatusButton = findViewById(R.id.timeButton_nav);
         toggleNav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                dbRef.child("users").child(userId).child("isFree").setValue(isChecked);
+                Calendar now = Calendar.getInstance();
+                Calendar endTime = Calendar.getInstance();
+                if (currentUser != null) {
+                    endTime.setTimeInMillis(currentUser.getEndTime());
+                    if ((isChecked && now.getTimeInMillis() < endTime.getTimeInMillis()) || !isChecked) {
+                        dbRef.child("users").child(userId).child("isFree").setValue(isChecked);
+                    } else {
+                        Log.d("debug", "now is " + now.getTimeInMillis() + ", time "
+                                + now.get(Calendar.HOUR_OF_DAY) + ": " + now.get(Calendar.MINUTE));
+                        Log.d("debug", "selected calendar is " + endTime.getTimeInMillis()  + ", time "
+                                + endTime.get(Calendar.HOUR_OF_DAY) + ": " + endTime.get(Calendar.MINUTE));
+                        Log.d("debug", "debug: fail to change status to " + isChecked);
+                    }
+                } else {
+                    Log.d("debug", "debug: currentUser is null for nav toggle");
+                }
+                Log.d("debug", "debug: toggle nav listener: " + isChecked);
             }
         });
         currentStatusButton.setOnClickListener(new View.OnClickListener() {
@@ -301,7 +317,6 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 FirebaseAuth.getInstance().signOut();
-                System.out.println("thiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiis");
                 startActivity(new Intent(MainActivity.this, LogIn.class));
                 finish();
             }
@@ -333,7 +348,8 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(getContext(), "You cannot select time before current time", Toast.LENGTH_SHORT).show();
                 DialogFragment datePickerFragment = new TimePickerFragmentBottom();
                 datePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerBottom");
-            } else {
+            }
+            else {
                 // change the dummy user to invoke onDataChange
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();
@@ -440,6 +456,11 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(getContext(), "You cannot set free time before current time", Toast.LENGTH_LONG).show();
                 DialogFragment timePickerFragment = new TimePickerFragmentNav();
                 timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
+            }
+            else if (now.getTimeInMillis() >= (calendar.getTimeInMillis() - 1800000)) {
+                Toast.makeText(getContext(), "minimum period is 30 minutes", Toast.LENGTH_LONG).show();
+                DialogFragment timePickerFragment = new TimePickerFragmentNav();
+                timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
             } else {
                 // update selected calendar object
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -488,7 +509,11 @@ public class MainActivity extends AppCompatActivity
             Calendar now = Calendar.getInstance();
             if (newEnd.getTimeInMillis() < now.getTimeInMillis()) {
                 Toast.makeText(v.getContext(), "You cannot set free time before current time", Toast.LENGTH_SHORT).show();
-            } else {
+            }
+            else if (newEnd.getTimeInMillis() < (now.getTimeInMillis() + 1800000)) {
+                Toast.makeText(v.getContext(), "minimum period is 30 minutes", Toast.LENGTH_SHORT).show();
+            }
+            else {
                 // update end time in database
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();

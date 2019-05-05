@@ -38,6 +38,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +62,8 @@ public class LogIn extends AppCompatActivity implements LoaderCallbacks<Cursor> 
     private View mProgressView;
     private View mLoginFormView;
     private String email;
+    String userId;
+
 
     private FirebaseAuth auth;
 
@@ -67,9 +71,33 @@ public class LogIn extends AppCompatActivity implements LoaderCallbacks<Cursor> 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in);
-
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        final DatabaseReference dbRef = database.getReference();
         auth = FirebaseAuth.getInstance();
 
+        // get user id from Shared Preferences
+        SharedPreferences sp = getSharedPreferences("User", MODE_PRIVATE);
+        userId = sp.getString("userID", "dummy");
+        // if there is no user id in Shared Preferences, go back to log in
+        if (userId.equals("dummy")) {
+
+        }
+        else {
+            Intent iin = getIntent();
+            Bundle b = iin.getExtras();
+            if (b != null) {
+                int dnum = b.getInt("delekey");
+                Log.d("testxx", Integer.toString(dnum));
+
+                if (dnum == 1) {
+                    dbRef.child("users").child(userId).removeValue();
+                    finishAffinity();
+                    System.exit(0);
+
+
+                }
+            }
+        }
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         mPasswordView = (EditText) findViewById(R.id.password);
         Button logInButton = (Button) findViewById(R.id.log_in_button);

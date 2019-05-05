@@ -2,6 +2,7 @@ package com.example.ufree;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -27,14 +28,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class FriendsExistingAdaptor extends RecyclerView.Adapter {
 
     ArrayList<FriendsExistingData> list;
     Context context;
     DatabaseReference dbref = FirebaseDatabase.getInstance().getReference("users");
     HashMap<String, Runnable> pendingRunnables = new HashMap<>();
-    final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-    final String idOfCurrentUser = user.getEmail().replaceAll("[^a-zA-Z0-9]", "");
+    final String idOfCurrentUser;
     final FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     final DatabaseReference databaseReference = firebaseDatabase.getReference("users");
     final DatabaseReference mDatabase1 = firebaseDatabase.getReference("users");
@@ -43,6 +45,8 @@ public class FriendsExistingAdaptor extends RecyclerView.Adapter {
     public FriendsExistingAdaptor(ArrayList<FriendsExistingData> list, Context context) {
         this.list = list;
         this.context = context;
+        SharedPreferences sp = context.getSharedPreferences("User", MODE_PRIVATE);
+        this.idOfCurrentUser = sp.getString("userID", "dummy");
     }
 
     @Override
