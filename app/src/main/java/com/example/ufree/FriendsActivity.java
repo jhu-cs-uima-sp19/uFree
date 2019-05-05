@@ -595,7 +595,7 @@ public class FriendsActivity extends AppCompatActivity
                 DialogFragment timePickerFragment = new TimePickerFragmentNav();
                 timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
             }
-            else if (currentDay == endDay && now.getTimeInMillis() >= calendar.getTimeInMillis() - 1800000) {
+            else if (now.getTimeInMillis() >= calendar.getTimeInMillis() - 1800000) {
                 Toast.makeText(getContext(), "minimum period is 30 minutes", Toast.LENGTH_LONG).show();
                 DialogFragment timePickerFragment = new TimePickerFragmentNav();
                 timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");

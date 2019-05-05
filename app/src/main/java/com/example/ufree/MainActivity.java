@@ -334,11 +334,7 @@ public class MainActivity extends AppCompatActivity
                 DialogFragment datePickerFragment = new TimePickerFragmentBottom();
                 datePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerBottom");
             }
-            else if (selectedCalendar.getTimeInMillis() < now.getTimeInMillis() + 1800000) {
-                Toast.makeText(getContext(), "minimum period is 30 minutes", Toast.LENGTH_LONG).show();
-                DialogFragment timePickerFragment = new TimePickerFragmentBottom();
-                timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
-            }else {
+            else {
                 // change the dummy user to invoke onDataChange
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();
@@ -446,11 +442,11 @@ public class MainActivity extends AppCompatActivity
                 DialogFragment timePickerFragment = new TimePickerFragmentNav();
                 timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
             }
-            else if (currentDay == endDay && now.getTimeInMillis() >= (calendar.getTimeInMillis() - 1800000)) {
+            else if (now.getTimeInMillis() >= (calendar.getTimeInMillis() - 1800000)) {
                 Toast.makeText(getContext(), "minimum period is 30 minutes", Toast.LENGTH_LONG).show();
                 DialogFragment timePickerFragment = new TimePickerFragmentNav();
                 timePickerFragment.show(getActivity().getSupportFragmentManager(), "timePickerNav");
-            }else {
+            } else {
                 // update selected calendar object
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
                 DatabaseReference dbRef = database.getReference();
@@ -501,7 +497,6 @@ public class MainActivity extends AppCompatActivity
             }
             else if (newEnd.getTimeInMillis() < (now.getTimeInMillis() + 1800000)) {
                 Toast.makeText(v.getContext(), "minimum period is 30 minutes", Toast.LENGTH_SHORT).show();
-
             }
             else {
                 // update end time in database

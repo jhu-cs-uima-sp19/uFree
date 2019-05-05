@@ -126,13 +126,13 @@ public class WelcomeActivity extends AppCompatActivity {
 
                         Calendar now = Calendar.getInstance();
 
-                        if(now.getTimeInMillis() >= endCalendar.getTimeInMillis()) {
+                        if (now.getTimeInMillis() >= endCalendar.getTimeInMillis()) {
                             Toast.makeText(view.getContext(), "You cannot select time before current time", Toast.LENGTH_SHORT).show();
                         }
-                        else if(now.getTimeInMillis() >= endCalendar.getTimeInMillis() - 1800000){
+                        else if (now.getTimeInMillis() >= endCalendar.getTimeInMillis() - 1800000) {
                             Toast.makeText(view.getContext(), "minimum period is 30 minutes", Toast.LENGTH_SHORT).show();
                         }
-                        else{
+                        else {
                            dbRef.child("users").child(userId).child("startTime").setValue(now.getTimeInMillis());
                            dbRef.child("users").child(userId).child("endTime").setValue(endCalendar.getTimeInMillis());
                            dbRef.child("users").child(userId).child("isFree").setValue(true);
