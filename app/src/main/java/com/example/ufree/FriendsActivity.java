@@ -330,6 +330,10 @@ public class FriendsActivity extends AppCompatActivity
                                     //         friendRequestData.add(new FriendRequestData(entry.getValue()));
                                     //     }
 
+                                    if (incomingFriends.size() == 0) {
+                                        TextView view = findViewById(R.id.friendRequestsText);
+                                        view.setVisibility(View.INVISIBLE);
+                                    }
 
                                     //        Log.d("test5", Integer.toString(incomingFriends.size()));
                                     for (int i = 0; i < incomingFriends.size(); i++) {
